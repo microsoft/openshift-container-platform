@@ -204,7 +204,7 @@ Ex: `azure group deployment create --name ocpdeployment --template-file azuredep
 The OpenShift Ansible playbook does take a while to run when using VMs backed by Standard Storage. VMs backed by Premium Storage are faster. If you want Premium Storage, select a DS or GS series VM.
 <hr />
 
-### It is VERY important that you reboot all the nodes in the cluster (Masters, Infras and Nodes) upon a successfull cluster deployment before you login and start using the OpenShift Cluster!
+### It is **VERY** important that you **reboot all the nodes** in the cluster (Masters, Infras and Nodes) upon a successfull cluster deployment before you login and start using the OpenShift Cluster!
 
 Be sure to follow the OpenShift instructions to create the necessary DNS entry for the OpenShift Router for access to applications. <br />
 

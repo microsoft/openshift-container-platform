@@ -44,6 +44,13 @@
 				"description": "VM Hostname"
 			}
 		},
+		"role": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "VM Role for tag"
+			}
+		},
 		"customImageName": {
 			"type": "string",
 			"minLength": 1,
@@ -88,7 +95,7 @@
 		"location": "[parameters('location')]",
 		"apiVersion": "[parameters('apiVersionCompute')]",
 		"tags": {
-			"displayName": "[concat(parameters('hostname'), ' VM Creation')]"
+			"Role": "[parameters('role')]"
 		},
 		"properties": {
 			"hardwareProfile": {

@@ -1,0 +1,96 @@
+﻿{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"_artifactsLocation": {
+			"value": "https://raw.githubusercontent.com/haroldwongms/openshift-containerplatform/master/"
+		},
+		"customVhdOrGallery": {
+			"value": "gallery"
+		},
+		"customStorageAccount": {
+			"value": "changeme"
+		},
+		"customOsDiskName": {
+			"value": "changeme"
+		},
+		"masterVmSize": {
+			"value": "Standard_DS2_v2"
+		},
+		"nodeVmSize": {
+			"value": "Standard_DS2_v2"
+		},
+		"infraVmSize": {
+			"value": "Standard_DS2_v2"
+		},
+		"openshiftClusterPrefix": {
+			"value": "changeme"
+		},
+		"openshiftMasterPublicIpDnsLabel": {
+			"value": "GEN-UNIQUE"
+		},
+		"infraLbPublicIpDnsLabel": {
+			"value": "GEN-UNIQUE"
+		},
+		"masterInstanceCount": {
+			"value": 1
+		},
+		"nodeInstanceCount": {
+			"value": 1
+		},
+		"infraInstanceCount": {
+			"value": 1
+		},
+		"dataDiskSize": {
+			"value": 128
+		},
+		"adminUsername": {
+			"value": "changeme"
+		},
+		"openshiftPassword": {
+			"value": "changeme"
+		},
+		"enableMetrics": {
+			"value": "true"
+		},
+		"enableLogging": {
+			"value": "true"
+		},
+		"rhsmUsernamePasswordOrActivationKey": {
+			"value": "password"
+		},
+		"rhsmUsernameOrOrgId": {
+			"value": "changeme"
+		},
+		"rhsmPasswordOrActivationKey": {
+			"value": "changeme"
+		},
+		"rhsmPoolId": {
+			"value": "changeme"
+		},
+		"sshPublicKey": {
+			"value": "GEN-SSH-PUB-KEY"
+		},
+		"keyVaultResourceGroup": {
+			"value": "changeme"
+		},
+		"keyVaultName": {
+			"value": "changeme"
+		},
+		"keyVaultSecret": {
+			"value": "changeme"
+		},
+		"27.aadClientId": {
+			"value": "changeme"
+		},
+		"28.aadClientSecret": {
+			"value": "changeme"
+		},
+		"defaultSubDomainType": {
+			"value": "xipio"
+		},
+		"defaultSubDomain": {
+			"value": "changeme"
+		}
+	}
+}

@@ -8,7 +8,7 @@
 				"description": "Base URL for Template Files",
 				"artifactsBaseUrl": ""
 			},
-			"defaultValue": "https://raw.githubusercontent.com/haroldwongms/openshift-containerplatform/master/"
+			"defaultValue": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/master/"
 		},
 		"customVhdOrGallery": {
 			"type": "string",
@@ -54,26 +54,6 @@
 				"description": "OpenShift Master VM size"
 			}
 		},
-		"nodeVmSize": {
-			"type": "string",
-			"defaultValue": "Standard_DS2_v2",
-			"allowedValues": [
-				"Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_A8", "Standard_A9", "Standard_A10", "Standard_A11",
-				"Standard_D2", "Standard_D3", "Standard_D4",
-				"Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14",
-				"Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
-				"Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2",
-				"Standard_G1", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5",
-				"Standard_DS2", "Standard_DS3", "Standard_DS4",
-				"Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14",
-				"Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
-				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2",
-				"Standard_GS1", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5"
-			],
-			"metadata": {
-				"description": "OpenShift Node VM(s) size"
-			}
-		},
 		"infraVmSize": {
 			"type": "string",
 			"defaultValue": "Standard_DS2_v2",
@@ -94,13 +74,33 @@
 				"description": "OpenShift Infra Node VM(s) size"
 			}
 		},
+		"nodeVmSize": {
+			"type": "string",
+			"defaultValue": "Standard_DS2_v2",
+			"allowedValues": [
+				"Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_A8", "Standard_A9", "Standard_A10", "Standard_A11",
+				"Standard_D2", "Standard_D3", "Standard_D4",
+				"Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14",
+				"Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
+				"Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2",
+				"Standard_G1", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5",
+				"Standard_DS2", "Standard_DS3", "Standard_DS4",
+				"Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14",
+				"Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
+				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2",
+				"Standard_GS1", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5"
+			],
+			"metadata": {
+				"description": "OpenShift Node VM(s) size"
+			}
+		},
 		"openshiftClusterPrefix": {
 			"type": "string",
-			"defaultValue": "aacl",
+			"defaultValue": "mycluster",
 			"minLength": 1,
 			"maxLength": 20,
 			"metadata": {
-				"description": "OpenShift cluster prefix.  Used to generate master, infra and node hostnames.  Maximum of 5 characters."
+				"description": "OpenShift cluster prefix.  Used to generate master, infra and node hostnames.  Maximum of 20 characters."
 			}
 		},
 		"openshiftMasterPublicIpDnsLabel": {
@@ -126,15 +126,6 @@
 				"description": "Number of OpenShift masters.  1 is non HA and 3 is for HA"
 			}
 		},
-		"nodeInstanceCount": {
-			"type": "int",
-			"defaultValue": 1,
-			"minValue": 1,
-			"allowedValues": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
-			"metadata": {
-				"description": "Number of OpenShift nodes"
-			}
-		},
 		"infraInstanceCount": {
 			"type": "int",
 			"defaultValue": 1,
@@ -142,6 +133,15 @@
 			"allowedValues": [1, 2, 3],
 			"metadata": {
 				"description": "Number of OpenShift infra nodes.  1 is non HA.  Choose 2 or 3 for HA"
+			}
+		},
+		"nodeInstanceCount": {
+			"type": "int",
+			"defaultValue": 1,
+			"minValue": 1,
+			"allowedValues": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+			"metadata": {
+				"description": "Number of OpenShift nodes"
 			}
 		},
 		"dataDiskSize": {
@@ -171,7 +171,7 @@
 		"enableMetrics": {
 			"type": "string",
 			"minLength": 1,
-			"defaultValue": "true",
+			"defaultValue": "false",
 			"allowedValues": [
 				"true", "false"
 			],
@@ -182,12 +182,23 @@
 		"enableLogging": {
 			"type": "string",
 			"minLength": 1,
-			"defaultValue": "true",
+			"defaultValue": "false",
 			"allowedValues": [
 				"true", "false"
 			],
 			"metadata": {
 				"description": "Enable OpenShift Logging: true or false"
+			}
+		},
+		"enableCockpit": {
+			"type": "string",
+			"minLength": 1,
+			"defaultValue": "false",
+			"allowedValues": [
+				"true", "false"
+			],
+			"metadata": {
+				"description": "Enable Cockpit: true or false"
 			}
 		},
 		"rhsmUsernamePasswordOrActivationKey": {
@@ -277,7 +288,7 @@
 			"type": "string",
 			"defaultValue": "contoso.com",
 			"metadata": {
-				"description": "Default Subdomain for application routing (Wildcard DNS) - must enter something even if you are using xip.io"
+				"description": "Default Subdomain for application routing (Wildcard DNS) - must enter something even if you are using xip.io. Must be all lowercase"
 			}
 		}
 	},
@@ -288,6 +299,7 @@
 		"apiVersionNetwork": "2016-03-30",
 		"apiVersionStorage": "2015-06-15",
 		"apiVersionLinkTemplate": "2015-01-01",
+		"defaultSubDomain": "[toLower(parameters('defaultSubDomain'))]",
 		"namingInfix": "[toLower(parameters('openshiftClusterPrefix'))]",
 		"openshiftBastionHostname": "[concat(variables('namingInfix'), '-bastion')]",
 		"openshiftMasterHostname": "[concat(variables('namingInfix'), '-master')]",
@@ -307,6 +319,7 @@
 		"masterSubnetName": "mastersubnet",
 		"nodeSubnetName": "nodesubnet",
 		"bastionPublicIp": "bastionpublicip",
+		"bastionPublicIpDnsLabel": "[concat('bastiondns', uniqueString(resourceGroup().id))]",
 		"persistentVolume1Type": "Standard_LRS",
 		"persistentVolume2Type": "Standard_LRS",
 		
@@ -338,14 +351,11 @@
 		"customImageName": "[concat(parameters('customStorageAccount'), parameters('customOsDiskName'))]",
 		"sshKeyPath": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
 		"bastionPrepScriptUrl": "[concat(parameters('_artifactsLocation'), 'scripts/bastionPrep.sh')]",
-		"loadBalancerPrepScriptUrl": "[concat(parameters('_artifactsLocation'), 'scripts/loadBalancerPrep.sh')]",
 		"nodePrepScriptUrl": "[concat(parameters('_artifactsLocation'), 'scripts/nodePrep.sh')]",
 		"masterPrepScriptUrl": "[concat(parameters('_artifactsLocation'), 'scripts/masterPrep.sh')]",
 		"bastionPrepScriptFileName": "bastionPrep.sh",
-		"loadBalancerPrepScriptFileName": "loadBalancerPrep.sh",
 		"nodePrepScriptFileName": "nodePrep.sh",
 		"masterPrepScriptFileName": "masterPrep.sh",
-		"clusterMIDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), 'nested/', parameters('customVhdOrGallery'), 'clustermi.json')]",
 		"clusterNodeDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), 'nested/', parameters('customVhdOrGallery'), 'clusternode.json')]",
 		"basicDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), 'nested/', parameters('customVhdOrGallery'), 'basic.json')]",
 		"openshiftDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), 'nested/openshiftdeploy.json')]",
@@ -825,7 +835,10 @@
 				"displayName": "OpenShiftBastionPublicIP"
 			},
 			"properties": {
-				"publicIPAllocationMethod": "Dynamic"
+				"publicIPAllocationMethod": "Dynamic",
+				"dnsSettings": {
+					"domainNameLabel": "[variables('bastionPublicIpDnsLabel')]"
+				}
 			}
 		}, {
 			"type": "Microsoft.Network/publicIPAddresses",
@@ -1238,6 +1251,9 @@
 					"hostname": {
 						"value": "[variables('openshiftBastionHostname')]"
 					},
+					"role": {
+						"value": "bastionnode"
+					},
 					"customImageName": {
 						"value": "[variables('customImageName')]"
 					},
@@ -1271,7 +1287,7 @@
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
-					"uri": "[variables('clusterMIDeploymentTemplateUrl')]",
+					"uri": "[variables('clusterNodeDeploymentTemplateUrl')]",
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters": {
@@ -1299,10 +1315,16 @@
 					"hostname": {
 						"value": "[concat(variables('openshiftMasterHostname'), '-', copyIndex())]"
 					},
+					"role": {
+						"value": "masternode"
+					},
 					"customImageName": {
 						"value": "[variables('customImageName')]"
 					},
-					"newStorageAccount": {
+					"newStorageAccountOs": {
+						"value": "[variables('newStorageAccountMaster')]"
+					},
+					"newStorageAccountData": {
 						"value": "[variables('newStorageAccountMaster')]"
 					},
 					"customStorageAccount": {
@@ -1332,7 +1354,7 @@
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
-					"uri": "[variables('clusterMIDeploymentTemplateUrl')]",
+					"uri": "[variables('clusterNodeDeploymentTemplateUrl')]",
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters": {
@@ -1360,10 +1382,16 @@
 					"hostname": {
 						"value": "[concat(variables('openshiftInfraHostname'), '-', copyIndex())]"
 					},
+					"role": {
+						"value": "infranode"
+					},
 					"customImageName": {
 						"value": "[variables('customImageName')]"
 					},
-					"newStorageAccount": {
+					"newStorageAccountOs": {
+						"value": "[variables('newStorageAccountInfra')]"
+					},
+					"newStorageAccountData": {
 						"value": "[variables('newStorageAccountInfra')]"
 					},
 					"customStorageAccount": {
@@ -1421,6 +1449,9 @@
 					},
 					"hostname": {
 						"value": "[concat(variables('openshiftNodeHostname'), '-', copyIndex())]"
+					},
+					"role": {
+						"value": "appnode"
 					},
 					"customImageName": {
 						"value": "[variables('customImageName')]"
@@ -1633,6 +1664,9 @@
 					"enableLogging": {
 						"value": "[parameters('enableLogging')]"
 					},
+					"enableCockpit": {
+						"value": "[parameters('enableCockpit')]"
+					},
 					"aadClientId": {
 						"value": "[parameters('aadClientId')]"
 					},
@@ -1643,7 +1677,7 @@
 						"value": "[concat(reference(parameters('infraLbPublicIpDnsLabel')).ipAddress, '.xip.io')]"
 					},
 					"customDomain": {
-						"value": "[parameters('defaultSubDomain')]"
+						"value": "[variables('defaultSubDomain')]"
 					},
 					"subDomainChosen": {
 						"value": "[concat(parameters('defaultSubDomainType'), 'Domain')]"
@@ -1664,6 +1698,10 @@
 		"Openshift Console Url": {
 			"type": "string",
 			"value": "[concat('https://', reference(parameters('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, ':8443/console')]"
+		},
+		"Bastion DNS FQDN": {
+			"type": "string",
+			"value": "[reference(variables('bastionPublicIp')).dnsSettings.fqdn]"
 		},
 		"Openshift Master SSH": {
 			"type": "string",

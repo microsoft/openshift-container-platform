@@ -146,6 +146,23 @@ cat > /home/${SUDOUSER}/configurestorageclass.yml <<EOF
     shell: oc create -f /home/${SUDOUSER}/scgeneric2.yml
 EOF
 
+# Create Playbook to reboot all nodes as last step to fix stuck nodes issue
+
+cat > /home/${SUDOUSER}/rebootnodes.yml <<EOF
+- hosts: nodes
+  gather_facts: no
+  remote_user: hwadmin
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: Reboot the server to finalize stuck node fix
+    shell: ( sleep 3 && reboot & )
+    async: 0
+    poll: 0 
+  - name: Wait for the server to reboot
+    local_action: wait_for host="{{ansible_host}}" delay=25 state=started port=22 connect_timeout=10 timeout=180
+EOF
+
 # Create vars.yml file for use by setup-azure-config.yml playbook
 
 cat > /home/${SUDOUSER}/vars.yml <<EOF
@@ -694,29 +711,7 @@ echo $(date) "- Rebooting all nodes"
 echo $(date) "- Sleep for 20"
 sleep 20
 
-# Loop to Reboot Masters
-
-for (( c=0; c<$MASTERCOUNT; c++ ))
-do
-  azure vm restart ${RESOURCEGROUP} $MASTER-$c
-done
-sleep 20
-
-# Loop to Reboot Infra Nodes
-
-for (( c=0; c<$INFRACOUNT; c++ ))
-do
-  azure vm restart ${RESOURCEGROUP} $INFRA-$c
-done
-sleep 20
-
-# Loop to Reboot Nodes
-
-for (( c=0; c<$NODECOUNT; c++ ))
-do
-  azure vm restart ${RESOURCEGROUP} $NODE-$c
-done
-sleep 20
+runuser -l $SUDOUSER -c "ansible-playbook ~/rebootnodes.yml"
 
 # Delete postinstall.yml file
 echo $(date) "- Deleting unecessary files"

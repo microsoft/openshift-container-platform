@@ -1,5 +1,5 @@
 #!/bin/bash
-echo $(date) " - Starting Script"
+echo $(date) " - Starting Infra / Node Prep Script"
 
 SELECT=$1
 USERNAME_ORG=$2
@@ -50,20 +50,13 @@ subscription-manager repos \
     --enable="rhel-7-server-ose-3.5-rpms" \
     --enable="rhel-7-fast-datapath-rpms"
 
-# Install and enable Cockpit
-echo $(date) " - Installing and enabling Cockpit"
-
-yum -y install cockpit
-
-systemctl enable cockpit.socket
-systemctl start cockpit.socket
-
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
 
 yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion
 yum -y update --exclude=WALinuxAgent
 yum install atomic-openshift-excluder atomic-openshift-docker-excluder
+
 atomic-openshift-excluder unexclude
 
 # Install Docker 1.12.x
@@ -92,8 +85,6 @@ fi
 
 systemctl enable docker
 systemctl start docker
-
-mkdir /etc/azure
 
 echo $(date) " - Script Complete"
 

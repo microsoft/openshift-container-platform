@@ -1,5 +1,5 @@
 #!/bin/bash
-echo $(date) " - Starting Script"
+echo $(date) " - Starting Bastion Prep Script"
 
 SELECT=$1
 USERNAME_ORG=$2
@@ -48,8 +48,7 @@ subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
     --enable="rhel-7-server-ose-3.5-rpms" \
-	--enable="rhel-7-fast-datapath-rpms" \
-    --enable="rhel-7-server-ose-3.1-rpms"
+    --enable="rhel-7-fast-datapath-rpms"
 
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
@@ -64,7 +63,7 @@ echo $(date) " - Installing OpenShift utilities"
 
 yum -y install atomic-openshift-utils
 
-# Create playbook to update ansible.cfg file
+# Create playbook to update ansible.cfg file to include path to library
 
 cat > updateansiblecfg.yaml <<EOF
 #!/usr/bin/ansible-playbook

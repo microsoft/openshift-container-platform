@@ -1,5 +1,5 @@
 #!/bin/bash
-echo $(date) " - Starting Script"
+echo $(date) " - Starting Master Prep Script"
 
 SELECT=$1
 USERNAME_ORG=$2
@@ -53,20 +53,13 @@ subscription-manager repos \
     --enable="rhel-7-server-ose-3.5-rpms" \
     --enable="rhel-7-fast-datapath-rpms" 
 
-# Install and enable Cockpit
-echo $(date) " - Installing and enabling Cockpit"
-
-yum -y install cockpit
-
-systemctl enable cockpit.socket
-systemctl start cockpit.socket
-
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
 
 yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion httpd-tools
 yum -y update --exclude=WALinuxAgent
 yum install atomic-openshift-excluder atomic-openshift-docker-excluder
+
 atomic-openshift-excluder unexclude
 
 # Install OpenShift utilities
@@ -101,36 +94,6 @@ fi
 systemctl enable docker
 systemctl start docker
 
-# Prereqs for NFS, if we're $MASTER-0
-# Create a lv with what's left in the docker-vg VG, which depends on disk size defined (100G disk = 60G free)
-
-if hostname -f|grep -- "-0" >/dev/null
-then
-   echo $(date) " - We are on master-0 ($(hostname)): Setting up NFS server for persistent storage"
-   yum -y install nfs-utils
-   VGFREESPACE=$(vgs|grep docker-vg|awk '{ print $7 }'|sed 's/.00g/G/')
-   lvcreate -n lv_nfs -L+$VGFREESPACE docker-vg
-   mkfs.xfs /dev/mapper/docker--vg-lv_nfs
-   echo "/dev/mapper/docker--vg-lv_nfs /exports xfs defaults 0 0" >>/etc/fstab
-   mkdir /exports
-   mount -a
-   if [ "$?" -eq 0 ]
-   then
-      echo "$(date) Successfully setup NFS."
-   else
-      echo "$(date) Failed to mount filesystem which is to host the NFS share."
-      exit 6
-   fi
-   
-   for item in registry metrics jenkins
-   do 
-      mkdir -p /exports/$item
-   done
-   
-   chown nfsnobody:nfsnobody /exports -R
-   chmod a+rwx /exports -R  
-fi
-
 # Create Storage Class yml files on MASTER-0
 
 if hostname -f|grep -- "-0" >/dev/null
@@ -157,6 +120,5 @@ parameters:
   storageAccount: ${STORAGEACCOUNT2}
 EOF
 fi
-
 
 echo $(date) " - Script Complete"

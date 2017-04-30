@@ -30,6 +30,7 @@ STORAGEACCOUNT1=${23}
 STORAGEACCOUNT2=${24}
 SAKEY1=${25}
 SAKEY2=${26}
+COCKPIT=${27}
 
 MASTERLOOP=$((MASTERCOUNT - 1))
 INFRALOOP=$((INFRACOUNT - 1))
@@ -58,8 +59,8 @@ sed -i -e "s/^# control_path = %(directory)s\/%%h-%%r/control_path = %(directory
 sed -i -e "s/^#host_key_checking = False/host_key_checking = False/" /etc/ansible/ansible.cfg
 sed -i -e "s/^#pty=False/pty=False/" /etc/ansible/ansible.cfg
 
-# Create Ansible Playbook for Post Installation task
-echo $(date) " - Create Ansible Playbook for Post Installation task"
+# Create Ansible Playbooks for Post Installation tasks
+echo $(date) " - Create Ansible Playbooks for Post Installation tasks"
 
 # Run on all masters - Create Inital OpenShift User on all Masters
 
@@ -83,7 +84,7 @@ EOF
 
 cat > /home/${SUDOUSER}/assignclusteradminrights.yml <<EOF
 ---
-- hosts: nfs
+- hosts: master0
   gather_facts: no
   remote_user: ${SUDOUSER}
   become: yes
@@ -115,7 +116,7 @@ EOF
 
 cat > /home/${SUDOUSER}/dockerregistry.yml <<EOF
 ---
-- hosts: nfs
+- hosts: master0
   gather_facts: no
   remote_user: ${SUDOUSER}
   become: yes
@@ -131,7 +132,7 @@ EOF
 
 cat > /home/${SUDOUSER}/configurestorageclass.yml <<EOF
 ---
-- hosts: nfs
+- hosts: master0
   gather_facts: no
   remote_user: ${SUDOUSER}
   become: yes
@@ -143,23 +144,6 @@ cat > /home/${SUDOUSER}/configurestorageclass.yml <<EOF
     shell: oc create -f /home/${SUDOUSER}/scgeneric1.yml
   - name: Create Storage Class with StorageAccountPV2
     shell: oc create -f /home/${SUDOUSER}/scgeneric2.yml
-EOF
-
-# Reboot all nodes as last step to fix stuck nodes issue
-
-cat > /home/${SUDOUSER}/rebootnodes.yml <<EOF
-- hosts: nodes
-  gather_facts: no
-  remote_user: hwadmin
-  become: yes
-  become_method: sudo
-  tasks:
-  - name: Reboot the server to finalize stuck node fix
-    shell: ( sleep 3 && reboot & )
-    async: 0
-    poll: 0 
-  - name: Wait for the server to reboot
-    local_action: wait_for host="{{ansible_host}}" delay=25 state=started port=22 connect_timeout=10 timeout=180
 EOF
 
 # Create vars.yml file for use by setup-azure-config.yml playbook
@@ -426,7 +410,7 @@ EOF
 
 cat > /home/${SUDOUSER}/deletestucknodes.yml <<EOF
 ---
-- hosts: nfs
+- hosts: master0
   gather_facts: no
   remote_user: ${SUDOUSER}
   become: yes
@@ -464,7 +448,7 @@ cat > /etc/ansible/hosts <<EOF
 [OSEv3:children]
 masters
 nodes
-nfs
+master0
 new_nodes
 
 # Set variables common for all OSEv3 hosts
@@ -478,7 +462,7 @@ docker_udev_workaround=True
 openshift_use_dnsmasq=false
 openshift_master_default_subdomain=$ROUTING
 openshift_override_hostname_check=true
-osm_use_cockpit=true
+osm_use_cockpit=${COCKPIT}
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 console_port=443
 openshift_cloudprovider_kind=azure
@@ -499,29 +483,19 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 openshift_hosted_metrics_deploy=$METRICS
 # As of this writing, there's a bug in the metrics deployment.
 # You'll see the metrics failing to deploy 59 times, it will, though, succeed the 60'th time.
-openshift_hosted_metrics_storage_kind=nfs
-openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
-openshift_hosted_metrics_storage_host=$MASTER-0
-openshift_hosted_metrics_storage_nfs_directory=/exports
-openshift_hosted_metrics_storage_volume_name=metrics
-openshift_hosted_metrics_storage_volume_size=10Gi
+openshift_metrics_cassandra_storage_type=dynamic
 openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 
 # Setup logging
 openshift_hosted_logging_deploy=$LOGGING
-openshift_hosted_logging_storage_kind=nfs
-openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
-openshift_hosted_logging_storage_host=$MASTER-0
-openshift_hosted_logging_storage_nfs_directory=/exports
-openshift_hosted_logging_storage_volume_name=logging
-openshift_hosted_logging_storage_volume_size=10Gi
+openshift_hosted_logging_storage_kind=dynamic
 openshift_master_logging_public_url=https://kibana.$ROUTING
 
 # host group for masters
 [masters]
 $MASTER-0
 
-[nfs]
+[master0]
 $MASTER-0
 
 # host group for nodes
@@ -559,7 +533,7 @@ cat > /etc/ansible/hosts <<EOF
 masters
 nodes
 etcd
-nfs
+master0
 new_nodes
 
 # Set variables common for all OSEv3 hosts
@@ -573,7 +547,7 @@ docker_udev_workaround=True
 openshift_use_dnsmasq=false
 openshift_master_default_subdomain=$ROUTING
 openshift_override_hostname_check=true
-osm_use_cockpit=true
+osm_use_cockpit=${COCKPIT}
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 console_port=443
 openshift_cloudprovider_kind=azure
@@ -595,22 +569,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 openshift_hosted_metrics_deploy=$METRICS
 # As of this writing, there's a bug in the metrics deployment.
 # You'll see the metrics failing to deploy 59 times, it will, though, succeed the 60'th time.
-openshift_hosted_metrics_storage_kind=nfs
-openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
-openshift_hosted_metrics_storage_host=$MASTER-0
-openshift_hosted_metrics_storage_nfs_directory=/exports
-openshift_hosted_metrics_storage_volume_name=metrics
-openshift_hosted_metrics_storage_volume_size=10Gi
-openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
+openshift_metrics_cassandra_storage_type=dynamic
+#openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 
 # Setup logging
 openshift_hosted_logging_deploy=$LOGGING
-openshift_hosted_logging_storage_kind=nfs
-openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
-openshift_hosted_logging_storage_host=$MASTER-0
-openshift_hosted_logging_storage_nfs_directory=/exports
-openshift_hosted_logging_storage_volume_name=logging
-openshift_hosted_logging_storage_volume_size=10Gi
+openshift_hosted_logging_storage_kind=dynamic
 openshift_master_logging_public_url=https://kibana.$ROUTING
 
 # host group for masters
@@ -621,7 +585,7 @@ $MASTER-[0:${MASTERLOOP}]
 [etcd]
 $MASTER-[0:${MASTERLOOP}] 
 
-[nfs]
+[master0]
 $MASTER-0
 
 # host group for nodes
@@ -730,7 +694,29 @@ echo $(date) "- Rebooting all nodes"
 echo $(date) "- Sleep for 20"
 sleep 20
 
-runuser -l $SUDOUSER -c "ansible-playbook ~/rebootnodes.yml"
+# Loop to Reboot Masters
+
+for (( c=0; c<$MASTERCOUNT; c++ ))
+do
+  azure vm restart ${RESOURCEGROUP} $MASTER-$c
+done
+sleep 20
+
+# Loop to Reboot Infra Nodes
+
+for (( c=0; c<$INFRACOUNT; c++ ))
+do
+  azure vm restart ${RESOURCEGROUP} $INFRA-$c
+done
+sleep 20
+
+# Loop to Reboot Nodes
+
+for (( c=0; c<$NODECOUNT; c++ ))
+do
+  azure vm restart ${RESOURCEGROUP} $NODE-$c
+done
+sleep 20
 
 # Delete postinstall.yml file
 echo $(date) "- Deleting unecessary files"

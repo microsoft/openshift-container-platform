@@ -151,16 +151,16 @@ EOF
 cat > /home/${SUDOUSER}/rebootnodes.yml <<EOF
 - hosts: nodes
   gather_facts: no
-  remote_user: hwadmin
+  become_user: root
   become: yes
   become_method: sudo
   tasks:
   - name: Reboot the server to finalize stuck node fix
-    shell: ( sleep 3 && reboot & )
+    shell: systemd-run --on-active=10 /usr/bin/systemctl reboot
     async: 0
     poll: 0 
   - name: Wait for the server to reboot
-    local_action: wait_for host="{{ansible_host}}" delay=25 state=started port=22 connect_timeout=10 timeout=180
+    local_action: wait_for host="{{ansible_host}}" delay=120 state=started port=22 connect_timeout=60 timeout=240
 EOF
 
 # Create vars.yml file for use by setup-azure-config.yml playbook

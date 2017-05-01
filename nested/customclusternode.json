@@ -1,0 +1,171 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"location": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Datacenter Region Location"
+			}
+		},
+		"sshKeyPath": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "SSH Public Key Path"
+			}
+		},
+		"sshPublicKey": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "SSH Public Key"
+			}
+		},
+		"dataDiskSize": {
+			"type": "int",
+			"metadata": {
+				"description": "Size of Data Disk"
+			}
+		},
+		"adminUsername": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Admin Username"
+			}
+		},
+		"vmSize": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "VM Size"
+			}
+		},
+		"availabilitySet": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Name of Availibility Set"
+			}
+		},
+		"hostname": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "VM Hostname"
+			}
+		},
+		"role": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "VM Role for tag"
+			}
+		},
+		"customImageName": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Name of Custom VHD Image"
+			}
+		},
+		"newStorageAccountOs": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Storage Account for OS Disk"
+			}
+		},
+		"newStorageAccountData": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Storage Account for Data Disk"
+			}
+		},
+		"customStorageAccount": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Storage Account for Custom Image"
+			}
+		},
+		"apiVersionStorage": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Storage API Version"
+			}
+		},
+		"apiVersionCompute": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Compute API Version"
+			}
+		}
+	},
+	"variables": {
+	},
+	"resources": [{
+		"type": "Microsoft.Compute/virtualMachines",
+		"name": "[parameters('hostname')]",
+		"location": "[parameters('location')]",
+		"apiVersion": "[parameters('apiVersionCompute')]",
+		"tags": {
+			"Role": "[parameters('role')]"
+		},
+		"properties": {
+			"availabilitySet": {
+				"id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySet'))]"
+			},
+			"hardwareProfile": {
+				"vmSize": "[parameters('vmSize')]"
+			},
+			"osProfile": {
+				"computerName": "[parameters('hostname')]",
+				"adminUsername": "[parameters('adminUsername')]",
+				"linuxConfiguration": {
+					"disablePasswordAuthentication": true,
+					"ssh": {
+						"publicKeys": [{
+							"path": "[parameters('sshKeyPath')]",
+							"keyData": "[parameters('sshPublicKey')]"
+						}]
+					}
+				}
+			},
+			"storageProfile": {
+				"osDisk": {
+					"name": "[concat(parameters('hostname'), 'osdisk')]",
+					"image": {
+						"uri": "[parameters('customImageName')]"
+					},
+					"vhd": {
+						"uri": "[concat(parameters('customStorageAccount'), 'vhds/', parameters('hostname'), '.vhd')]"
+					},
+					"osType": "Linux",
+					"caching": "ReadWrite",
+					"createOption": "FromImage"
+				},
+				"dataDisks": [{
+					"name": "[concat(parameters('hostname'), '-docker-pool')]",
+					"diskSizeGB": "[parameters('dataDiskSize')]",
+					"lun": 0,
+					"vhd": {
+						"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccountData')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '-docker-pool.vhd')]"
+					},
+					"createOption": "Empty"
+				}]
+			},
+			"networkProfile": {
+				"networkInterfaces": [{
+					"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('hostname'), '-nic'))]"
+				}]
+			}
+		}
+	}],
+	"outputs": {}
+}

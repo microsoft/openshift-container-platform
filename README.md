@@ -1,5 +1,7 @@
 # OpenShift Container Platform Deployment Template
 
+Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
+
 **For OpenShift Origin refer to https://github.com/Microsoft/openshift-origin**
 
 ## OpenShift Container Platform 3.5 with Username / Password authentication for OpenShift

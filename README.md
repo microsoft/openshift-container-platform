@@ -198,15 +198,13 @@ Ex: `azure group deployment create --name ocpdeployment --template-file azuredep
 1. Create Resource Group: az group create -n \<name\> -l \<location\><br />
 Ex: `az group create -n openshift-cluster -l westus`
 2. Create Resource Group Deployment: az group deployment create --name \<deployment name\> --template-file \<template_file\> --parameters @\<parameters_file\> --resource-group \<resource group name\> --nowait<br />
-Ex: `azure group deployment create --name ocpdeployment --template-file azuredeploy.json --parameters @azuredeploy.parameters.json --resource-group openshift-cluster --no-wait`
+Ex: `az group deployment create --name ocpdeployment --template-file azuredeploy.json --parameters @azuredeploy.parameters.json --resource-group openshift-cluster --no-wait`
 
 
 ### NOTE
 
 The OpenShift Ansible playbook does take a while to run when using VMs backed by Standard Storage. VMs backed by Premium Storage are faster. If you want Premium Storage, select a DS or GS series VM.
 <hr />
-
-### It is **VERY** important that you **reboot all the nodes** in the cluster (Masters, Infras and Nodes) upon a successfull cluster deployment before you login and start using the OpenShift Cluster!
 
 Be sure to follow the OpenShift instructions to create the necessary DNS entry for the OpenShift Router for access to applications. <br />
 
@@ -227,9 +225,17 @@ You should see a folder named '0' and '1'.  In each of these folders, you will s
 
 ### Metrics and logging
 
+**Metrics**
+
+If you deployed Metrics, it can take up to 15 minutes for Metrics to fully deploy. Please be patient.
+This is due to the fact that the Azure provider is configured after the cluster is installed and Metrics needs Persistent Storage from Azure so it hangs until the deployment script completes.
+
+You can check the status from the OpenShift Web Console or CLI by looking in the openShift-infra project.
+
 **Logging**
 
-If logging is enabled, you will need to perform some post deployment steps in order to get it up and running.
+If Logging is enabled, you will need to perform some post deployment steps in order to get it up and running.
+If Metrics is also enabled, please wait for all the Metrics pods to come on line before completing the post installation steps for Logging.
 
 First, log into the OpenShift Web Console and go into the logging project. Click on Deployment Config for logging-es.
 
@@ -239,7 +245,7 @@ Next, click on Deploy in upper right.
 
 ![Logging ReDeploy](images/loggingredeploy.jpg)
 
-It will take up to 10 minutes from this point before Logging and Metrics is online. You can check the status by clicking into the appropriate project (logging or openshift-infra) and checking the status of the pods. Once all the pods are online, the service is operational.
+It will take up to 15 minutes from this point before Logging is online. You can check the status by clicking into the appropriate project (logging or openshift-infra) and checking the status of the pods. Once all the pods are online, the service is operational.
 
 To display metrics and logs, you need to logon to OpenShift ( https://publicDNSname:8443 ) go into the logging project, click on the Kubana route and accept the SSL exception in your browser, then do the same with the Hawkster metrics route in the openshift-infra project.
 
@@ -249,6 +255,8 @@ To create additional (non-admin) users in your environment, login to your master
 <br><i>htpasswd /etc/origin/master/htpasswd mynewuser</i>
 
 ### Access to Cockpit
+
+If you enable Cockpit, then the password for 'root' is set to be the same as the password for the first OpenShift user.
 
 Use user 'root' and the same password as you assigned to your OpenShift admin to login to Cockpit ( https://publicDNSname:9090 ).
    

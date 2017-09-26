@@ -66,7 +66,7 @@ yum install atomic-openshift-excluder atomic-openshift-docker-excluder
 atomic-openshift-excluder unexclude
 
 # Grow Root File System
-echo (date) " - Grow Root FS"
+echo $(date) " - Grow Root FS"
 
 rootdev=`findmnt --target / -o SOURCE -n`
 rootdrivename=`lsblk -no pkname $rootdev`

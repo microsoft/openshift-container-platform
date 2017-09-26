@@ -236,7 +236,7 @@ cat > /home/${SUDOUSER}/setup-azure-node-master.yml <<EOF
   - name: restart atomic-openshift-node
     systemd:
       state: restarted
-      name: origin-node
+      name: atomic-openshift-node
   post_tasks:
   - name: make sure /etc/azure exists
     file:
@@ -255,7 +255,7 @@ cat > /home/${SUDOUSER}/setup-azure-node-master.yml <<EOF
           "resourceGroup": "{{ g_resourceGroup }}",
         } 
     notify:
-    - restart origin-node
+    - restart atomic-openshift-node
   - name: insert the azure disk config into the node
     modify_yaml:
       dest: "{{ node_conf }}"
@@ -291,7 +291,7 @@ cat > /home/${SUDOUSER}/setup-azure-node.yml <<EOF
   - name: restart atomic-openshift-node
     systemd:
       state: restarted
-      name: origin-node
+      name: atomic-openshift-node
   post_tasks:
   - name: make sure /etc/azure exists
     file:
@@ -310,7 +310,7 @@ cat > /home/${SUDOUSER}/setup-azure-node.yml <<EOF
           "resourceGroup": "{{ g_resourceGroup }}",
         } 
     notify:
-    - restart origin-node
+    - restart atomic-openshift-node
   - name: insert the azure disk config into the node
     modify_yaml:
       dest: "{{ node_conf }}"

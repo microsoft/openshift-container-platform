@@ -6,8 +6,12 @@ USERNAME_ORG=$2
 PASSWORD_ACT_KEY="$3"
 POOL_ID=$4
 STORAGEACCOUNT1=$5
-STORAGEACCOUNT2=$6
-SUDOUSER=$7
+SUDOUSER=$6
+
+# Remove RHUI
+
+rm -f /etc/yum.repos.d/rh-cloud.repo
+sleep 10
 
 # Register Host with Cloud Access Subscription
 echo $(date) " - Register host with Cloud Access Subscription"
@@ -50,13 +54,13 @@ subscription-manager repos --disable="*"
 subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
-    --enable="rhel-7-server-ose-3.5-rpms" \
+    --enable="rhel-7-server-ose-3.6-rpms" \
     --enable="rhel-7-fast-datapath-rpms" 
 
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
 
-yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion httpd-tools
+yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion httpd-tools kexec-tools sos psacct
 yum -y update --exclude=WALinuxAgent
 yum install atomic-openshift-excluder atomic-openshift-docker-excluder
 
@@ -110,15 +114,6 @@ parameters:
   storageAccount: ${STORAGEACCOUNT1}
 EOF
 
-cat <<EOF > /home/${SUDOUSER}/scgeneric2.yml
-kind: StorageClass
-apiVersion: storage.k8s.io/v1beta1
-metadata:
-  name: slow
-provisioner: kubernetes.io/azure-disk
-parameters:
-  storageAccount: ${STORAGEACCOUNT2}
-EOF
 fi
 
 echo $(date) " - Script Complete"

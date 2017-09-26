@@ -3,7 +3,7 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"_artifactsLocation": {
-			"value": "https://raw.githubusercontent.com/haroldwongms/openshift-containerplatform/master/"
+			"value": "https://raw.githubusercontent.com/haroldwongms/openshift-containerplatform/master"
 		},
 		"customVhdOrGallery": {
 			"value": "gallery"
@@ -26,17 +26,11 @@
 		"openshiftClusterPrefix": {
 			"value": "changeme"
 		},
-		"openshiftMasterPublicIpDnsLabel": {
-			"value": "GEN-UNIQUE"
-		},
-		"infraLbPublicIpDnsLabel": {
-			"value": "GEN-UNIQUE"
-		},
 		"masterInstanceCount": {
-			"value": 1
+			"value": 3
 		},
 		"infraInstanceCount": {
-			"value": 1
+			"value": 2
 		},
 		"nodeInstanceCount": {
 			"value": 1

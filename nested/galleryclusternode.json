@@ -150,7 +150,8 @@
 						"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccountOs')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '.vhd')]"
 					},
 					"caching": "ReadWrite",
-					"createOption": "FromImage"
+					"createOption": "FromImage",
+					"diskSizeGB": 64
 				},
 				"dataDisks": [{
 					"name": "[concat(parameters('hostname'), '-docker-pool')]",

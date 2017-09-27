@@ -448,6 +448,20 @@ cat >> /etc/ansible/hosts <<EOF
 [new_nodes]
 EOF
 
+echo $(date) " - Running network_manager.yml playbook" 
+DOMAIN=`domainname -d` 
+
+# Setup NetworkManager to manage eth0 
+runuser -l $SUDOUSER -c "ansible-playbook openshift-ansible/playbooks/byo/openshift-node/network_manager.yml" 
+
+# Configure resolv.conf on all hosts through NetworkManager 
+echo $(date) " - Setting up NetworkManager on eth0" 
+
+runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\"" 
+sleep 5 
+runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\"" 
+runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\"" 
+
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
 

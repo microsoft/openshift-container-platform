@@ -591,8 +591,9 @@ fi
 
 if [ $METRICS == "true" ]
 then
+	sleep 30
 	echo $(date) "- Deploying Metrics"
-	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e \"openshift_metrics_install_metrics=True\""
+	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True"
 	if [ $? -eq 0 ]
 	then
 	   echo $(date) " - Metrics configuration completed successfully"
@@ -606,8 +607,9 @@ fi
 
 if [ $LOGGING == "true" ] 
 then
+	sleep 60
 	echo $(date) "- Deploying Logging"
-	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e \"openshift_logging_install_logging=True\""
+	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True"
 	if [ $? -eq 0 ]
 	then
 	   echo $(date) " - Logging configuration completed successfully"

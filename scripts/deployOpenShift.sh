@@ -399,18 +399,18 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 openshift_hosted_metrics_deploy=false
 openshift_metrics_cassandra_storage_type=dynamic
 openshift_metrics_start_cluster=true
-openshift_metrics_hawkular_nodeselector={"role":"infra"}
-openshift_metrics_cassandra_nodeselector={"role":"infra"}
-openshift_metrics_heapster_nodeselector={"role":"infra"}
+openshift_metrics_hawkular_nodeselector={"type":"infra"}
+openshift_metrics_cassandra_nodeselector={"type":"infra"}
+openshift_metrics_heapster_nodeselector={"type":"infra"}
 openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 
 # Setup logging
 openshift_hosted_logging_deploy=false
 openshift_hosted_logging_storage_kind=dynamic
 openshift_logging_fluentd_nodeselector={"logging":"true"}
-openshift_logging_es_nodeselector={"role":"infra"}
-openshift_logging_kibana_nodeselector={"role":"infra"}
-openshift_logging_curator_nodeselector={"role":"infra"}
+openshift_logging_es_nodeselector={"type":"infra"}
+openshift_logging_kibana_nodeselector={"type":"infra"}
+openshift_logging_curator_nodeselector={"type":"infra"}
 openshift_master_logging_public_url=https://kibana.$ROUTING
 
 # host group for masters
@@ -586,6 +586,8 @@ else
    echo $(date) "- Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
    exit 10
 fi
+
+oc label nodes --all logging-infra-fluentd=true
 
 # Configure Metrics
 

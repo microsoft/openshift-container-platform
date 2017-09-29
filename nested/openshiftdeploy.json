@@ -1,4 +1,4 @@
-﻿{
+{
 	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
 	"contentVersion": "1.0.0.0",
 	"parameters": {
@@ -186,6 +186,10 @@
 		"subscriptionId": "[subscription().subscriptionId]",
 		"location": "[resourceGroup().location]",
 		"resourceGroupName": "[resourceGroup().name]",
+		"redHatTags": {
+			"app": "OpenShift",
+			"provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
+		},
 		"openshiftDeploymentScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/deployOpenShift.sh')]",
 		"openshiftDeploymentScriptFileName": "deployOpenShift.sh"
 	},
@@ -195,7 +199,9 @@
 		"location": "[resourceGroup().location]",
 		"apiVersion": "[parameters('apiVersionCompute')]",
 		"tags": {
-			"displayName": "DeployOpenShift"
+			"displayName": "DeployOpenShift",
+				"provider": "[variables('redHatTags').provider]",
+				"app": "[variables('redHatTags').app]"
 		},
 		"properties": {
 			"publisher": "Microsoft.Azure.Extensions",

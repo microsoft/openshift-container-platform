@@ -65,6 +65,13 @@
 				"description": "Storage Account"
 			}
 		},
+		"diagStorageAccount": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Diagnostics Storage Account"
+			}
+		},
 		"customStorageAccount": {
 			"type": "string",
 			"minLength": 1,
@@ -88,6 +95,10 @@
 		}
 	},
 	"variables": {
+		"redHatTags": {
+			"app": "OpenShift",
+			"provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
+		},
 	},
 	"resources": [{
 		"type": "Microsoft.Compute/virtualMachines",
@@ -95,7 +106,9 @@
 		"location": "[parameters('location')]",
 		"apiVersion": "[parameters('apiVersionCompute')]",
 		"tags": {
-			"Role": "[parameters('role')]"
+			"Role": "[parameters('role')]",
+				"provider": "[variables('redHatTags').provider]",
+				"app": "[variables('redHatTags').app]"
 		},
 		"properties": {
 			"hardwareProfile": {
@@ -132,6 +145,12 @@
 				"networkInterfaces": [{
 					"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('hostname'), '-nic'))]"
 				}]
+			},
+			"diagnosticsProfile": {
+				"bootDiagnostics": {
+					"enabled": true,
+					"storageUri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('diagStorageAccount')), parameters('apiVersionStorage')).primaryEndpoints['blob']))]"
+				}
 			}
 		}
 	}],

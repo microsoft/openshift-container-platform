@@ -398,11 +398,18 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Setup metrics
 openshift_hosted_metrics_deploy=$METRICS
 openshift_metrics_cassandra_storage_type=dynamic
+openshift_metrics_hawkular_nodeselector={"role":"infra"}
+openshift_metrics_cassandra_nodeselector={"role":"infra"}
+openshift_metrics_heapster_nodeselector={"role":"infra"}
 openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 
 # Setup logging
 openshift_hosted_logging_deploy=$LOGGING
 openshift_hosted_logging_storage_kind=dynamic
+openshift_logging_fluentd_nodeselector={"logging":"true"}
+openshift_logging_es_nodeselector={"role":"infra"}
+openshift_logging_kibana_nodeselector={"role":"infra"}
+openshift_logging_curator_nodeselector={"role":"infra"}
 openshift_master_logging_public_url=https://kibana.$ROUTING
 
 # host group for masters
@@ -468,6 +475,14 @@ echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
 
 runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml"
 
+if [ $? -eq 0 ]
+then
+   echo $(date) " - OpenShift Cluster installed successfully"
+else
+   echo $(date) "- OpenShift Cluster failed to install"
+   exit 6
+fi
+
 echo $(date) " - Modifying sudoers"
 
 sed -i -e "s/Defaults    requiretty/# Defaults    requiretty/" /etc/sudoers
@@ -532,9 +547,44 @@ sleep 120
 echo $(date) "- Configuring OpenShift Cloud Provider to be Azure"
 
 runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-master.yml"
+
+if [ $? -eq 0 ]
+then
+   echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
+else
+   echo $(date) "- Cloud Provider setup of master config on Master Nodes failed to completed"
+   exit 7
+fi
+
 runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-node-master.yml"
+
+if [ $? -eq 0 ]
+then
+   echo $(date) " - Cloud Provider setup of node config on Master Nodes completed successfully"
+else
+   echo $(date) "- Cloud Provider setup of node config on Master Nodes failed to completed"
+   exit 8
+fi
+
 runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-node.yml"
+
+if [ $? -eq 0 ]
+then
+   echo $(date) " - Cloud Provider setup of node config on App Nodes completed successfully"
+else
+   echo $(date) "- Cloud Provider setup of node config on App Nodes failed to completed"
+   exit 9
+fi
+
 runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
+
+if [ $? -eq 0 ]
+then
+   echo $(date) " - Cloud Provider setup of OpenShift Cluster completed successfully"
+else
+   echo $(date) "- Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
+   exit 10
+fi
 
 # Delete postinstall.yml file
 echo $(date) "- Deleting unecessary files"

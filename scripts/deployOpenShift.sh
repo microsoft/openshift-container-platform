@@ -396,15 +396,16 @@ openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 
 # Setup metrics
-openshift_hosted_metrics_deploy=$METRICS
+openshift_hosted_metrics_deploy=false
 openshift_metrics_cassandra_storage_type=dynamic
+openshift_metrics_start_cluster=true
 openshift_metrics_hawkular_nodeselector={"role":"infra"}
 openshift_metrics_cassandra_nodeselector={"role":"infra"}
 openshift_metrics_heapster_nodeselector={"role":"infra"}
 openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 
 # Setup logging
-openshift_hosted_logging_deploy=$LOGGING
+openshift_hosted_logging_deploy=false
 openshift_hosted_logging_storage_kind=dynamic
 openshift_logging_fluentd_nodeselector={"logging":"true"}
 openshift_logging_es_nodeselector={"role":"infra"}
@@ -584,6 +585,36 @@ then
 else
    echo $(date) "- Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
    exit 10
+fi
+
+# Configure Metrics
+
+if [ $METRICS == "true" ]
+then
+	echo $(date) "- Deploying Metrics"
+	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e \"openshift_metrics_install_metrics=True\""
+	if [ $? -eq 0 ]
+	then
+	   echo $(date) " - Metrics configuration completed successfully"
+	else
+	   echo $(date) "- Metrics configuration failed"
+	   exit 11
+	fi
+fi
+
+# Configure Logging
+
+if [ $LOGGING == "true" ] 
+then
+	echo $(date) "- Deploying Logging"
+	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e \"openshift_logging_install_logging=True\""
+	if [ $? -eq 0 ]
+	then
+	   echo $(date) " - Logging configuration completed successfully"
+	else
+	   echo $(date) "- Logging configuration failed"
+	   exit 12
+	fi
 fi
 
 # Delete postinstall.yml file

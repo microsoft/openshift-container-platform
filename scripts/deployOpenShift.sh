@@ -31,7 +31,11 @@ SAKEY1=${24}
 COCKPIT=${25}
 AZURE=${26}
 
-echo $AZURE
+echo "testing variables"
+echo "cockpit is" $COCKPIT
+echo "azure is" $AZURE
+echo "azure 2 is" ${26}
+ehco "number 25 is" ${25}
 exit 20
 
 

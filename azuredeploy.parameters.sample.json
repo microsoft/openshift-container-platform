@@ -9,10 +9,10 @@
 			"value": "gallery"
 		},
 		"customStorageAccount": {
-			"value": "changeme"
+			"value": "https://customstorageaccount.blob.core.windows.net/"
 		},
 		"customOsDiskName": {
-			"value": "changeme"
+			"value": "images/customosdisk.vhd"
 		},
 		"masterVmSize": {
 			"value": "Standard_DS2_v2"
@@ -24,7 +24,7 @@
 			"value": "Standard_DS2_v2"
 		},
 		"openshiftClusterPrefix": {
-			"value": "changeme"
+			"value": "ocpcluster"
 		},
 		"masterInstanceCount": {
 			"value": 3
@@ -39,10 +39,10 @@
 			"value": 128
 		},
 		"adminUsername": {
-			"value": "changeme"
+			"value": "clusteradmin"
 		},
 		"openshiftPassword": {
-			"value": "changeme"
+			"value": "GEN-PASSWORD"
 		},
 		"enableMetrics": {
 			"value": "false"
@@ -54,43 +54,43 @@
 			"value": "false"
 		},
 		"rhsmUsernamePasswordOrActivationKey": {
-			"value": "password"
+			"value": "usernamepassword"
 		},
 		"rhsmUsernameOrOrgId": {
-			"value": "changeme"
+			"value": "rhsmuser"
 		},
 		"rhsmPasswordOrActivationKey": {
-			"value": "changeme"
+			"value": "GEN-PASSWORD"
 		},
 		"rhsmPoolId": {
-			"value": "changeme"
+			"value": "8a81234151631b3201a5e6f4322e42a9"
 		},
 		"sshPublicKey": {
 			"value": "GEN-SSH-PUB-KEY"
 		},
 		"keyVaultResourceGroup": {
-			"value": "changeme"
+			"value": "kvrg"
 		},
 		"keyVaultName": {
-			"value": "changeme"
+			"value": "keyvaultname"
 		},
 		"keyVaultSecret": {
-			"value": "changeme"
+			"value": "mysecret"
 		},
 		"enableAzure": {
 			"value": "false"
 		},
 		"aadClientId": {
-			"value": "changeme"
+			"value": "12345678-abcd-47bf-9b6f-12345678abcd"
 		},
 		"aadClientSecret": {
-			"value": "changeme"
+			"value": "GEN-PASSWORD"
 		},
 		"defaultSubDomainType": {
 			"value": "nipio"
 		},
 		"defaultSubDomain": {
-			"value": "changeme"
+			"value": "domain.com"
 		}
 	}
 }

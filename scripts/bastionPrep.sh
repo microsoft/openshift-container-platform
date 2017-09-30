@@ -6,6 +6,11 @@ USERNAME_ORG=$2
 PASSWORD_ACT_KEY="$3"
 POOL_ID=$4
 
+# Remove RHUI
+
+rm -f /etc/yum.repos.d/rh-cloud.repo
+sleep 10
+
 # Register Host with Cloud Access Subscription
 echo $(date) " - Register host with Cloud Access Subscription"
 
@@ -47,13 +52,13 @@ subscription-manager repos --disable="*"
 subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
-    --enable="rhel-7-server-ose-3.5-rpms" \
+    --enable="rhel-7-server-ose-3.6-rpms" \
     --enable="rhel-7-fast-datapath-rpms"
 
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
 
-yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion httpd-tools nodejs
+yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion httpd-tools kexec-tools sos psacct
 yum -y update --exclude=WALinuxAgent
 yum install atomic-openshift-excluder atomic-openshift-docker-excluder
 atomic-openshift-excluder unexclude
@@ -83,11 +88,5 @@ EOF
 echo $(date) " - Updating ansible.cfg file"
 
 ansible-playbook ./updateansiblecfg.yaml
-
-# Install Azure CLI
-
-echo $(date) " - Installing Azure CLI"
-
-npm install -g azure-cli
 
 echo $(date) " - Script Complete"

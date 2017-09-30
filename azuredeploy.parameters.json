@@ -77,6 +77,9 @@
 		"keyVaultSecret": {
 			"value": "changeme"
 		},
+		"enableAzure": {
+			"value": "false"
+		},
 		"aadClientId": {
 			"value": "changeme"
 		},

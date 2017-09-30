@@ -255,6 +255,16 @@
 				"description": "Key Vault Secret Name that contains the Private Key"
 			}
 		},
+		"enableAzure": {
+			"type": "string",
+			"defaultValue": "false",
+			"allowedValues": [
+				"true", "false"
+			],
+			"metadata": {
+				"description": "Enable Azure as Cloud Provider - true or false"
+			}
+		},
 		"aadClientId": {
 			"type": "string",
 			"minLength": 1,
@@ -1949,6 +1959,9 @@
 					},
 					"enableCockpit": {
 						"value": "[parameters('enableCockpit')]"
+					},
+					"enableAzure": {
+						"value": "[parameters('enableAzure')]"
 					},
 					"aadClientId": {
 						"value": "[parameters('aadClientId')]"

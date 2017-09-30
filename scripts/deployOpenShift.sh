@@ -29,6 +29,7 @@ LOCATION=${22}
 STORAGEACCOUNT1=${23}
 SAKEY1=${24}
 COCKPIT=${25}
+AZURE=${26}
 
 BASTION=$(hostname)
 
@@ -397,7 +398,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Setup metrics
 openshift_hosted_metrics_deploy=false
-openshift_metrics_cassandra_storage_type=dynamic
+#openshift_metrics_cassandra_storage_type=dynamic
 openshift_metrics_start_cluster=true
 openshift_metrics_hawkular_nodeselector={"type":"infra"}
 openshift_metrics_cassandra_nodeselector={"type":"infra"}
@@ -406,7 +407,7 @@ openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 
 # Setup logging
 openshift_hosted_logging_deploy=false
-openshift_hosted_logging_storage_kind=dynamic
+#openshift_hosted_logging_storage_kind=dynamic
 openshift_logging_fluentd_nodeselector={"logging":"true"}
 openshift_logging_es_nodeselector={"type":"infra"}
 openshift_logging_kibana_nodeselector={"type":"infra"}
@@ -480,7 +481,7 @@ if [ $? -eq 0 ]
 then
    echo $(date) " - OpenShift Cluster installed successfully"
 else
-   echo $(date) "- OpenShift Cluster failed to install"
+   echo $(date) " - OpenShift Cluster failed to install"
    exit 6
 fi
 
@@ -530,64 +531,70 @@ echo $(date) "- Assigning password for root, which is used to login to Cockpit"
 runuser -l $SUDOUSER -c "ansible-playbook ~/assignrootpassword.yml"
 fi
 
-# Create Storage Classes
-echo $(date) "- Creating Storage Classes"
-
-runuser -l $SUDOUSER -c "ansible-playbook ~/configurestorageclass.yml"
-
 # Configure Docker Registry to use Azure Storage Account
 echo $(date) "- Configuring Docker Registry to use Azure Storage Account"
 
 runuser -l $SUDOUSER -c "ansible-playbook ~/dockerregistry.yml"
 
-echo $(date) "- Sleep for 120"
-
-sleep 120
-
-# Execute setup-azure-master and setup-azure-node playbooks to configure Azure Cloud Provider
-echo $(date) "- Configuring OpenShift Cloud Provider to be Azure"
-
-runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-master.yml"
-
-if [ $? -eq 0 ]
+if [[ $AZURE == "true" ]]
 then
-   echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
-else
-   echo $(date) "- Cloud Provider setup of master config on Master Nodes failed to completed"
-   exit 7
+
+	# Create Storage Classes
+	echo $(date) "- Creating Storage Classes"
+
+	runuser -l $SUDOUSER -c "ansible-playbook ~/configurestorageclass.yml"
+
+	echo $(date) "- Sleep for 120"
+
+	sleep 120
+
+	# Execute setup-azure-master and setup-azure-node playbooks to configure Azure Cloud Provider
+	echo $(date) "- Configuring OpenShift Cloud Provider to be Azure"
+
+	runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-master.yml"
+
+	if [ $? -eq 0 ]
+	then
+	   echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
+	else
+	   echo $(date) "- Cloud Provider setup of master config on Master Nodes failed to completed"
+	   exit 7
+	fi
+
+	runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-node-master.yml"
+
+	if [ $? -eq 0 ]
+	then
+	   echo $(date) " - Cloud Provider setup of node config on Master Nodes completed successfully"
+	else
+	   echo $(date) "- Cloud Provider setup of node config on Master Nodes failed to completed"
+	   exit 8
+	fi
+
+	runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-node.yml"
+
+	if [ $? -eq 0 ]
+	then
+	   echo $(date) " - Cloud Provider setup of node config on App Nodes completed successfully"
+	else
+	   echo $(date) "- Cloud Provider setup of node config on App Nodes failed to completed"
+	   exit 9
+	fi
+
+	runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
+
+	if [ $? -eq 0 ]
+	then
+	   echo $(date) " - Cloud Provider setup of OpenShift Cluster completed successfully"
+	else
+	   echo $(date) "- Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
+	   exit 10
+	fi
+
+	oc label nodes --all logging-infra-fluentd=true
+	oc label nodes --all logging=true
+
 fi
-
-runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-node-master.yml"
-
-if [ $? -eq 0 ]
-then
-   echo $(date) " - Cloud Provider setup of node config on Master Nodes completed successfully"
-else
-   echo $(date) "- Cloud Provider setup of node config on Master Nodes failed to completed"
-   exit 8
-fi
-
-runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-node.yml"
-
-if [ $? -eq 0 ]
-then
-   echo $(date) " - Cloud Provider setup of node config on App Nodes completed successfully"
-else
-   echo $(date) "- Cloud Provider setup of node config on App Nodes failed to completed"
-   exit 9
-fi
-
-runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
-
-if [ $? -eq 0 ]
-then
-   echo $(date) " - Cloud Provider setup of OpenShift Cluster completed successfully"
-else
-   echo $(date) "- Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
-   exit 10
-fi
-
-oc label nodes --all logging-infra-fluentd=true
 
 # Configure Metrics
 
@@ -595,7 +602,10 @@ if [ $METRICS == "true" ]
 then
 	sleep 30
 	echo $(date) "- Deploying Metrics"
-	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True"
+	if [ $AZURE == "true" ]
+		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
+	else
+		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True"
 	if [ $? -eq 0 ]
 	then
 	   echo $(date) " - Metrics configuration completed successfully"
@@ -611,7 +621,11 @@ if [ $LOGGING == "true" ]
 then
 	sleep 60
 	echo $(date) "- Deploying Logging"
-	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True"
+	if [ $AZURE == "true" ]
+	then
+		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True -e openshift_hosted_logging_storage_kind=dynamic"
+	else
+		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True"
 	if [ $? -eq 0 ]
 	then
 	   echo $(date) " - Logging configuration completed successfully"

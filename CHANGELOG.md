@@ -15,5 +15,6 @@ This CHANGELOG.md file will contain the update log for the latest set of updates
 11. Enabled Diagnostics Storage for all VMs.
 12. Added Tags to all resources.
 13. Switched to nip.io (versus xip.io).
-14. General cleanup (removed unecessary resources, variables, etc.).
+14. Added option to enable Azure Cloud Provider (true or false).
+15. General cleanup (removed unecessary resources, variables, etc.).
 

@@ -130,6 +130,7 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 16. keyVaultResourceGroup: The name of the Resource Group that contains the Key Vault
 17. keyVaultName: The name of the Key Vault you created
 18. keyVaultSecret: The Secret Name you used when creating the Secret (that contains the Private Key)
+18. enableAzure: Enable Azure Cloud Provider - value is either "true" or "false"
 18. aadClientId: Azure Active Directory Client ID also known as Application ID for Service Principal
 18. aadClientSecret: Azure Active Directory Client Secret for Service Principal
 19. defaultSubDomainType: This will either be nipio (if you don't have your own domain) or custom if you have your own domain that you would like to use for routing

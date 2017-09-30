@@ -591,8 +591,7 @@ then
 	   exit 10
 	fi
 
-	oc label nodes --all logging-infra-fluentd=true
-	oc label nodes --all logging=true
+	oc label nodes --all logging-infra-fluentd=true logging=true
 
 fi
 

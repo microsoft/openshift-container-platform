@@ -1,0 +1,96 @@
+﻿{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"_artifactsLocation": {
+			"value": "https://raw.githubusercontent.com/haroldwongms/openshift-containerplatform/master"
+		},
+		"customVhdOrGallery": {
+			"value": "gallery"
+		},
+		"customStorageAccount": {
+			"value": "https://customstorageaccount.blob.core.windows.net/"
+		},
+		"customOsDiskName": {
+			"value": "images/customosdisk.vhd"
+		},
+		"masterVmSize": {
+			"value": "Standard_DS2_v2"
+		},
+		"infraVmSize": {
+			"value": "Standard_DS2_v2"
+		},
+		"nodeVmSize": {
+			"value": "Standard_DS2_v2"
+		},
+		"openshiftClusterPrefix": {
+			"value": "ocpcluster"
+		},
+		"masterInstanceCount": {
+			"value": 3
+		},
+		"infraInstanceCount": {
+			"value": 2
+		},
+		"nodeInstanceCount": {
+			"value": 1
+		},
+		"dataDiskSize": {
+			"value": 128
+		},
+		"adminUsername": {
+			"value": "clusteradmin"
+		},
+		"openshiftPassword": {
+			"value": "GEN-PASSWORD"
+		},
+		"enableMetrics": {
+			"value": "false"
+		},
+		"enableLogging": {
+			"value": "false"
+		},
+		"enableCockpit": {
+			"value": "false"
+		},
+		"rhsmUsernamePasswordOrActivationKey": {
+			"value": "usernamepassword"
+		},
+		"rhsmUsernameOrOrgId": {
+			"value": "rhsmuser"
+		},
+		"rhsmPasswordOrActivationKey": {
+			"value": "GEN-PASSWORD"
+		},
+		"rhsmPoolId": {
+			"value": "8a81234151631b3201a5e6f4322e42a9"
+		},
+		"sshPublicKey": {
+			"value": "GEN-SSH-PUB-KEY"
+		},
+		"keyVaultResourceGroup": {
+			"value": "kvrg"
+		},
+		"keyVaultName": {
+			"value": "keyvaultname"
+		},
+		"keyVaultSecret": {
+			"value": "mysecret"
+		},
+		"enableAzure": {
+			"value": "false"
+		},
+		"aadClientId": {
+			"value": "12345678-abcd-47bf-9b6f-12345678abcd"
+		},
+		"aadClientSecret": {
+			"value": "GEN-PASSWORD"
+		},
+		"defaultSubDomainType": {
+			"value": "nipio"
+		},
+		"defaultSubDomain": {
+			"value": "domain.com"
+		}
+	}
+}

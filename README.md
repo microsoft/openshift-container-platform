@@ -13,11 +13,11 @@ This template deploys OpenShift Container Platform with basic username / passwor
 |Virtual Network   		|**Address prefix:** 10.0.0.0/8<br />**Master subnet:** 10.1.0.0/16<br />**Node subnet:** 10.2.0.0/16                      |
 |Master Load Balancer	|2 probes and 2 rules for TCP 8443 and TCP 9090 <br/> NAT rules for SSH on Ports 2200-220X                                           |
 |Infra Load Balancer	|3 probes and 3 rules for TCP 80, TCP 443 and TCP 9090 									                                             |
-|Public IP Addresses	|Bastion Public IP for Bastion Node<br />OpenShift Master public IP attached Master Load Balancer<br />OpenShift Router public IP attached to Infra Load Balancer            |
-|Storage Accounts   	|1 Storage Account for Bastion VM <br />1 Storage Account for Master VMs <br />1 Storage Accounts for Infra VMs<br />2 Storage Accounts for Node VMs<br />1 Storage Account for Private Docker Registry<br />1 Storage Account for Persistent Volumes  |
+|Public IP Addresses	|Bastion Public IP for Bastion Node<br />OpenShift Master public IP attached to Master Load Balancer<br />OpenShift Router public IP attached to Infra Load Balancer            |
+|Storage Accounts   	|1 Storage Account for Bastion VM <br />1 Storage Account for Master VMs <br />1 Storage Account for Infra VMs<br />2 Storage Accounts for Node VMs<br />1 Storage Account for Private Docker Registry<br />1 Storage Account for Persistent Volumes  |
 |Network Security Groups|1 Network Security Group for Bastion VM<br />1 Network Security Group Master VMs<br />1 Network Security Group for Infra VMs<br />1 Network Security Group for Node VMs |
 |Availability Sets      |1 Availability Set for Master VMs<br />1 Availability Set for Infra VMs<br />1 Availability Set for Node VMs  |
-|Virtual Machines   	|1 Bastion Node - Used to Run Ansible Playbook for OpenShift deployment<br />3 or 5 Masters<br />2 or 3 Infra nodes<br />User-defined number of nodes (1 to 30)<br />All VMs include a single attached data disk for Docker thin pool logical volume|
+|Virtual Machines   	|1 Bastion Node - Used to Run Ansible Playbook for OpenShift deployment<br />3 or 5 Master Nodes<br />2 or 3 Infra Nodes<br />User-defined number of Nodes (1 to 30)<br />All VMs include a single attached data disk for Docker thin pool logical volume|
 
 ![Cluster Diagram](images/openshiftdiagram.jpg)
 
@@ -28,7 +28,7 @@ This template deploys multiple VMs and requires some pre-work before you can suc
 This template allows you to choose between a custom VHD image in an existing Storage Account or the On-Demand Red Hat Enterprise Linux image from the Azure Gallery. 
 >If you use the On-Demand image, there is an hourly charge for using this image.  At the same time, the instance will be registered to your Red Hat subscription, so you will also be using one of your entitlements. This will lead to "double billing".
 
-After successful deployment, the Bastion Node is no longer required unless you want to use it to add nodes or run other playbooks in the future.  You can turn it off and delete it or keep it around for running future playbooks.
+After successful deployment, the Bastion Node is no longer required unless you want to use it to add nodes or run other playbooks in the future.  You can turn it off and delete it or keep it around for running future playbooks.  You can also use this as the jump host for managing your OpenShift cluster.
 
 ## Prerequisites
 
@@ -70,12 +70,12 @@ Assigning permissions to the entire Subscription is the easiest method but does 
       Ex: `az ad sp create-for-rbac -n openshiftcloudprovider --password Pass@word1 --role contributor --scopes /subscriptions/555a123b-1234-5ccc-defgh-6789abcdef01`<br/>
 
 2. **Create Service Principal and assign permissions to Resource Group**<br/>
-  a.  If you use this option, you must have created the Resource Group first.  Be sure you don't create any resources in this Resource Group before deploying the cluster.
+  a.  If you use this option, you must have created the Resource Group first.  Be sure you don't create any resources in this Resource Group before deploying the cluster.<br/>
   b.  az ad sp create-for-rbac -n \<friendly name\> --password \<password\> --role contributor --scopes /subscriptions/\<subscription_id\>/resourceGroups/\<Resource Group Name\><br/>
       Ex: `az ad sp create-for-rbac -n openshiftcloudprovider --password Pass@word1 --role contributor --scopes /subscriptions/555a123b-1234-5ccc-defgh-6789abcdef01/resourceGroups/00000test`<br/>
 
 3. **Create Service Principal without assigning permissions to Resource Group**<br/>
-  a.  If you use this option, you will need to assign permissions to either the Subscription or the newly created Resource Group shortly after you initiate the deployment of the cluster or the post installation scripts will fail when configuring Azure as the Cloud Provider.
+  a.  If you use this option, you will need to assign permissions to either the Subscription or the newly created Resource Group shortly after you initiate the deployment of the cluster or the post installation scripts will fail when configuring Azure as the Cloud Provider.<br/>
   b.  az ad sp create-for-rbac -n \<friendly name\> --password \<password\> --role contributor --skip-assignment<br/>
       Ex: `az ad sp create-for-rbac -n openshiftcloudprovider --password Pass@word1 --role contributor --skip-assignment`<br/>
 
@@ -93,7 +93,6 @@ You will get an output similar to:
 
 The appId is used for the aadClientId parameter.
 
-To assign permissions, please follow the instructions from Azure CLI 1.0 Step 2 above.
 
 ### Red Hat Subscription Access
 
@@ -161,20 +160,21 @@ The OpenShift Ansible playbook does take a while to run when using VMs backed by
 
 Be sure to follow the OpenShift instructions to create the necessary DNS entry for the OpenShift Router for access to applications. <br />
 
-Currently there is a hiccup in the deployment of metrics and logging that will cause the deployment to take a little longer than normal.  When you look at the stdout files on the Bastion host, you will see that the installation had numerous retries for certain playbook tasks.  This is normal.
 
 ### TROUBLESHOOTING
 
 If you encounter an error during deployment of the cluster, please view the deployment status.  The following Error Codes will help to narrow things down.
 
-1. Exit Code 3:  Your Red Hat Subscription User Name / Password or Organization ID / Activation Key is incorrect
-2. Exit Code 4:  Your Red Hat Pool ID is incorrect or there are no entitlements available
-3. Exit Code 5:  Unable to provision Docker Thin Pool Volume
-4. Exit Code 6:  OpenShift Cluster installation failed
-5. Exit Code 7:  OpenShift Cluster installation succeeded but Azure Cloud Provider configuration failed - master config on Master Node issue
-6. Exit Code 8:  OpenShift Cluster installation succeeded but Azure Cloud Provider configuration failed - node config on Master Node issue
-7. Exit Code 9:  OpenShift Cluster installation succeeded but Azure Cloud Provider configuration failed - node config on Infra or App Node issue
-8. Exit Code 10: OpenShift Cluster installation succeeded but Azure Cloud Provider configuration failed - correcting Master Nodes or not able to set Master as unschedulable
+1.  Exit Code 3:  Your Red Hat Subscription User Name / Password or Organization ID / Activation Key is incorrect
+2.  Exit Code 4:  Your Red Hat Pool ID is incorrect or there are no entitlements available
+3.  Exit Code 5:  Unable to provision Docker Thin Pool Volume
+4.  Exit Code 6:  OpenShift Cluster installation failed
+5.  Exit Code 7:  OpenShift Cluster installation succeeded but Azure Cloud Provider configuration failed - master config on Master Node issue
+6.  Exit Code 8:  OpenShift Cluster installation succeeded but Azure Cloud Provider configuration failed - node config on Master Node issue
+7.  Exit Code 9:  OpenShift Cluster installation succeeded but Azure Cloud Provider configuration failed - node config on Infra or App Node issue
+8.  Exit Code 10: OpenShift Cluster installation succeeded but Azure Cloud Provider configuration failed - correcting Master Nodes or not able to set Master as unschedulable
+9.  Exit Code 11: Metrics failed to deploy
+10. Exit Code 12: Logging failed to deploy
 
 For Exit Codes 7 - 10, the OpenShift Cluster did install but the Azure Cloud Provider configuration failed.  You can SSH to the Bastion node and from there SSH to each of the nodes in the cluster and fix the issues.
 
@@ -190,27 +190,15 @@ You should see a folder named '0' and '1'.  In each of these folders, you will s
 
 **Metrics**
 
-If you deployed Metrics, it can take up to 15 minutes for Metrics to fully deploy. Please be patient.
-This is due to the fact that the Azure provider is configured after the cluster is installed and Metrics needs Persistent Storage from Azure so it hangs until the deployment script completes.
+If you deployed Metrics, it will take a few extra minutes deployment to complete. Please be patient.
 
-You can check the status from the OpenShift Web Console or CLI by looking in the openShift-infra project.
+Once the deployment is complete, log into the OpenShift Web Console and complete an addition configuration step.  Go to the openshift-infra project, click on Hawkster metrics route, and accept the SSL exception in your browser.
 
 **Logging**
 
-If Logging is enabled, you will need to perform some post deployment steps in order to get it up and running.
-If Metrics is also enabled, please wait for all the Metrics pods to come on line before completing the post installation steps for Logging.
+If you deployed Logging, it will take a few extra minutes deployment to complete. Please be patient.
 
-First, log into the OpenShift Web Console and go into the logging project. Click on Deployment Config for logging-es.
-
-![Logging Deployment Config](images/loggingdeployconfig.jpg)
-
-Next, click on Deploy in upper right.
-
-![Logging ReDeploy](images/loggingredeploy.jpg)
-
-It will take up to 15 minutes from this point before Logging is online. You can check the status by clicking into the appropriate project (logging or openshift-infra) and checking the status of the pods. Once all the pods are online, the service is operational.
-
-To display metrics and logs, you need to logon to OpenShift ( https://publicDNSname:8443 ) go into the logging project, click on the Kubana route and accept the SSL exception in your browser, then do the same with the Hawkster metrics route in the openshift-infra project.
+Once the deployment is complete, log into the OpenShift Web Console and complete an addition configuration step.  Go to the logging project, click on the Kubana route, and accept the SSL exception in your browser.
 
 ### Creation of additional users
 
@@ -221,7 +209,7 @@ To create additional (non-admin) users in your environment, login to your master
 
 If you enable Cockpit, then the password for 'root' is set to be the same as the password for the first OpenShift user.
 
-Use user 'root' and the same password as you assigned to your OpenShift admin to login to Cockpit ( https://publicDNSname:9090 ).
+Use user 'root' and the same password as you assigned to your OpenShift admin to login to Cockpit ( use port 9090 instead of 8443 from Web Console ).
    
 ### Additional OpenShift Configuration Options
  

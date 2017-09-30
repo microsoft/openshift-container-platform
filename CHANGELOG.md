@@ -16,5 +16,6 @@ This CHANGELOG.md file will contain the update log for the latest set of updates
 12. Added Tags to all resources.
 13. Switched to nip.io (versus xip.io).
 14. Added option to enable Azure Cloud Provider (true or false).
-15. General cleanup (removed unecessary resources, variables, etc.).
+15. Moved Metric and Logging setup to post cluster install.
+16. General cleanup (removed unecessary resources, variables, etc.).
 

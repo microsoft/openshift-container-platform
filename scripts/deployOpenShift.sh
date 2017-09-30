@@ -31,6 +31,10 @@ SAKEY1=${24}
 COCKPIT=${25}
 AZURE=${26}
 
+echo $AZURE
+exit 20
+
+
 BASTION=$(hostname)
 
 MASTERLOOP=$((MASTERCOUNT - 1))

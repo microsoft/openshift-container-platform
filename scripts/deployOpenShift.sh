@@ -33,6 +33,10 @@ AZURE=${26}
 
 BASTION=$(hostname)
 
+# Determine if Commercial Azure or Azure Government
+CLOUD=$( curl -H Metadata:true "http://169.254.169.254/metadata/instance/compute/location?api-version=2017-04-02&format=text" | cut -c 1-2 )
+CLOUD=${CLOUD^^}
+
 MASTERLOOP=$((MASTERCOUNT - 1))
 INFRALOOP=$((INFRACOUNT - 1))
 NODELOOP=$((NODECOUNT - 1))
@@ -105,6 +109,26 @@ cat > /home/${SUDOUSER}/assignrootpassword.yml <<EOF
 EOF
 
 # Run on MASTER-0 node - configure registry to use Azure Storage
+# Create docker registry config based on Commercial Azure or Azure Government
+
+if [[ $CLOUD == "US" ]]
+then
+
+cat > /home/${SUDOUSER}/dockerregistry.yml <<EOF
+---
+- hosts: master0
+  gather_facts: no
+  remote_user: ${SUDOUSER}
+  become: yes
+  become_method: sudo
+  vars:
+    description: "Set registry to use Azure Storage"
+  tasks:
+  - name: Configure docker-registry to use Azure Storage
+    shell: oc env dc docker-registry -e REGISTRY_STORAGE=azure -e REGISTRY_STORAGE_AZURE_ACCOUNTNAME=$REGISTRYSA -e REGISTRY_STORAGE_AZURE_ACCOUNTKEY=$ACCOUNTKEY -e REGISTRY_STORAGE_AZURE_CONTAINER=registry -e REGISTRY_STORAGE_AZURE_REALM=core.usgovcloudapi.net
+EOF
+
+else
 
 cat > /home/${SUDOUSER}/dockerregistry.yml <<EOF
 ---
@@ -119,6 +143,8 @@ cat > /home/${SUDOUSER}/dockerregistry.yml <<EOF
   - name: Configure docker-registry to use Azure Storage
     shell: oc env dc docker-registry -e REGISTRY_STORAGE=azure -e REGISTRY_STORAGE_AZURE_ACCOUNTNAME=$REGISTRYSA -e REGISTRY_STORAGE_AZURE_ACCOUNTKEY=$ACCOUNTKEY -e REGISTRY_STORAGE_AZURE_CONTAINER=registry
 EOF
+
+fi
 
 # Run on MASTER-0 node - configure Storage Class
 

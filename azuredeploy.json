@@ -286,7 +286,7 @@
 				"nipio", "custom"
 			],
 			"metadata": {
-				"description": "Default Subdomain type - xip.io or custom (defined in next parameter)"
+				"description": "Default Subdomain type - nip.io or custom (defined in next parameter)"
 			}
 		},
 		"defaultSubDomain": {

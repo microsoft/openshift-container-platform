@@ -1,10 +1,16 @@
 #!/bin/bash
 echo $(date) " - Starting Bastion Prep Script"
 
-SELECT=$1
-USERNAME_ORG=$2
-PASSWORD_ACT_KEY="$3"
-POOL_ID=$4
+USERNAME_ORG=$1
+PASSWORD_ACT_KEY="$2"
+POOL_ID=$3
+PRIVATEKEY=$4
+
+# Generate private keys for use by Ansible
+echo $(date) " - Generating Private keys for use by Ansible for OpenShift Installation"
+
+runuser -l $SUDOUSER -c "echo \"$PRIVATEKEY\" > ~/.ssh/id_rsa"
+runuser -l $SUDOUSER -c "chmod 600 ~/.ssh/id_rsa*"
 
 # Remove RHUI
 
@@ -14,18 +20,13 @@ sleep 10
 # Register Host with Cloud Access Subscription
 echo $(date) " - Register host with Cloud Access Subscription"
 
-if [[ $SELECT == "usernamepassword" ]]
-then
-   subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY"
-else
-   subscription-manager register --org="$USERNAME_ORG" --activationkey="$PASSWORD_ACT_KEY"
-fi
+subscription-manager register --username="$$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --activationkey="$PASSWORD_ACT_KEY" --org="$$USERNAME_ORG"
 
 if [ $? -eq 0 ]
 then
    echo "Subscribed successfully"
 else
-   echo "Incorrect Username and Password or Organization ID and / or Activation Key specified"
+   echo "Incorrect Username / Password or Organization ID / Activation Key specified"
    exit 3
 fi
 

@@ -353,12 +353,6 @@ cat > /home/${SUDOUSER}/setup-azure-node.yml <<EOF
       - azure
     notify:
     - restart atomic-openshift-node
-  - name: delete the node so it can recreate itself
-    command: oc delete node {{inventory_hostname}}
-    delegate_to: ${BASTION}
-  - name: sleep to let node come back to life
-    pause:
-       seconds: 90
 EOF
 
 # Create Playbook to delete stuck Master nodes and set as not schedulable
@@ -398,7 +392,7 @@ ansible_ssh_user=$SUDOUSER
 ansible_become=yes
 openshift_install_examples=true
 deployment_type=openshift-enterprise
-openshift_release=v3.6
+openshift_release=v3.7
 docker_udev_workaround=True
 openshift_use_dnsmasq=true
 openshift_master_default_subdomain=$ROUTING
@@ -607,7 +601,7 @@ then
 	   exit 9
 	fi
 
-	runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
+	# runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
 
 	if [ $? -eq 0 ]
 	then

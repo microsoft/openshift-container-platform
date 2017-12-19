@@ -362,14 +362,8 @@ cat > /home/${SUDOUSER}/deletestucknodes.yml <<EOF
   gather_facts: no
   become: yes
   vars:
-    description: "Delete stuck nodes"
+    description: "Reset Masters to non-schedulable"
   tasks:
-  - name: Delete stuck nodes so it can recreate itself
-    command: oc delete node {{inventory_hostname}}
-    delegate_to: ${BASTION}
-  - name: sleep between deletes
-    pause:
-      seconds: 25
   - name: set masters as unschedulable
     command: oadm manage-node {{inventory_hostname}} --schedulable=false
 EOF
@@ -601,7 +595,7 @@ then
 	   exit 9
 	fi
 
-	# runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
+	runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
 
 	if [ $? -eq 0 ]
 	then
@@ -669,5 +663,7 @@ rm /home/${SUDOUSER}/setup-azure-master.yml
 rm /home/${SUDOUSER}/setup-azure-node-master.yml
 rm /home/${SUDOUSER}/setup-azure-node.yml
 rm /home/${SUDOUSER}/deletestucknodes.yml
+
+sleep 120
 
 echo $(date) " - Script complete"

@@ -6,6 +6,7 @@ PASSWORD_ACT_KEY="$2"
 POOL_ID=$3
 STORAGEACCOUNT1=$4
 SUDOUSER=$5
+LOCATION=$6
 
 # Remove RHUI
 
@@ -111,14 +112,15 @@ if hostname -f|grep -- "-0" >/dev/null
 then
 cat <<EOF > /home/${SUDOUSER}/scgeneric1.yml
 kind: StorageClass
-apiVersion: storage.k8s.io/v1beta1
+apiVersion: storage.k8s.io/v1
 metadata:
   name: generic
   annotations:
-    storageclass.beta.kubernetes.io/is-default-class: "true"
+    storageclass.kubernetes.io/is-default-class: "true"
 provisioner: kubernetes.io/azure-disk
 parameters:
   storageAccount: ${STORAGEACCOUNT1}
+  location: ${LOCATION}
 EOF
 
 fi

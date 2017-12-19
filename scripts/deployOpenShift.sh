@@ -575,6 +575,7 @@ then
 	   exit 7
 	fi
 
+	sleep 60
 	runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-node-master.yml"
 
 	if [ $? -eq 0 ]
@@ -585,6 +586,7 @@ then
 	   exit 8
 	fi
 
+	sleep 60
 	runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-node.yml"
 
 	if [ $? -eq 0 ]
@@ -595,6 +597,7 @@ then
 	   exit 9
 	fi
 
+	sleep 120
 	runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
 
 	if [ $? -eq 0 ]

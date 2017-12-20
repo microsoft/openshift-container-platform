@@ -207,11 +207,13 @@ cat > /home/${SUDOUSER}/setup-azure-master.yml <<EOF
       dest: "{{ azure_conf }}"
       content: |
         {
-          "aadClientID" : "{{ g_aadClientId }}",
-          "aadClientSecret" : "{{ g_aadClientSecret }}",
-          "subscriptionID" : "{{ g_subscriptionId }}",
-          "tenantID" : "{{ g_tenantId }}",
+          "aadClientId": "{{ g_aadClientId }}",
+          "aadClientSecret": "{{ g_aadClientSecret }}",
+		  "aadTenantId": "{{ g_tenantId }}",
+          "subscriptionId": "{{ g_subscriptionId }}",
+          "tenantId": "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
+		  "location": "{{ g_location }}"
         } 
     notify:
     - restart atomic-openshift-master-api
@@ -273,11 +275,13 @@ cat > /home/${SUDOUSER}/setup-azure-node-master.yml <<EOF
       dest: "{{ azure_conf }}"
       content: |
         {
-          "aadClientID" : "{{ g_aadClientId }}",
-          "aadClientSecret" : "{{ g_aadClientSecret }}",
-          "subscriptionID" : "{{ g_subscriptionId }}",
-          "tenantID" : "{{ g_tenantId }}",
+          "aadClientId": "{{ g_aadClientId }}",
+          "aadClientSecret": "{{ g_aadClientSecret }}",
+		  "aadTenantId": "{{ g_tenantId }}",
+          "subscriptionId": "{{ g_subscriptionId }}",
+          "tenantId": "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
+		  "location": "{{ g_location }}"
         } 
     notify:
     - restart atomic-openshift-node
@@ -328,11 +332,13 @@ cat > /home/${SUDOUSER}/setup-azure-node.yml <<EOF
       dest: "{{ azure_conf }}"
       content: |
         {
-          "aadClientID" : "{{ g_aadClientId }}",
-          "aadClientSecret" : "{{ g_aadClientSecret }}",
-          "subscriptionID" : "{{ g_subscriptionId }}",
-          "tenantID" : "{{ g_tenantId }}",
+          "aadClientId": "{{ g_aadClientId }}",
+          "aadClientSecret": "{{ g_aadClientSecret }}",
+		  "aadTenantId": "{{ g_tenantId }}",
+          "subscriptionId": "{{ g_subscriptionId }}",
+          "tenantId": "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
+		  "location": "{{ g_location }}"
         } 
     notify:
     - restart atomic-openshift-node

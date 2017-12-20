@@ -4,9 +4,8 @@ echo $(date) " - Starting Master Prep Script"
 USERNAME_ORG=$1
 PASSWORD_ACT_KEY="$2"
 POOL_ID=$3
-STORAGEACCOUNT1=$4
-SUDOUSER=$5
-LOCATION=$6
+SUDOUSER=$4
+LOCATION=$5
 
 # Remove RHUI
 
@@ -119,8 +118,9 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: kubernetes.io/azure-disk
 parameters:
-  storageAccount: ${STORAGEACCOUNT1}
+  king: managed
   location: ${LOCATION}
+  storageaccounttype: Premium_LRS
 EOF
 
 fi

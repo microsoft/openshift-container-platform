@@ -1854,18 +1854,6 @@
 		"Openshift Infra Load Balancer FQDN": {
 			"type": "string",
 			"value": "[reference(variables('infraLbPublicIpDnsLabel')).dnsSettings.fqdn]"
-		},
-		"Node OS Storage Account Name": {
-			"type": "string",
-			"value": "[variables('newStorageAccountNodeOs')]"
-		},
-		"Node Data Storage Account Name": {
-			"type": "string",
-			"value": "[variables('newStorageAccountNodeData')]"
-		},
-		"Infra Storage Account Name": {
-			"type": "string",
-			"value": "[variables('newStorageAccountInfra')]"
 		}
 	}
 }

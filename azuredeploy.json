@@ -85,7 +85,8 @@
 		"openshiftClusterPrefix": {
 			"type": "string",
 			"defaultValue": "mycluster",
-			"regex": "^[a-z0-9A-Z]{1,20}$",
+			"minLength": 4,
+			"maxLength": 20,
 			"metadata": {
 				"description": "OpenShift cluster prefix.  Used to generate master, infra and node hostnames.  Maximum of 20 characters."
 			}
@@ -227,7 +228,6 @@
 		},
 		"aadClientId": {
 			"type": "string",
-			"regex": "^[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}$",
 			"metadata": {
 				"description": "Azure AD Client ID"
 			}
@@ -278,7 +278,6 @@
 		"diagStorageAccount1": "[concat('diag1', uniqueString(concat(resourceGroup().id, 'dsa1')))]",
 		"diagStorageAccount2": "[concat('diag2', uniqueString(concat(resourceGroup().id, 'dsa2')))]",
 		"newStorageAccountRegistry": "[concat('registry', uniqueString(concat(resourceGroup().id, 'registry')))]",
-		"newStorageAccountPersistentVolume1": "[concat('pv1sa', uniqueString(concat(resourceGroup().id, 'persistentvolume1')))]",
 		"addressPrefix": "10.0.0.0/8",
 		"masterSubnetPrefix": "10.1.0.0/16",
 		"nodeSubnetPrefix": "10.2.0.0/16",
@@ -321,7 +320,6 @@
 		"bastionVmSize": "Standard_DS2_v2",
 		"imageReference": "[variables('osType')]",
 		"singlequote": "'",
-		"customImageName": "[concat(parameters('customStorageAccount'), parameters('customOsDiskName'))]",
 		"sshKeyPath": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
 		"bastionPrepScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/bastionPrep.sh')]",
 		"nodePrepScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/nodePrep.sh')]",
@@ -1002,7 +1000,7 @@
 		}, {
 			"type": "Microsoft.Compute/availabilitySets",
 			"name": "[variables('availabilitySetArray')[copyIndex()].name]",
-			"location": "[parameters('location')]",
+			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
 			"tags": {
 				"displayName": "[variables('availabilitySetArray')[copyIndex()].tagName]",
@@ -1674,7 +1672,7 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('bash ', variables('masterPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', variables('newStorageAccountPersistentVolume1'), ' ', parameters('adminUsername'), ' ', variables('location'))]"
+					"commandToExecute": "[concat('bash ', variables('masterPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', parameters('adminUsername'), ' ', variables('location'))]"
 				}
 			}
 		}, {
@@ -1744,6 +1742,7 @@
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [
+				"[concat('Microsoft.Compute/virtualMachines/', variables('openshiftBastionHostname'), '/extensions/deployOpenShift')]",
 				"masterPrepLoop",
 				"infraPrepLoop",
 				"nodePrepLoop"
@@ -1766,12 +1765,6 @@
 					},
 					"newStorageAccountKey": {
 						"value": "[listKeys(variables('newStorageAccountRegistry'),'2015-06-15').key1]"
-					},
-					"newStorageAccountPersistentVolume1": {
-						"value": "[variables('newStorageAccountPersistentVolume1')]"
-					},
-					"newStorageAccountPV1Key": {
-						"value": "[listKeys(variables('newStorageAccountPersistentVolume1'),'2015-06-15').key1]"
 					},
 					"openshiftBastionHostname": {
 						"value": "[variables('openshiftBastionHostname')]"
@@ -1840,6 +1833,9 @@
 							},
 							"secretName": "[parameters('keyVaultSecret')]"
 						}
+					},
+					"redHatTags": {
+						"value": "[variables('redHatTags')]"
 					}
 				}
 			}

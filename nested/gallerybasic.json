@@ -4,118 +4,101 @@
 	"parameters": {
 		"location": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Datacenter Region Location"
 			}
 		},
 		"sshKeyPath": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "SSH Public Key Path"
 			}
 		},
 		"sshPublicKey": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "SSH Public Key"
 			}
 		},
 		"adminUsername": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Admin Username"
 			}
 		},
 		"vmSize": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "VM Size"
 			}
 		},
-		"hostname": {
+		"hostName": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "VM Hostname"
 			}
 		},
 		"role": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "VM Role for tag"
 			}
 		},
-		"customImageName": {
+		"vmStorageType": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
-				"description": "Name of Custom VHD Image"
-			}
-		},
-		"newStorageAccount": {
-			"type": "string",
-			"minLength": 1,
-			"metadata": {
-				"description": "Storage Account"
+				"description": "VM Storage Type"
 			}
 		},
 		"diagStorageAccount": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Diagnostics Storage Account"
 			}
 		},
-		"customStorageAccount": {
-			"type": "string",
-			"minLength": 1,
-			"metadata": {
-				"description": "Storage Account for Custom Image"
-			}
-		},
 		"apiVersionStorage": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Storage API Version"
 			}
 		},
 		"apiVersionCompute": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Compute API Version"
+			}
+		},
+		"imageReference": {
+			"type": "object",
+			"metadata": {
+				"description": "Image Reference"
+			}
+		},
+		"redHatTags": {
+			"type": "object",
+			"metadata": {
+				"description": "Red Hat Tags"
 			}
 		}
 	},
 	"variables": {
-		"redHatTags": {
-			"app": "OpenShift",
-			"provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
-		},
 	},
 	"resources": [{
 		"type": "Microsoft.Compute/virtualMachines",
-		"name": "[parameters('hostname')]",
+		"name": "[parameters('hostName')]",
 		"location": "[parameters('location')]",
 		"apiVersion": "[parameters('apiVersionCompute')]",
 		"tags": {
 			"Role": "[parameters('role')]",
-				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"provider": "[parameters('redHatTags').provider]",
+				"app": "[parameters('redHatTags').app]"
 		},
 		"properties": {
 			"hardwareProfile": {
 				"vmSize": "[parameters('vmSize')]"
 			},
 			"osProfile": {
-				"computerName": "[parameters('hostname')]",
+				"computerName": "[parameters('hostName')]",
 				"adminUsername": "[parameters('adminUsername')]",
 				"linuxConfiguration": {
 					"disablePasswordAuthentication": true,
@@ -128,24 +111,20 @@
 				}
 			},
 			"storageProfile": {
-				"imageReference": {
-					"publisher": "RedHat",
-					"offer": "RHEL",
-					"sku": "7-RAW",
-					"version": "latest"
-				},
+				"imageReference": "[parameters('imageReference')]",
 				"osDisk": {
-					"name": "[concat(parameters('hostname'), 'osdisk')]",
-					"vhd": {
-						"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccount')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '.vhd')]"
+					"name": "[concat(parameters('hostName'), 'osdisk')]",
+					"managedDisk": {
+						"storageAccountType": "[parameters('vmStorageType')]"
 					},
 					"caching": "ReadWrite",
-					"createOption": "FromImage"
+					"createOption": "FromImage",
+					"osType": "Linux"
 				}
 			},
 			"networkProfile": {
 				"networkInterfaces": [{
-					"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('hostname'), '-nic'))]"
+					"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('hostName'), '-nic'))]"
 				}]
 			},
 			"diagnosticsProfile": {

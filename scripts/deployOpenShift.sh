@@ -209,11 +209,11 @@ cat > /home/${SUDOUSER}/setup-azure-master.yml <<EOF
         {
           "aadClientId": "{{ g_aadClientId }}",
           "aadClientSecret": "{{ g_aadClientSecret }}",
-		  "aadTenantId": "{{ g_tenantId }}",
+          "aadTenantId": "{{ g_tenantId }}",
           "subscriptionId": "{{ g_subscriptionId }}",
           "tenantId": "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
-		  "location": "{{ g_location }}"
+          "location": "{{ g_location }}"
         } 
     notify:
     - restart atomic-openshift-master-api
@@ -277,11 +277,11 @@ cat > /home/${SUDOUSER}/setup-azure-node-master.yml <<EOF
         {
           "aadClientId": "{{ g_aadClientId }}",
           "aadClientSecret": "{{ g_aadClientSecret }}",
-		  "aadTenantId": "{{ g_tenantId }}",
+          "aadTenantId": "{{ g_tenantId }}",
           "subscriptionId": "{{ g_subscriptionId }}",
           "tenantId": "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
-		  "location": "{{ g_location }}"
+          "location": "{{ g_location }}"
         } 
     notify:
     - restart atomic-openshift-node
@@ -334,11 +334,11 @@ cat > /home/${SUDOUSER}/setup-azure-node.yml <<EOF
         {
           "aadClientId": "{{ g_aadClientId }}",
           "aadClientSecret": "{{ g_aadClientSecret }}",
-		  "aadTenantId": "{{ g_tenantId }}",
+          "aadTenantId": "{{ g_tenantId }}",
           "subscriptionId": "{{ g_subscriptionId }}",
           "tenantId": "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
-		  "location": "{{ g_location }}"
+          "location": "{{ g_location }}"
         } 
     notify:
     - restart atomic-openshift-node

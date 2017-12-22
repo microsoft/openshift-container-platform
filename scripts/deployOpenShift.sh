@@ -407,7 +407,7 @@ openshift_router_selector='type=infra'
 openshift_registry_selector='type=infra'
 
 # Deploy Service Catalog
-openshift_enable_service_catalog=false
+#openshift_enable_service_catalog=false
 
 openshift_master_cluster_method=native
 openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME

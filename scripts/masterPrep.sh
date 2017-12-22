@@ -118,7 +118,7 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: kubernetes.io/azure-disk
 parameters:
-  king: managed
+  kind: managed
   location: ${LOCATION}
   storageaccounttype: Premium_LRS
 EOF

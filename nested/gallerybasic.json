@@ -38,10 +38,10 @@
 				"description": "VM Hostname"
 			}
 		},
-		"unmanagedDiskUri": {
+		"unmanagedOsDiskUri": {
 			"type": "string",
 			"metadata": {
-				"description": "Unmanaged disk uri"
+				"description": "Unmanaged OS disk uri"
 			}
 		},
 		"role": {
@@ -117,7 +117,7 @@
 			"osDisk": {
 				"name": "[concat(parameters('hostName'), 'osdisk')]",
 				"vhd": {
-					"uri": "[concat(parameters('unmanagedDiskUri'), 'vhds/', parameters('hostname'), '.vhd')]"
+					"uri": "[concat(parameters('unmanagedOsDiskUri'), 'vhds/', parameters('hostname'), '.vhd')]"
 				},
 				"caching": "ReadWrite",
 				"createOption": "FromImage"

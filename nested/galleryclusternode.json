@@ -50,6 +50,18 @@
 				"description": "VM Hostname"
 			}
 		},
+		"unmanagedOsDiskUri": {
+			"type": "string",
+			"metadata": {
+				"description": "Unmanaged OS disk uri"
+			}
+		},
+		"unmanagedDataDiskUri": {
+			"type": "string",
+			"metadata": {
+				"description": "Unmanaged data disk uri"
+			}
+		},
 		"role": {
 			"type": "string",
 			"metadata": {
@@ -138,7 +150,7 @@
 			"osDisk": {
 				"name": "[concat(parameters('hostName'), 'osdisk')]",
 				"vhd": {
-					"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccountOs')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '.vhd')]"
+					"uri": "[concat(parameters('unmanagedOsDiskUri'), 'vhds/', parameters('hostname'), '.vhd')]"
 				},
 				"caching": "ReadWrite",
 				"createOption": "FromImage"
@@ -148,7 +160,7 @@
 				"diskSizeGB": "[parameters('dataDiskSize')]",
 				"lun": 0,
 				"vhd": {
-					"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccountData')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '-docker-pool.vhd')]"
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-docker-pool.vhd')]"
 				},
 				"createOption": "Empty"
 			}]

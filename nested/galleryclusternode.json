@@ -56,10 +56,10 @@
 				"description": "VM Role for tag"
 			}
 		},
-		"newStorageAccount": {
+		"vmStorageType": {
 			"type": "string",
 			"metadata": {
-				"description": "Storage Account"
+				"description": "VM Storage Type"
 			}
 		},
 		"storageKind": {
@@ -68,10 +68,16 @@
 				"description": "Managed or Unmanaged disk"
 			}
 		},
-		"vmStorageType": {
+		"newStorageAccountOs": {
 			"type": "string",
 			"metadata": {
-				"description": "VM Storage Type"
+				"description": "Storage Account for OS disk"
+			}
+		},
+		"newStorageAccountData": {
+			"type": "string",
+			"metadata": {
+				"description": "Storage Account for data disk"
 			}
 		},
 		"diagStorageAccount": {
@@ -132,7 +138,7 @@
 			"osDisk": {
 				"name": "[concat(parameters('hostName'), 'osdisk')]",
 				"vhd": {
-					"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccount')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '.vhd')]"
+					"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccountOs')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '.vhd')]"
 				},
 				"caching": "ReadWrite",
 				"createOption": "FromImage"
@@ -142,7 +148,7 @@
 				"diskSizeGB": "[parameters('dataDiskSize')]",
 				"lun": 0,
 				"vhd": {
-					"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccount')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '-docker-pool.vhd')]"
+					"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccountData')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '-docker-pool.vhd')]"
 				},
 				"createOption": "Empty"
 			}]

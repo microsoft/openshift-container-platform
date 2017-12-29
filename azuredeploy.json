@@ -1404,6 +1404,9 @@
 					"vmStorageType": {
 						"value": "[variables('vmSizesMap')[variables('bastionVmSize')].storageAccountType]"
 					},
+					"storageKind": {
+						"value": "[parameters('storageKind')]"
+					},
 					"newStorageAccount": {
 						"value": "[variables('newStorageAccountBastion')]"
 					},
@@ -1473,6 +1476,9 @@
 					},
 					"vmStorageType": {
 						"value": "[variables('vmSizesMap')[parameters('masterVmSize')].storageAccountType]"
+					},
+					"storageKind": {
+						"value": "[parameters('storageKind')]"
 					},
 					"newStorageAccountOs": {
 						"value": "[variables('newStorageAccountMaster')]"
@@ -1547,6 +1553,9 @@
 					"vmStorageType": {
 						"value": "[variables('vmSizesMap')[parameters('infraVmSize')].storageAccountType]"
 					},
+					"storageKind": {
+						"value": "[parameters('storageKind')]"
+					},
 					"newStorageAccountOs": {
 						"value": "[variables('newStorageAccountMaster')]"
 					},
@@ -1619,6 +1628,9 @@
 					},
 					"vmStorageType": {
 						"value": "[variables('vmSizesMap')[parameters('nodeVmSize')].storageAccountType]"
+					},
+					"storageKind": {
+						"value": "[parameters('storageKind')]"
 					},
 					"newStorageAccountOs": {
 						"value": "[variables('newStorageAccountMaster')]"

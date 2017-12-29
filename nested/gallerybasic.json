@@ -44,10 +44,10 @@
 				"description": "VM Role for tag"
 			}
 		},
-		"newStorageAccount": {
+		"vmStorageType": {
 			"type": "string",
 			"metadata": {
-				"description": "Storage Account"
+				"description": "VM Storage Type"
 			}
 		},
 		"storageKind": {
@@ -56,10 +56,10 @@
 				"description": "Managed or Unmanaged disk"
 			}
 		},
-		"vmStorageType": {
+		"newStorageAccount": {
 			"type": "string",
 			"metadata": {
-				"description": "VM Storage Type"
+				"description": "Storage Account"
 			}
 		},
 		"diagStorageAccount": {

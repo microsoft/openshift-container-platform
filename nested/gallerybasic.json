@@ -38,6 +38,12 @@
 				"description": "VM Hostname"
 			}
 		},
+		"unmanagedDiskUri": {
+			"type": "string",
+			"metadata": {
+				"description": "Unmanaged disk uri"
+			}
+		},
 		"role": {
 			"type": "string",
 			"metadata": {
@@ -111,7 +117,7 @@
 			"osDisk": {
 				"name": "[concat(parameters('hostName'), 'osdisk')]",
 				"vhd": {
-					"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccount')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '.vhd')]"
+					"uri": "[concat(parameters('unmanagedDiskUri'), 'vhds/', parameters('hostname'), '.vhd')]"
 				},
 				"caching": "ReadWrite",
 				"createOption": "FromImage"
@@ -147,7 +153,6 @@
 				}
 			},
 			"storageProfile": "[variables(variables('storageProfile'))]",
-			},
 			"networkProfile": {
 				"networkInterfaces": [{
 					"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('hostName'), '-nic'))]"

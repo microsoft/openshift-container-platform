@@ -133,6 +133,7 @@
 				},
 				"caching": "ReadWrite",
 				"createOption": "FromImage",
+				"diskSizeGB": 64,
 				"osType": "Linux"
 			},
 			"dataDisks": [{
@@ -153,7 +154,8 @@
 					"uri": "[concat(parameters('unmanagedOsDiskUri'), 'vhds/', parameters('hostname'), '.vhd')]"
 				},
 				"caching": "ReadWrite",
-				"createOption": "FromImage"
+				"createOption": "FromImage",
+				"diskSizeGB": 64
 			},
 			"dataDisks": [{
 				"name": "[concat(parameters('hostname'), '-docker-pool')]",

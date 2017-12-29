@@ -581,7 +581,9 @@ then
 	   echo $(date) "- Cloud Provider setup of master config on Master Nodes failed to completed"
 	   exit 7
 	fi
-
+	
+	echo $(date) "- Sleep for 60"
+	
 	sleep 60
 	runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-node-master.yml"
 
@@ -592,7 +594,9 @@ then
 	   echo $(date) "- Cloud Provider setup of node config on Master Nodes failed to completed"
 	   exit 8
 	fi
-
+	
+	echo $(date) "- Sleep for 60"
+	
 	sleep 60
 	runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-node.yml"
 
@@ -603,7 +607,9 @@ then
 	   echo $(date) "- Cloud Provider setup of node config on App Nodes failed to completed"
 	   exit 9
 	fi
-
+	
+	echo $(date) "- Sleep for 120"
+	
 	sleep 120
 	runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
 
@@ -673,7 +679,9 @@ rm /home/${SUDOUSER}/setup-azure-master.yml
 rm /home/${SUDOUSER}/setup-azure-node-master.yml
 rm /home/${SUDOUSER}/setup-azure-node.yml
 rm /home/${SUDOUSER}/deletestucknodes.yml
-
-sleep 120
+	
+echo $(date) "- Sleep for 60"
+	
+sleep 60
 
 echo $(date) " - Script complete"

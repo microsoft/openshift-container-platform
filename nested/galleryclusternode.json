@@ -56,6 +56,18 @@
 				"description": "VM Role for tag"
 			}
 		},
+		"newStorageAccount": {
+			"type": "string",
+			"metadata": {
+				"description": "Storage Account"
+			}
+		},
+		"storageKind": {
+			"type": "string",
+			"metadata": {
+				"description": "Managed or Unmanaged disk"
+			}
+		},
 		"vmStorageType": {
 			"type": "string",
 			"metadata": {
@@ -94,6 +106,48 @@
 		}
 	},
 	"variables": {
+		"managedStorageProfile": {
+			"imageReference": "[parameters('imageReference')]",
+			"osDisk": {
+				"name": "[concat(parameters('hostName'), 'osdisk')]",
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"caching": "ReadWrite",
+				"createOption": "FromImage",
+				"osType": "Linux"
+			},
+			"dataDisks": [{
+				"name": "[concat(parameters('hostName'), '-docker-pool')]",
+				"diskSizeGB": "[parameters('dataDiskSize')]",
+				"lun": 0,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			}]
+		},
+		"unmanagedStorageProfile": {
+			"imageReference": "[parameters('imageReference')]",
+			"osDisk": {
+				"name": "[concat(parameters('hostName'), 'osdisk')]",
+				"vhd": {
+					"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccount')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '.vhd')]"
+				},
+				"caching": "ReadWrite",
+				"createOption": "FromImage"
+			},
+			"dataDisks": [{
+				"name": "[concat(parameters('hostname'), '-docker-pool')]",
+				"diskSizeGB": "[parameters('dataDiskSize')]",
+				"lun": 0,
+				"vhd": {
+					"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccount')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '-docker-pool.vhd')]"
+				},
+				"createOption": "Empty"
+			}]
+		},
+		"storageProfile": "[concat(parameters('storageKind'), 'StorageProfile')]"
 	},
 	"resources": [{
 		"type": "Microsoft.Compute/virtualMachines",
@@ -125,28 +179,7 @@
 					}
 				}
 			},
-			"storageProfile": {
-				"imageReference": "[parameters('imageReference')]",
-				"osDisk": {
-					"name": "[concat(parameters('hostName'), 'osdisk')]",
-					"managedDisk": {
-						"storageAccountType": "[parameters('vmStorageType')]"
-					},
-					"caching": "ReadWrite",
-					"createOption": "FromImage",
-					"diskSizeGB": 64,
-					"osType": "Linux"
-				},
-				"dataDisks": [{
-					"name": "[concat(parameters('hostName'), '-docker-pool')]",
-					"diskSizeGB": "[parameters('dataDiskSize')]",
-					"lun": 0,
-					"managedDisk": {
-						"storageAccountType": "[parameters('vmStorageType')]"
-					},
-					"createOption": "Empty"
-				}]
-			},
+			"storageProfile": "[variables(variables('storageProfile'))]",
 			"networkProfile": {
 				"networkInterfaces": [{
 					"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('hostName'), '-nic'))]"

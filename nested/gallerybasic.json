@@ -44,6 +44,18 @@
 				"description": "VM Role for tag"
 			}
 		},
+		"newStorageAccount": {
+			"type": "string",
+			"metadata": {
+				"description": "Storage Account"
+			}
+		},
+		"storageKind": {
+			"type": "string",
+			"metadata": {
+				"description": "Managed or Unmanaged disk"
+			}
+		},
 		"vmStorageType": {
 			"type": "string",
 			"metadata": {
@@ -82,6 +94,30 @@
 		}
 	},
 	"variables": {
+		"managedStorageProfile": {
+			"imageReference": "[parameters('imageReference')]",
+			"osDisk": {
+				"name": "[concat(parameters('hostName'), 'osdisk')]",
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"caching": "ReadWrite",
+				"createOption": "FromImage",
+				"osType": "Linux"
+			}
+		},
+		"unmanagedStorageProfile": {
+			"imageReference": "[parameters('imageReference')]",
+			"osDisk": {
+				"name": "[concat(parameters('hostName'), 'osdisk')]",
+				"vhd": {
+					"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccount')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '.vhd')]"
+				},
+				"caching": "ReadWrite",
+				"createOption": "FromImage"
+			}
+		},
+		"storageProfile": "[concat(parameters('storageKind'), 'StorageProfile')]"
 	},
 	"resources": [{
 		"type": "Microsoft.Compute/virtualMachines",
@@ -110,17 +146,7 @@
 					}
 				}
 			},
-			"storageProfile": {
-				"imageReference": "[parameters('imageReference')]",
-				"osDisk": {
-					"name": "[concat(parameters('hostName'), 'osdisk')]",
-					"managedDisk": {
-						"storageAccountType": "[parameters('vmStorageType')]"
-					},
-					"caching": "ReadWrite",
-					"createOption": "FromImage",
-					"osType": "Linux"
-				}
+			"storageProfile": "[variables(variables('storageProfile'))]",
 			},
 			"networkProfile": {
 				"networkInterfaces": [{

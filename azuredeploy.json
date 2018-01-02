@@ -402,9 +402,11 @@
 		"bastionPrepScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/bastionPrep.sh')]",
 		"nodePrepScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/nodePrep.sh')]",
 		"masterPrepScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/masterPrep.sh')]",
+		"openshiftDeploymentScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/deployOpenShift.sh')]",
 		"bastionPrepScriptFileName": "bastionPrep.sh",
 		"nodePrepScriptFileName": "nodePrep.sh",
 		"masterPrepScriptFileName": "masterPrep.sh",
+		"openshiftDeploymentScriptFileName": "deployOpenShift.sh",
 		"clusterNodeDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/galleryclusternode.json')]",
 		"basicDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/gallerybasic.json')]",
 		"openshiftDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/openshiftdeploy.json')]",
@@ -1713,30 +1715,57 @@
 				}
 			}
 		}, {
-			"type": "Microsoft.Compute/virtualMachines/extensions",
-			"name": "[concat(variables('openshiftBastionHostname'), '/deployOpenShift')]",
-			"location": "[variables('location')]",
-			"apiVersion": "[variables('apiVersionCompute')]",
-			"tags": {
-				"displayName": "PrepBastion",
-				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
-			},
+			"name": "bastionPrep",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [
 				"bastionVmDeployment"
 			],
 			"properties": {
-				"publisher": "Microsoft.Azure.Extensions",
-				"type": "CustomScript",
-				"typeHandlerVersion": "2.0",
-				"autoUpgradeMinorVersion": true,
-				"settings": {
-					"fileUris": [
-						"[variables('bastionPrepScriptUrl')]"
-					]
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('openshiftDeploymentTemplateUrl')]",
+					"contentVersion": "1.0.0.0"
 				},
-				"protectedSettings": {
-					"commandToExecute": "[concat('bash ', variables('bastionPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ',variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'))]"
+				"parameters": {
+					"_artifactsLocation": {
+						"value": "[parameters('_artifactsLocation')]"
+					},
+					"apiVersionCompute": {
+						"value": "[variables('apiVersionCompute')]"
+					},
+					"bastionPrepScriptUrl": {
+						"value": "[variables('bastionPrepScriptUrl')]"
+					},
+					"bastionPrepScriptFileName": {
+						"value": "[variables('bastionPrepScriptFileName')]"
+					},
+					"openshiftBastionHostname": {
+						"value": "[variables('openshiftBastionHostname')]"
+					},
+					"adminUsername": {
+						"value": "[parameters('adminUsername')]"
+					},
+					"rhsmUsernameOrOrgId": {
+						"value": "[parameters('rhsmUsernameOrOrgId')]"
+					},
+					"rhsmPasswordOrActivationKey": {
+						"value": "[parameters('rhsmPasswordOrActivationKey')]"
+					},
+					"rhsmPoolId": {
+						"value": "[parameters('rhsmPoolId')]"
+					},
+					"sshPrivateKey": {
+						"reference": {
+							"keyvault": {
+								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+							},
+							"secretName": "[parameters('keyVaultSecret')]"
+						}
+					},
+					"redHatTags": {
+						"value": "[variables('redHatTags')]"
+					}
 				}
 			}
 		}, {
@@ -1837,7 +1866,7 @@
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [
-				"[concat('Microsoft.Compute/virtualMachines/', variables('openshiftBastionHostname'), '/extensions/deployOpenShift')]",
+				"bastionPrep",
 				"masterPrepLoop",
 				"infraPrepLoop",
 				"nodePrepLoop"
@@ -1854,6 +1883,12 @@
 					},
 					"apiVersionCompute": {
 						"value": "[variables('apiVersionCompute')]"
+					},
+					"openshiftDeploymentScriptUrl": {
+						"value": "[variables('openshiftDeploymentScriptUrl')]"
+					},
+					"openshiftDeploymentScriptFileName": {
+						"value": "[variables('openshiftDeploymentScriptFileName')]"
 					},
 					"newStorageAccountRegistry": {
 						"value": "[variables('newStorageAccountRegistry')]"
@@ -1920,14 +1955,6 @@
 					},
 					"subDomainChosen": {
 						"value": "[concat(parameters('defaultSubDomainType'), 'Domain')]"
-					},
-					"sshPrivateKey": {
-						"reference": {
-							"keyvault": {
-								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
-							},
-							"secretName": "[parameters('keyVaultSecret')]"
-						}
 					},
 					"redHatTags": {
 						"value": "[variables('redHatTags')]"

@@ -4,14 +4,14 @@ echo $(date) " - Starting Bastion Prep Script"
 USERNAME_ORG=$1
 PASSWORD_ACT_KEY="$2"
 POOL_ID=$3
-# PRIVATEKEY=$4
-# SUDOUSER=$5
+PRIVATEKEY=$4
+SUDOUSER=$5
 
-# Generate private keys for use by Ansible
-# echo $(date) " - Generating Private keys for use by Ansible for OpenShift Installation"
+Generate private keys for use by Ansible
+echo $(date) " - Generating Private keys for use by Ansible for OpenShift Installation"
 
-# runuser -l $SUDOUSER -c "echo \"$PRIVATEKEY\" > ~/.ssh/id_rsa"
-# runuser -l $SUDOUSER -c "chmod 600 ~/.ssh/id_rsa*"
+runuser -l $SUDOUSER -c "echo \"$PRIVATEKEY\" > ~/.ssh/id_rsa"
+runuser -l $SUDOUSER -c "chmod 600 ~/.ssh/id_rsa*"
 
 # Remove RHUI
 

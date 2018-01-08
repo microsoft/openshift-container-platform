@@ -1,4 +1,4 @@
-# OpenShift Container Platform Deployment Template
+# OpenShift Container Platform Deployment Template - Release 3.6
 
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
@@ -22,6 +22,8 @@ This template deploys OpenShift Container Platform with basic username / passwor
 ![Cluster Diagram](images/openshiftdiagram.jpg)
 
 ## READ the instructions in its entirety before deploying!
+
+Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started
 
 This template deploys multiple VMs and requires some pre-work before you can successfully deploy the OpenShift Cluster.  If you don't get the pre-work done correctly, you will most likely fail to deploy the cluster using this template.  Please read the instructions completely before you proceed. 
 
@@ -138,8 +140,8 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 ## Deploy Template
 
 Deploy to Azure using Azure Portal: 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Fmaster%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Frelease-3.6%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Frelease-3.6%2Fazuredeploy.json" target="_blank">
     <img src="http://armviz.io/visualizebutton.png"/>
 </a><br/>
 

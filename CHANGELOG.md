@@ -1,5 +1,11 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES - January 8, 2018
+
+1.  Created branch for Release 3.6.
+2.  Update artifactsBaseUrl to point to release-3.6 branch.
+
+
 # UPDATES for Release 3.6 - September 29, 2017
 
 1.  Removed installation of Azure CLI as this is no longer needed.

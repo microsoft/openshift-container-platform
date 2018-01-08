@@ -3,7 +3,7 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"_artifactsLocation": {
-			"value": "https://raw.githubusercontent.com/haroldwongms/openshift-containerplatform/master"
+			"value": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/release-3.6"
 		},
 		"customVhdOrGallery": {
 			"value": "gallery"

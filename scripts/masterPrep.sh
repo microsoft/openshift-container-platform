@@ -6,6 +6,7 @@ PASSWORD_ACT_KEY="$2"
 POOL_ID=$3
 SUDOUSER=$4
 LOCATION=$5
+STORAGEACCOUNT=$6
 
 # Remove RHUI
 
@@ -109,7 +110,20 @@ systemctl start docker
 
 if hostname -f|grep -- "-0" >/dev/null
 then
-cat <<EOF > /home/${SUDOUSER}/scgeneric1.yml
+cat <<EOF > /home/${SUDOUSER}/scunmanaged.yml
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: generic
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/azure-disk
+parameters:
+  location: ${LOCATION}
+  storageAccount: ${STORAGEACCOUNT}
+EOF
+
+cat <<EOF > /home/${SUDOUSER}/scmanaged.yml
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
@@ -122,7 +136,6 @@ parameters:
   location: ${LOCATION}
   storageaccounttype: Premium_LRS
 EOF
-
 fi
 
 echo $(date) " - Script Complete"

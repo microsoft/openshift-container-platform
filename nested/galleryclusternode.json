@@ -127,7 +127,7 @@
 		"managedStorageProfile": {
 			"imageReference": "[parameters('imageReference')]",
 			"osDisk": {
-				"name": "[concat(parameters('hostName'), 'osdisk')]",
+				"name": "[concat(parameters('hostName'), '-osdisk')]",
 				"managedDisk": {
 					"storageAccountType": "[parameters('vmStorageType')]"
 				},

@@ -178,7 +178,7 @@ cat > /home/${SUDOUSER}/reboot-master.yml <<EOF
       port: 22
       host: "{{ ansible_ssh_host|default(inventory_hostname) }}"
       delay: 10
-      timeout: 90
+      timeout: 180
     connection: local
     become: false
 EOF
@@ -203,7 +203,7 @@ cat > /home/${SUDOUSER}/reboot-nodes.yml <<EOF
       port: 22
       host: "{{ ansible_ssh_host|default(inventory_hostname) }}"
       delay: 10
-      timeout: 90
+      timeout: 180
     connection: local
     become: false
 EOF

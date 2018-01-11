@@ -164,7 +164,6 @@ cat > /home/${SUDOUSER}/reboot-master.yml <<EOF
 ---
 - hosts: masters
   gather_facts: no
-  remote_user: "{{ lookup('env','SUDOUSER') }}"
   become: yes
   become_method: sudo
   tasks:
@@ -190,7 +189,6 @@ cat > /home/${SUDOUSER}/reboot-nodes.yml <<EOF
 ---
 - hosts: nodes:!masters
   gather_facts: no
-  remote_user: "{{ lookup('env','SUDOUSER') }}"
   become: yes
   become_method: sudo
   tasks:
@@ -657,8 +655,8 @@ then
 	echo $(date) "- Rebooting cluster to complete installation"
 	
 	oc label nodes --all logging-infra-fluentd=true logging=true
-	runuser $SUDOUSER -c "ansible-playbook ~/reboot-master.yml"
-	runuser $SUDOUSER -c "ansible-playbook ~/reboot-nodes.yml"
+	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-master.yml"
+	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-nodes.yml"
 
 fi
 

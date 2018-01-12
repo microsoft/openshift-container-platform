@@ -1,5 +1,16 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES for Release 3.7 - January 12, 2018
+
+1.  Inject the Private Key into Bastion host during prep.
+2.  Add support for managed and unmanaged disks.
+3.  Update prep script to simplify Cloud Access registration for username/password or activation key/organization id.
+4.  Update Azure Cloud Provider playbooks - no need to delete node and include cluster reboot.
+5.  Include additional data disk sizes.
+6.  Create storage class based on managed or unmanaged disk.
+7.  General cleanup.
+
+
 # UPDATES for Release 3.6 - September 29, 2017
 
 1.  Removed installation of Azure CLI as this is no longer needed.
@@ -17,5 +28,5 @@ This CHANGELOG.md file will contain the update log for the latest set of updates
 13. Switched to nip.io (versus xip.io).
 14. Added option to enable Azure Cloud Provider (true or false).
 15. Moved Metric and Logging setup to post cluster install.
-16. General cleanup (removed unecessary resources, variables, etc.).
+16. General cleanup (removed unnecessary resources, variables, etc.).
 

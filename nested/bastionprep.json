@@ -1,0 +1,105 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"_artifactsLocation": {
+			"type": "string",
+			"metadata": {
+				"description": "Base URL for script location"
+			}
+		},
+		"apiVersionCompute": {
+			"type": "string",
+			"metadata": {
+				"description": "API version for compute resources"
+			}
+		},
+		"bastionPrepScriptUrl": {
+			"type": "string",
+			"metadata": {
+				"description": "Bastion prep script Url"
+			}
+		},
+		"bastionPrepScriptFileName": {
+			"type": "string",
+			"metadata": {
+				"description": "Bastion prep script file name"
+			}
+		},
+		"openshiftBastionHostname": {
+			"type": "string",
+			"metadata": {
+				"description": "OpenShift Bastion hostname"
+			}
+		},
+		"adminUsername": {
+			"type": "string",
+			"metadata": {
+				"description": "Administrator username on all VMs"
+			}
+		},
+		"rhsmUsernameOrOrgId": {
+			"type": "string",
+			"metadata": {
+				"description": "Red Hat Subscription Manager username or Organization Id"
+			}
+		},
+		"rhsmPasswordOrActivationKey": {
+			"type": "securestring",
+			"metadata": {
+				"description": "Red Hat Subscription Manager password or activation key"
+			}
+		},
+		"rhsmPoolId": {
+			"type": "string",
+			"metadata": {
+				"description": "Pool Id with OpenShift entitlements"
+			}
+		},
+		"sshPrivateKey": {
+			"type": "securestring",
+			"metadata": {
+				"description": "SSH private key for deploying OpenShift"
+			}
+		},
+		"redHatTags": {
+			"type": "object",
+			"metadata": {
+				"description": "Red Hat Tags"
+			}
+		}
+	},
+	"variables": {
+		"singlequote": "'",
+		"tenantId": "[subscription().tenantId]",
+		"subscriptionId": "[subscription().subscriptionId]",
+		"location": "[resourceGroup().location]",
+		"resourceGroupName": "[resourceGroup().name]"
+	},
+	"resources": [{
+		"type": "Microsoft.Compute/virtualMachines/extensions",
+		"name": "[concat(parameters('openshiftBastionHostname'), '/deployOpenShift')]",
+		"location": "[resourceGroup().location]",
+		"apiVersion": "[parameters('apiVersionCompute')]",
+		"tags": {
+			"displayName": "PrepBastion",
+				"provider": "[parameters('redHatTags').provider]",
+				"app": "[parameters('redHatTags').app]"
+		},
+		"properties": {
+			"publisher": "Microsoft.Azure.Extensions",
+			"type": "CustomScript",
+			"typeHandlerVersion": "2.0",
+			"autoUpgradeMinorVersion": true,
+			"settings": {
+				"fileUris": [
+					"[parameters('bastionPrepScriptUrl')]"
+				]
+			},
+			"protectedSettings": {
+				"commandToExecute": "[concat('bash ', parameters('bastionPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ',variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', variables('singlequote'), parameters('sshPrivateKey'), variables('singlequote'), ' ', variables('singlequote'), parameters('adminUsername'), variables('singlequote'))]"
+			}
+		}
+	}],
+	"outputs": {}
+}

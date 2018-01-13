@@ -4,21 +4,18 @@
 	"parameters": {
 		"location": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Datacenter Region Location"
 			}
 		},
 		"sshKeyPath": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "SSH Public Key Path"
 			}
 		},
 		"sshPublicKey": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "SSH Public Key"
 			}
@@ -31,104 +28,156 @@
 		},
 		"adminUsername": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Admin Username"
 			}
 		},
 		"vmSize": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "VM Size"
 			}
 		},
 		"availabilitySet": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Name of Availibility Set"
 			}
 		},
-		"hostname": {
+		"hostName": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "VM Hostname"
 			}
 		},
+		"unmanagedOsDiskUri": {
+			"type": "string",
+			"metadata": {
+				"description": "Unmanaged OS disk uri"
+			}
+		},
+		"unmanagedDataDiskUri": {
+			"type": "string",
+			"metadata": {
+				"description": "Unmanaged data disk uri"
+			}
+		},
 		"role": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "VM Role for tag"
 			}
 		},
-		"customImageName": {
+		"vmStorageType": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
-				"description": "Name of Custom VHD Image"
+				"description": "VM Storage Type"
+			}
+		},
+		"storageKind": {
+			"type": "string",
+			"metadata": {
+				"description": "Managed or Unmanaged disk"
 			}
 		},
 		"newStorageAccountOs": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Storage Account for OS disk"
 			}
 		},
 		"newStorageAccountData": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
-				"description": "Storage Account for Data disk"
+				"description": "Storage Account for data disk"
 			}
 		},
 		"diagStorageAccount": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Diagnostics Storage Account"
 			}
 		},
-		"customStorageAccount": {
-			"type": "string",
-			"minLength": 1,
-			"metadata": {
-				"description": "Storage Account for Custom Image"
-			}
-		},
 		"apiVersionStorage": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Storage API Version"
 			}
 		},
 		"apiVersionCompute": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Compute API Version"
+			}
+		},
+		"imageReference": {
+			"type": "object",
+			"metadata": {
+				"description": "Image Reference"
+			}
+		},
+		"redHatTags": {
+			"type": "object",
+			"metadata": {
+				"description": "Red Hat Tags"
 			}
 		}
 	},
 	"variables": {
-		"redHatTags": {
-			"app": "OpenShift",
-			"provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
+		"managedStorageProfile": {
+			"imageReference": "[parameters('imageReference')]",
+			"osDisk": {
+				"name": "[concat(parameters('hostName'), '-osdisk')]",
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"caching": "ReadWrite",
+				"createOption": "FromImage",
+				"diskSizeGB": 64,
+				"osType": "Linux"
+			},
+			"dataDisks": [{
+				"name": "[concat(parameters('hostName'), '-docker-pool')]",
+				"diskSizeGB": "[parameters('dataDiskSize')]",
+				"lun": 0,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			}]
 		},
+		"unmanagedStorageProfile": {
+			"imageReference": "[parameters('imageReference')]",
+			"osDisk": {
+				"name": "[concat(parameters('hostName'), '-osdisk')]",
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedOsDiskUri'), 'vhds/', parameters('hostname'), '-osdisk.vhd')]"
+				},
+				"caching": "ReadWrite",
+				"createOption": "FromImage",
+				"diskSizeGB": 64
+			},
+			"dataDisks": [{
+				"name": "[concat(parameters('hostname'), '-docker-pool')]",
+				"diskSizeGB": "[parameters('dataDiskSize')]",
+				"lun": 0,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-docker-pool.vhd')]"
+				},
+				"createOption": "Empty"
+			}]
+		},
+		"storageProfile": "[concat(parameters('storageKind'), 'StorageProfile')]"
 	},
 	"resources": [{
 		"type": "Microsoft.Compute/virtualMachines",
-		"name": "[parameters('hostname')]",
+		"name": "[parameters('hostName')]",
 		"location": "[parameters('location')]",
 		"apiVersion": "[parameters('apiVersionCompute')]",
 		"tags": {
 			"Role": "[parameters('role')]",
-				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"provider": "[parameters('redHatTags').provider]",
+				"app": "[parameters('redHatTags').app]"
 		},
 		"properties": {
 			"availabilitySet": {
@@ -138,7 +187,7 @@
 				"vmSize": "[parameters('vmSize')]"
 			},
 			"osProfile": {
-				"computerName": "[parameters('hostname')]",
+				"computerName": "[parameters('hostName')]",
 				"adminUsername": "[parameters('adminUsername')]",
 				"linuxConfiguration": {
 					"disablePasswordAuthentication": true,
@@ -150,35 +199,10 @@
 					}
 				}
 			},
-			"storageProfile": {
-				"imageReference": {
-					"publisher": "RedHat",
-					"offer": "RHEL",
-					"sku": "7-RAW",
-					"version": "latest"
-				},
-				"osDisk": {
-					"name": "[concat(parameters('hostname'), 'osdisk')]",
-					"vhd": {
-						"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccountOs')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '.vhd')]"
-					},
-					"caching": "ReadWrite",
-					"createOption": "FromImage",
-					"diskSizeGB": 64
-				},
-				"dataDisks": [{
-					"name": "[concat(parameters('hostname'), '-docker-pool')]",
-					"diskSizeGB": "[parameters('dataDiskSize')]",
-					"lun": 0,
-					"vhd": {
-						"uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('newStorageAccountData')), parameters('apiVersionStorage')).primaryEndpoints['blob'], 'vhds/'), parameters('hostname'), '-docker-pool.vhd')]"
-					},
-					"createOption": "Empty"
-				}]
-			},
+			"storageProfile": "[variables(variables('storageProfile'))]",
 			"networkProfile": {
 				"networkInterfaces": [{
-					"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('hostname'), '-nic'))]"
+					"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('hostName'), '-nic'))]"
 				}]
 			},
 			"diagnosticsProfile": {

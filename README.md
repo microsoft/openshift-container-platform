@@ -1,10 +1,21 @@
 # OpenShift Container Platform Deployment Template
 
+## NOTE: Structural change to Repo
+
+The master branch will now contain the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new things or try new things.
+
+We will now have branches for the stable releases:
+- Release-3.6
+- Release-3.7
+- etc.
+
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
 **For OpenShift Origin refer to https://github.com/Microsoft/openshift-origin**
 
-## OpenShift Container Platform 3.6 with Username / Password authentication for OpenShift
+## OpenShift Container Platform 3.7 with Username / Password authentication for OpenShift
+
+Currently, there is an issue when enabling the Azure Cloud Provider.  The cluster works fine with the exception that the Service Catalog does not display all templates.  The workaround at this time is to select from the openshift project to view all original templates.  We have a bugzilla bug open with Red Hat and will update the templates once the solution is available.
 
 This template deploys OpenShift Container Platform with basic username / password for authentication to OpenShift. It includes the following resources:
 
@@ -14,7 +25,8 @@ This template deploys OpenShift Container Platform with basic username / passwor
 |Master Load Balancer	|2 probes and 2 rules for TCP 8443 and TCP 9090 <br/> NAT rules for SSH on Ports 2200-220X                                           |
 |Infra Load Balancer	|3 probes and 3 rules for TCP 80, TCP 443 and TCP 9090 									                                             |
 |Public IP Addresses	|Bastion Public IP for Bastion Node<br />OpenShift Master public IP attached to Master Load Balancer<br />OpenShift Router public IP attached to Infra Load Balancer            |
-|Storage Accounts   	|1 Storage Account for Bastion VM <br />1 Storage Account for Master VMs <br />1 Storage Account for Infra VMs<br />2 Storage Accounts for Node VMs<br />1 Storage Account for Private Docker Registry<br />1 Storage Account for Persistent Volumes  |
+|Storage Accounts <br />Unmanaged Disks  	|1 Storage Account for Bastion VM <br />1 Storage Account for Master VMs <br />1 Storage Account for Infra VMs<br />2 Storage Accounts for Node VMs<br />2 Storage Accounts for Diagnostics Logs <br />1 Storage Account for Private Docker Registry<br />1 Storage Account for Persistent Volumes  |
+|Storage Accounts <br />Managed Disks      |2 Storage Accounts for Diagnostics Logs <br />1 Storage Account for Private Docker Registry |
 |Network Security Groups|1 Network Security Group for Bastion VM<br />1 Network Security Group Master VMs<br />1 Network Security Group for Infra VMs<br />1 Network Security Group for Node VMs |
 |Availability Sets      |1 Availability Set for Master VMs<br />1 Availability Set for Infra VMs<br />1 Availability Set for Node VMs  |
 |Virtual Machines   	|1 Bastion Node - Used to Run Ansible Playbook for OpenShift deployment<br />3 or 5 Master Nodes<br />2 or 3 Infra Nodes<br />User-defined number of Nodes (1 to 30)<br />All VMs include a single attached data disk for Docker thin pool logical volume|
@@ -22,6 +34,8 @@ This template deploys OpenShift Container Platform with basic username / passwor
 ![Cluster Diagram](images/openshiftdiagram.jpg)
 
 ## READ the instructions in its entirety before deploying!
+
+Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started
 
 This template deploys multiple VMs and requires some pre-work before you can successfully deploy the OpenShift Cluster.  If you don't get the pre-work done correctly, you will most likely fail to deploy the cluster using this template.  Please read the instructions completely before you proceed. 
 
@@ -111,18 +125,18 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 2.  masterVmSize: Size of the Master VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
 3.  infraVmSize: Size of the Infra VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
 3.  nodeVmSize: Size of the App Node VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
-4.  openshiftClusterPrefix: Cluster Prefix used to configure hostnames for all nodes - bastion, master, infra and app nodes. Between 1 and 20 characters.
+4.  storageKind: The type of storage to be used. Value is either "managed" or "unmanaged"
+4.  openshiftClusterPrefix: Cluster Prefix used to configure hostnames for all nodes - bastion, master, infra and app nodes. Between 1 and 20 characters
 7.  masterInstanceCount: Number of Masters nodes to deploy
 8.  infraInstanceCount: Number of infra nodes to deploy
 8.  nodeInstanceCount: Number of Nodes to deploy
-9.  dataDiskSize: Size of data disk to attach to nodes for Docker volume - valid sizes are 128 GB, 512 GB and 1023 GB
+9.  dataDiskSize: Size of data disk to attach to nodes for Docker volume - valid sizes are 32 GB, 64 GB, 128 GB, 256 GB, 512 GB, 1024 GB, and 2048 GB
 10. adminUsername: Admin username for both OS (VM) login and initial OpenShift user
 11. openshiftPassword: Password for OpenShift user and root user
 11. enableMetrics: Enable Metrics - value is either "true" or "false"
 11. enableLogging: Enable Logging - value is either "true" or "false"
 11. enableCockpit: Enable Cockpit - value is either "true" or "false"
-12. rhsmUsernamePasswordOrActivationKey: Choose to use Username and Password or Organization ID and Activation Key for registration. Valid values are "usernamepassword" and "activationkey".
-12. rhsmUsernameOrOrgId: Red Hat Subscription Manager Username or Organization ID. If usernamepassword selected in previous input, then use Username; otherwise entier Organization ID. To find your Organization ID, run on registered server: `subscription-manager identity`.
+12. rhsmUsernameOrOrgId: Red Hat Subscription Manager Username or Organization ID. To find your Organization ID, run on registered server: `subscription-manager identity`.
 13. rhsmPasswordOrActivationKey: Red Hat Subscription Manager Password or Activation Key for your Cloud Access subscription. You can get this from [here](https://access.redhat.com/management/activation_keys).
 14. rhsmPoolId: The Red Hat Subscription Manager Pool ID that contains your OpenShift entitlements
 15. sshPublicKey: Copy your SSH Public Key here
@@ -213,4 +227,4 @@ Use user 'root' and the same password as you assigned to your OpenShift admin to
    
 ### Additional OpenShift Configuration Options
  
-You can configure additional settings per the official (<a href="https://docs.openshift.com/container-platform/3.6/welcome/index.html" target="_blank">OpenShift Enterprise Documentation</a>).
+You can configure additional settings per the official (<a href="https://docs.openshift.com/container-platform/3.7/welcome/index.html" target="_blank">OpenShift Enterprise Documentation</a>).

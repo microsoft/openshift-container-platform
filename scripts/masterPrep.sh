@@ -1,12 +1,12 @@
 #!/bin/bash
 echo $(date) " - Starting Master Prep Script"
 
-SELECT=$1
-USERNAME_ORG=$2
-PASSWORD_ACT_KEY="$3"
-POOL_ID=$4
-STORAGEACCOUNT1=$5
-SUDOUSER=$6
+USERNAME_ORG=$1
+PASSWORD_ACT_KEY="$2"
+POOL_ID=$3
+SUDOUSER=$4
+LOCATION=$5
+STORAGEACCOUNT=$6
 
 # Remove RHUI
 
@@ -16,18 +16,13 @@ sleep 10
 # Register Host with Cloud Access Subscription
 echo $(date) " - Register host with Cloud Access Subscription"
 
-if [[ $SELECT == "usernamepassword" ]]
-then
-   subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY"
-else
-   subscription-manager register --org="$USERNAME_ORG" --activationkey="$PASSWORD_ACT_KEY"
-fi
+subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
 
 if [ $? -eq 0 ]
 then
    echo "Subscribed successfully"
 else
-   echo "Incorrect Username and Password or Organization ID and / or Activation Key specified"
+   echo "Incorrect Username / Password or Organization ID / Activation Key specified"
    exit 3
 fi
 
@@ -54,7 +49,7 @@ subscription-manager repos --disable="*"
 subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
-    --enable="rhel-7-server-ose-3.6-rpms" \
+    --enable="rhel-7-server-ose-3.7-rpms" \
     --enable="rhel-7-fast-datapath-rpms" 
 
 # Install base packages and update system to latest packages
@@ -115,18 +110,32 @@ systemctl start docker
 
 if hostname -f|grep -- "-0" >/dev/null
 then
-cat <<EOF > /home/${SUDOUSER}/scgeneric1.yml
+cat <<EOF > /home/${SUDOUSER}/scunmanaged.yml
 kind: StorageClass
-apiVersion: storage.k8s.io/v1beta1
+apiVersion: storage.k8s.io/v1
 metadata:
   name: generic
   annotations:
-    storageclass.beta.kubernetes.io/is-default-class: "true"
+    storageclass.kubernetes.io/is-default-class: "true"
 provisioner: kubernetes.io/azure-disk
 parameters:
-  storageAccount: ${STORAGEACCOUNT1}
+  location: ${LOCATION}
+  storageAccount: ${STORAGEACCOUNT}
 EOF
 
+cat <<EOF > /home/${SUDOUSER}/scmanaged.yml
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: generic
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/azure-disk
+parameters:
+  kind: managed
+  location: ${LOCATION}
+  storageaccounttype: Premium_LRS
+EOF
 fi
 
 echo $(date) " - Script Complete"

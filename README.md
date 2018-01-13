@@ -1,4 +1,13 @@
-# OpenShift Container Platform Deployment Template (Release 3.7)
+# OpenShift Container Platform Deployment Template
+
+## NOTE: Structural change to Repo
+
+The master branch will now contain the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new things or try new things.
+
+We will now have branches for the stable releases:
+- Release-3.6
+- Release-3.7
+- etc.
 
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
@@ -23,6 +32,8 @@ This template deploys OpenShift Container Platform with basic username / passwor
 ![Cluster Diagram](images/openshiftdiagram.jpg)
 
 ## READ the instructions in its entirety before deploying!
+
+Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started
 
 This template deploys multiple VMs and requires some pre-work before you can successfully deploy the OpenShift Cluster.  If you don't get the pre-work done correctly, you will most likely fail to deploy the cluster using this template.  Please read the instructions completely before you proceed. 
 

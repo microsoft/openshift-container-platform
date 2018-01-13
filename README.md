@@ -15,6 +15,7 @@ Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
 ## OpenShift Container Platform 3.7 with Username / Password authentication for OpenShift
 
+
 This template deploys OpenShift Container Platform with basic username / password for authentication to OpenShift. It includes the following resources:
 
 |Resource           	|Properties                                                                                                                          |

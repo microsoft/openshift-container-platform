@@ -639,7 +639,19 @@ then
 	   exit 11
 	fi
 
-	oc label nodes --all logging-infra-fluentd=true logging=true
+	echo $(date) "- Restarting OVS to complete installation" 
+	
+ 	echo $(date) "- Sleep for 20" 
+ 	
+ 	sleep 20	 
+ 	runuser -l $SUDOUSER -c  "oc label nodes --all logging-infra-fluentd=true logging=true" 
+
+ 	runuser -l $SUDOUSER -c  "ansible all -b  -m service -a 'name=openvswitch state=restarted' " 
+
+ 	echo $(date) "- Restarting origin nodes after 20 seconds" 
+ 	sleep 20 
+
+ 	runuser -l $SUDOUSER -c  "ansible nodes -b  -m service -a 'name=atomic-openshift-node state=restarted' " 
 
 fi
 

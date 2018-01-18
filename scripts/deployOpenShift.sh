@@ -680,6 +680,7 @@ then
 	   exit 10
 	fi
 
+	sleep 60
 	runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
 
 	if [ $? -eq 0 ]

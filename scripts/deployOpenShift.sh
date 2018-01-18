@@ -437,6 +437,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 openshift_hosted_metrics_deploy=false
 #openshift_metrics_cassandra_storage_type=dynamic
 openshift_metrics_start_cluster=true
+openshift_metrics_startup_timeout=120
 openshift_metrics_hawkular_nodeselector={"type":"infra"}
 openshift_metrics_cassandra_nodeselector={"type":"infra"}
 openshift_metrics_heapster_nodeselector={"type":"infra"}

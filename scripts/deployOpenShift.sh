@@ -214,6 +214,7 @@ cat > /home/${SUDOUSER}/setup-azure-master.yml <<EOF
           "subscriptionID" : "{{ g_subscriptionId }}",
           "tenantID" : "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
+          "location": "{{ g_location }}"
         } 
     notify:
     - restart atomic-openshift-master-api
@@ -280,6 +281,7 @@ cat > /home/${SUDOUSER}/setup-azure-node-master.yml <<EOF
           "subscriptionID" : "{{ g_subscriptionId }}",
           "tenantID" : "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
+          "location": "{{ g_location }}"
         } 
     notify:
     - restart atomic-openshift-node
@@ -335,6 +337,7 @@ cat > /home/${SUDOUSER}/setup-azure-node.yml <<EOF
           "subscriptionID" : "{{ g_subscriptionId }}",
           "tenantID" : "{{ g_tenantId }}",
           "resourceGroup": "{{ g_resourceGroup }}",
+          "location": "{{ g_location }}"
         } 
     notify:
     - restart atomic-openshift-node
@@ -353,31 +356,39 @@ cat > /home/${SUDOUSER}/setup-azure-node.yml <<EOF
       - azure
     notify:
     - restart atomic-openshift-node
-  - name: delete the node so it can recreate itself
-    command: oc delete node {{inventory_hostname}}
-    delegate_to: ${BASTION}
-  - name: sleep to let node come back to life
-    pause:
-       seconds: 90
 EOF
 
 # Create Playbook to delete stuck Master nodes and set as not schedulable
 
-cat > /home/${SUDOUSER}/deletestucknodes.yml <<EOF
+cat > /home/${SUDOUSER}/deletestuckmasternodes.yml <<EOF
 - hosts: masters
   gather_facts: no
   become: yes
   vars:
-    description: "Delete stuck nodes"
+    description: "Delete stuck master nodes"
   tasks:
   - name: Delete stuck nodes so it can recreate itself
     command: oc delete node {{inventory_hostname}}
-    delegate_to: ${BASTION}
+    delegate_to: ${MASTER}-0
   - name: sleep between deletes
     pause:
-      seconds: 25
+      seconds: 60
   - name: set masters as unschedulable
     command: oadm manage-node {{inventory_hostname}} --schedulable=false
+EOF
+
+# Create Playbook to delete stuck infra and app nodes
+
+cat > /home/${SUDOUSER}/deletestucknodes.yml <<EOF
+- hosts: nodes:!masters
+  gather_facts: no
+  become: yes
+  vars:
+    description: "Delete stuck infra and app nodes"
+  tasks:
+  - name: Delete stuck nodes so it can recreate itself
+    command: oc delete node {{inventory_hostname}}
+    delegate_to: ${MASTER}-0
 EOF
 
 # Create Ansible Hosts File
@@ -598,6 +609,16 @@ then
 	   exit 8
 	fi
 
+	runuser -l $SUDOUSER -c "ansible-playbook ~/deletestuckmasternodes.yml"
+
+	if [ $? -eq 0 ]
+	then
+	   echo $(date) " - Master nodes deleted and recreated successfully. nonschedulable labels reapplied."
+	else
+	   echo $(date) "- Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
+	   exit 9
+	fi
+	
 	runuser -l $SUDOUSER -c "ansible-playbook ~/setup-azure-node.yml"
 
 	if [ $? -eq 0 ]
@@ -605,7 +626,7 @@ then
 	   echo $(date) " - Cloud Provider setup of node config on App Nodes completed successfully"
 	else
 	   echo $(date) "- Cloud Provider setup of node config on App Nodes failed to completed"
-	   exit 9
+	   exit 10
 	fi
 
 	runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
@@ -614,8 +635,8 @@ then
 	then
 	   echo $(date) " - Cloud Provider setup of OpenShift Cluster completed successfully"
 	else
-	   echo $(date) "- Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
-	   exit 10
+	   echo $(date) "- Cloud Provider setup failed to delete stuck infra and app nodes"
+	   exit 11
 	fi
 
 	oc label nodes --all logging-infra-fluentd=true logging=true
@@ -630,9 +651,9 @@ then
 	echo $(date) "- Deploying Metrics"
 	if [ $AZURE == "true" ]
 	then
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
+		runuser -l $SUDOUSER -c "ansible-playbook -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml"
 	else
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True"
+		runuser -l $SUDOUSER -c "ansible-playbook -e openshift_metrics_install_metrics=True /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml"
 	fi
 	if [ $? -eq 0 ]
 	then
@@ -651,9 +672,9 @@ then
 	echo $(date) "- Deploying Logging"
 	if [ $AZURE == "true" ]
 	then
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True -e openshift_hosted_logging_storage_kind=dynamic"
+		runuser -l $SUDOUSER -c "ansible-playbook -e openshift_logging_install_logging=True -e openshift_hosted_logging_storage_kind=dynamic /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml"
 	else
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True"
+		runuser -l $SUDOUSER -c "ansible-playbook -e openshift_logging_install_logging=True /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml"
 	fi
 	if [ $? -eq 0 ]
 	then
@@ -675,6 +696,7 @@ rm /home/${SUDOUSER}/vars.yml
 rm /home/${SUDOUSER}/setup-azure-master.yml
 rm /home/${SUDOUSER}/setup-azure-node-master.yml
 rm /home/${SUDOUSER}/setup-azure-node.yml
+rm /home/${SUDOUSER}/deletestuckmasternodes.yml
 rm /home/${SUDOUSER}/deletestucknodes.yml
 
 echo $(date) " - Script complete"

@@ -660,6 +660,9 @@ then
 	   exit 8
 	fi
 
+	echo $(date) " - Sleep for 60"
+	
+	sleep 60
 	runuser -l $SUDOUSER -c "ansible-playbook ~/deletestuckmasternodes.yml"
 
 	if [ $? -eq 0 ]
@@ -680,6 +683,7 @@ then
 	   exit 10
 	fi
 
+	echo $(date) " - Sleep for 60"
 	sleep 60
 	runuser -l $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
 
@@ -691,21 +695,22 @@ then
 	   exit 11
 	fi
 
-	echo $(date) "- Restarting OVS to complete installation" 
+	echo $(date) "- Restart OVS service" 
 	
- 	echo $(date) "- Sleep for 20" 
+ 	echo $(date) "- Sleep for 30" 
  	
- 	sleep 20	 
+ 	sleep 30	 
  	runuser -l $SUDOUSER -c  "oc label nodes --all logging-infra-fluentd=true logging=true"
-	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-master.yml"
-	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-nodes.yml"
+#	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-master.yml"
+#	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-nodes.yml"
 
-# 	runuser -l $SUDOUSER -c  "ansible all -b  -m service -a 'name=openvswitch state=restarted' " 
+ 	runuser -l $SUDOUSER -c  "ansible all -b  -m service -a 'name=openvswitch state=restarted' " 
 
-# 	echo $(date) "- Restarting origin nodes after 20 seconds" 
-# 	sleep 20 
-
-# 	runuser -l $SUDOUSER -c  "ansible nodes -b  -m service -a 'name=atomic-openshift-node state=restarted' " 
+ 	echo $(date) "- Restart openshift-node service" 
+	echo $(date) "- Sleep for 60" 
+	
+ 	sleep 60 
+ 	runuser -l $SUDOUSER -c  "ansible nodes -b  -m service -a 'name=atomic-openshift-node state=restarted' " 
 
 fi
 

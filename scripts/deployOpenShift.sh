@@ -173,56 +173,6 @@ g_resourceGroup: $RESOURCEGROUP
 g_location: $LOCATION
 EOF
 
-# Create playbook to reboot master nodes
-
-cat > /home/${SUDOUSER}/reboot-master.yml <<EOF
----
-- hosts: masters
-  gather_facts: no
-  become: yes
-  become_method: sudo
-  tasks:
-  - name: Reboot master nodes
-    shell: (/bin/sleep 5 ; shutdown -r now "OpenShift configurations required reboot" ) &
-    async: 30
-    poll: 0
-    ignore_errors: true
-
-  - name: Wait for master nodes to reboot
-    wait_for:
-      port: 22
-      host: "{{ ansible_ssh_host|default(inventory_hostname) }}"
-      delay: 10
-      timeout: 180
-    connection: local
-    become: false
-EOF
-
-# Create playbook to reboot infra and app nodes
-
-cat > /home/${SUDOUSER}/reboot-nodes.yml <<EOF
----
-- hosts: nodes:!masters
-  gather_facts: no
-  become: yes
-  become_method: sudo
-  tasks:
-  - name: Reboot infra and app nodes
-    shell: (/bin/sleep 5 ; shutdown -r now "OpenShift configurations required reboot" ) &
-    async: 30
-    poll: 0
-    ignore_errors: true
-
-  - name: Wait for infra and app nodes to reboot
-    wait_for:
-      port: 22
-      host: "{{ ansible_ssh_host|default(inventory_hostname) }}"
-      delay: 10
-      timeout: 180
-    connection: local
-    become: false
-EOF
-
 # Create Azure Cloud Provider configuration Playbook for Master Config
 
 cat > /home/${SUDOUSER}/setup-azure-master.yml <<EOF
@@ -701,8 +651,6 @@ then
  	
  	sleep 30	 
  	runuser -l $SUDOUSER -c  "oc label nodes --all logging-infra-fluentd=true logging=true"
-#	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-master.yml"
-#	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-nodes.yml"
 
  	runuser -l $SUDOUSER -c  "ansible all -b  -m service -a 'name=openvswitch state=restarted' " 
 
@@ -757,7 +705,7 @@ then
 fi
 
 # Delete postinstall.yml file
-echo $(date) "- Deleting unecessary files"
+echo $(date) "- Deleting unnecessary files"
 
 rm /home/${SUDOUSER}/addocpuser.yml
 rm /home/${SUDOUSER}/assignclusteradminrights.yml

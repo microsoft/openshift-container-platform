@@ -54,7 +54,7 @@
 			"value": "false"
 		},
 		"rhsmUsernamePasswordOrActivationKey": {
-			"value": "password"
+			"value": "usernamepassword"
 		},
 		"rhsmUsernameOrOrgId": {
 			"value": "changeme"

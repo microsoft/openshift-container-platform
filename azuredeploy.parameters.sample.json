@@ -60,7 +60,7 @@
 			"value": "rhsmuser"
 		},
 		"rhsmPasswordOrActivationKey": {
-			"value": "GEN-PASSWORD"
+			"value": "rhsmuser_password"
 		},
 		"rhsmPoolId": {
 			"value": "8a81234151631b3201a5e6f4322e42a9"
@@ -84,7 +84,7 @@
 			"value": "12345678-abcd-47bf-9b6f-12345678abcd"
 		},
 		"aadClientSecret": {
-			"value": "GEN-PASSWORD"
+			"value": "your_secure_password"
 		},
 		"defaultSubDomainType": {
 			"value": "nipio"

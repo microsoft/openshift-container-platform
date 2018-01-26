@@ -107,8 +107,8 @@
 		"apiVersion": "[parameters('apiVersionCompute')]",
 		"tags": {
 			"Role": "[parameters('role')]",
-				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+			"provider": "[variables('redHatTags').provider]",
+			"app": "[variables('redHatTags').app]"
 		},
 		"properties": {
 			"hardwareProfile": {

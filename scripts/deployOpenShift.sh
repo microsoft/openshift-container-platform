@@ -438,9 +438,9 @@ openshift_router_selector='type=infra'
 openshift_registry_selector='type=infra'
 
 # Deploy Service Catalog
-openshift_enable_service_catalog=false
+# openshift_enable_service_catalog=false
 
-template_service_broker_install=false
+# template_service_broker_install=false
 
 openshift_master_cluster_method=native
 openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
@@ -497,7 +497,7 @@ done
 
 for (( c=0; c<$INFRACOUNT; c++ ))
 do
-  echo "$INFRA-$c openshift_node_labels=\"{'type': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
+  echo "$INFRA-$c openshift_node_labels=\"{'type': 'infra', 'zone': 'default', 'region': 'infra'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
 done
 
 # Loop to add Nodes

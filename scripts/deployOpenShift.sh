@@ -399,7 +399,7 @@ EOF
 
 # Create Playbook to delete stuck Master nodes and set as not schedulable
 
-cat > /home/${SUDOUSER}/deletestucknodes.yml <<EOF
+cat > /home/${SUDOUSER}/masternonscheduleable.yml <<EOF
 - hosts: masters
   gather_facts: no
   become: yes
@@ -445,7 +445,9 @@ openshift_router_selector='type=infra'
 openshift_registry_selector='type=infra'
 
 # Deploy Service Catalog
-#openshift_enable_service_catalog=false
+# openshift_enable_service_catalog=false
+
+# template_service_broker_install=false
 
 openshift_master_cluster_method=native
 openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
@@ -463,9 +465,10 @@ openshift_metrics_hawkular_nodeselector={"type":"infra"}
 openshift_metrics_cassandra_nodeselector={"type":"infra"}
 openshift_metrics_heapster_nodeselector={"type":"infra"}
 openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
+#openshift_metrics_storage_labels={'storage': 'metrics'}
 
 # Setup logging
-openshift_metrics_install_logging=false
+openshift_logging_install_logging=false
 #openshift_hosted_logging_storage_kind=dynamic
 openshift_logging_fluentd_nodeselector={"logging":"true"}
 openshift_logging_es_nodeselector={"type":"infra"}
@@ -473,6 +476,7 @@ openshift_logging_kibana_nodeselector={"type":"infra"}
 openshift_logging_curator_nodeselector={"type":"infra"}
 openshift_master_logging_public_url=https://kibana.$ROUTING
 openshift_logging_master_public_url=https://$MASTERPUBLICIPHOSTNAME:8443
+openshift_logging_storage_labels={'storage': 'logging'}
 
 # host group for masters
 [masters]
@@ -500,7 +504,7 @@ done
 
 for (( c=0; c<$INFRACOUNT; c++ ))
 do
-  echo "$INFRA-$c openshift_node_labels=\"{'type': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
+  echo "$INFRA-$c openshift_node_labels=\"{'type': 'infra', 'zone': 'default', 'region': 'infra'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
 done
 
 # Loop to add Nodes
@@ -650,7 +654,7 @@ then
 	echo $(date) "- Sleep for 120"
 	
 	sleep 120
-	runuser $SUDOUSER -c "ansible-playbook ~/deletestucknodes.yml"
+	runuser $SUDOUSER -c "ansible-playbook ~/masternonscheduleable.yml"
 
 	if [ $? -eq 0 ]
 	then
@@ -662,7 +666,7 @@ then
 
 	echo $(date) "- Rebooting cluster to complete installation"
 	
-	oc label nodes --all logging-infra-fluentd=true logging=true
+	runuser -l $SUDOUSER -c  "oc label nodes --all logging-infra-fluentd=true logging=true"
 	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-master.yml"
 	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-nodes.yml"
 
@@ -720,7 +724,7 @@ rm /home/${SUDOUSER}/dockerregistry.yml
 rm /home/${SUDOUSER}/setup-azure-master.yml
 rm /home/${SUDOUSER}/setup-azure-node-master.yml
 rm /home/${SUDOUSER}/setup-azure-node.yml
-rm /home/${SUDOUSER}/deletestucknodes.yml
+rm /home/${SUDOUSER}/masternonscheduleable.yml
 rm /home/${SUDOUSER}/reboot-master.yml
 rm /home/${SUDOUSER}/reboot-nodes.yml
 	

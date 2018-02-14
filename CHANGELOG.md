@@ -1,5 +1,9 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES for Release 3.7 - February 14, 2018
+
+1.  Create Release 3.7 branch
+
 # UPDATES for Release 3.7 - January 12, 2018
 
 1.  Inject the Private Key into Bastion host during prep.

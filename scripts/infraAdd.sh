@@ -8,26 +8,13 @@ INFRA=$1
 SUDOUSER=$2
 
 # Create playbook to update hosts file
-
-cat > updatehosts.yaml <<EOF
-#!/usr/bin/ansible-playbook
-
-- hosts: localhost
-  gather_facts: no
-  tasks: 
-  - lineinfile:
-      dest: /etc/ansible/hosts
-      insertafter: '[new_nodes]'
-      line: "$INFRA openshift_node_labels=\"{'type': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA"
-      regexp: '^$INFRA '
-      state: present
-EOF
+# Filename: updateinfrahosts.yaml
 
 # Run Ansible Playbook to update Hosts file
 
 echo $(date) " - Updating hosts file"
-
-ansible-playbook ./updatehosts.yaml
+wget https://raw.githubusercontent.com/microsoft/openshift-container-platform/master/updateinfrahosts.yaml
+ansible-playbook ./updateinfrahosts.yaml
 
 # Run Ansible Playbook to add new Infra to OpenShift Cluster
 

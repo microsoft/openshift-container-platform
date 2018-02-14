@@ -1,5 +1,12 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES for Master (Release 3.7) - February 14, 2018
+
+1.  Created Release 3.7 Branch
+2.  Update deployOpenShift.sh file to separate out Ansible Playbooks
+3.  Created separate repo for OpenShift installation Playbooks
+
+
 # UPDATES for Release 3.7 - January 12, 2018
 
 1.  Inject the Private Key into Bastion host during prep.

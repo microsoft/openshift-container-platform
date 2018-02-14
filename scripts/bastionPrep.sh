@@ -7,7 +7,7 @@ POOL_ID=$3
 PRIVATEKEY=$4
 SUDOUSER=$5
 
-Generate private keys for use by Ansible
+# Generate private keys for use by Ansible
 echo $(date) " - Generating Private keys for use by Ansible for OpenShift Installation"
 
 runuser -l $SUDOUSER -c "echo \"$PRIVATEKEY\" > ~/.ssh/id_rsa"

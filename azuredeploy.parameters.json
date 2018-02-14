@@ -3,16 +3,7 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"_artifactsLocation": {
-			"value": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/master"
-		},
-		"customVhdOrGallery": {
-			"value": "gallery"
-		},
-		"customStorageAccount": {
-			"value": "changeme"
-		},
-		"customOsDiskName": {
-			"value": "changeme"
+			"value": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/release-3.7"
 		},
 		"masterVmSize": {
 			"value": "Standard_DS2_v2"

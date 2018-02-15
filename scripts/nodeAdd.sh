@@ -13,7 +13,7 @@ SUDOUSER=$2
 # Run Ansible Playbook to update Hosts file
 
 echo $(date) " - Updating hosts file"
-wget https://raw.githubusercontent.com/microsoft/openshift-container-platform/master/updatenodehosts.yaml
+wget https://raw.githubusercontent.com/microsoft/openshift-container-platform-playbooks/master/updatenodehosts.yaml
 ansible-playbook ./updatenodehosts.yaml
 
 # Run Ansible Playbook to add new Node to OpenShift Cluster

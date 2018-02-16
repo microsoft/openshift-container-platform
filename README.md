@@ -1,13 +1,4 @@
-# OpenShift Container Platform Deployment Template
-
-## NOTE: Structural change to Repo
-
-The master branch will now contain the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new things or try new things.
-
-We will now have branches for the stable releases:
-- Release-3.6
-- Release-3.7
-- etc.
+# OpenShift Container Platform Deployment Template - Release 3.7
 
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
@@ -119,9 +110,6 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 ### azuredeploy.Parameters.json File Explained
 
 1.  _artifactsLocation: URL for artifacts (json, scripts, etc.)
-2.  customVhdOrGallery: Choose to use a custom VHD image or an image from the Azure Gallery. The valid inputs are "gallery" or "custom". The default is set to "gallery".
-2.  customStorageAccount: The URL to the storage account that contains your custom VHD image. Include the ending '/'. If "gallery" is chosen above, this parameter will not be used. Example: https://customstorageaccount.blob.core.windows.net/
-2.  customOsDiskName: The folder and name of the custom VHD image. If "gallery" is chosen above, this parameter will be not be used. Example: images/customosdisk.vhd
 2.  masterVmSize: Size of the Master VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
 3.  infraVmSize: Size of the Infra VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
 3.  nodeVmSize: Size of the App Node VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
@@ -135,7 +123,6 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 11. openshiftPassword: Password for OpenShift user and root user
 11. enableMetrics: Enable Metrics - value is either "true" or "false"
 11. enableLogging: Enable Logging - value is either "true" or "false"
-11. enableCockpit: Enable Cockpit - value is either "true" or "false"
 12. rhsmUsernameOrOrgId: Red Hat Subscription Manager Username or Organization ID. To find your Organization ID, run on registered server: `subscription-manager identity`.
 13. rhsmPasswordOrActivationKey: Red Hat Subscription Manager Password or Activation Key for your Cloud Access subscription. You can get this from [here](https://access.redhat.com/management/activation_keys).
 14. rhsmPoolId: The Red Hat Subscription Manager Pool ID that contains your OpenShift entitlements

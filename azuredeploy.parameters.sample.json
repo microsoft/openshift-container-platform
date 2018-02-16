@@ -5,15 +5,6 @@
 		"_artifactsLocation": {
 			"value": "https://raw.githubusercontent.com/Microsoft/openshift-containerplatform/master"
 		},
-		"customVhdOrGallery": {
-			"value": "gallery"
-		},
-		"customStorageAccount": {
-			"value": "https://customstorageaccount.blob.core.windows.net/"
-		},
-		"customOsDiskName": {
-			"value": "images/customosdisk.vhd"
-		},
 		"masterVmSize": {
 			"value": "Standard_DS2_v2"
 		},
@@ -55,9 +46,6 @@
 		},
 		"enableCockpit": {
 			"value": "false"
-		},
-		"rhsmUsernamePasswordOrActivationKey": {
-			"value": "usernamepassword"
 		},
 		"rhsmUsernameOrOrgId": {
 			"value": "rhsmuser"

@@ -133,6 +133,7 @@ openshift_registry_selector='type=infra'
 # openshift_enable_service_catalog=false
 
 # template_service_broker_install=false
+template_service_broker_selector={"type":"infra"}
 
 openshift_master_cluster_method=native
 openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME

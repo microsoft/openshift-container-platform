@@ -408,7 +408,7 @@ fi
 # Delete yaml files
 echo $(date) "- Deleting unecessary files"
 
-mkdir /home/${SUDOUSER}/openshift-container-platform-playbooks 2>&1 >/dev/null
+mkdir /home/${SUDOUSER}/openshift-container-platform-playbooks || true
 rm -rf /home/${SUDOUSER}/openshift-container-platform-playbooks
 
 echo $(date) "- Sleep for 60"

@@ -162,7 +162,7 @@ openshift_logging_kibana_nodeselector={"type":"infra"}
 openshift_logging_curator_nodeselector={"type":"infra"}
 openshift_master_logging_public_url=https://kibana.$ROUTING
 openshift_logging_master_public_url=https://$MASTERPUBLICIPHOSTNAME:8443
-openshift_logging_storage_labels={'storage': 'logging'}
+#openshift_logging_storage_labels={'storage': 'logging'}
 
 # host group for masters
 [masters]
@@ -354,13 +354,13 @@ then
 
 	echo $(date) "- Rebooting cluster to complete installation"
 
-  runuser -l $SUDOUSER -c  "oc label nodes $MASTER-0 openshift-infra=apiserver"
+	runuser -l $SUDOUSER -c  "oc label nodes $MASTER-0 openshift-infra=apiserver"
 	runuser -l $SUDOUSER -c  "oc label nodes --all logging-infra-fluentd=true logging=true"
 	runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/reboot-master.yaml"
 	runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
-  sleep 10
-  runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker"
-  runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker"
+	sleep 10
+	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker"
+	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker"
 
 fi
 
@@ -409,7 +409,7 @@ fi
 # Delete yaml files
 echo $(date) "- Deleting unecessary files"
 
-mkdir /home/${SUDOUSER}/openshift-container-platform-playbooks 2>&1 >/dev/null
+mkdir /home/${SUDOUSER}/openshift-container-platform-playbooks || true
 rm -rf /home/${SUDOUSER}/openshift-container-platform-playbooks
 
 echo $(date) "- Sleep for 60"

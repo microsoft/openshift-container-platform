@@ -74,7 +74,7 @@ xfs_growfs $rootdev
 # Install Docker 1.12.x
 echo $(date) " - Installing Docker 1.12.x"
 
-yum -y install docker
+yum -y install docker-1.12.6
 sed -i -e "s#^OPTIONS='--selinux-enabled'#OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'#" /etc/sysconfig/docker
 
 # Create thin pool logical volume for Docker
@@ -99,4 +99,3 @@ systemctl enable docker
 systemctl start docker
 
 echo $(date) " - Script Complete"
-

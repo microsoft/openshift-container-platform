@@ -50,7 +50,7 @@ subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
     --enable="rhel-7-server-ose-3.7-rpms" \
-    --enable="rhel-7-fast-datapath-rpms" 
+    --enable="rhel-7-fast-datapath-rpms"
 
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
@@ -82,7 +82,7 @@ yum -y install atomic-openshift-utils
 # Install Docker 1.12.x
 echo $(date) " - Installing Docker 1.12.x"
 
-yum -y install docker
+yum -y install docker-1.12.6
 sed -i -e "s#^OPTIONS='--selinux-enabled'#OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'#" /etc/sysconfig/docker
 
 # Create thin pool logical volume for Docker

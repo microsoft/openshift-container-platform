@@ -103,6 +103,10 @@ fi
 
 systemctl enable docker
 systemctl start docker
+#gluster pre-reqs for all
+yum install -y iscsi-initiator-utils device-mapper-multipath
+mpathconf --enable
+## Placeholder for /etc/multipath.conf entry and systemctl restart multipathd
 modprobe dm_thin_pool
 modprobe dm_multipath
 modprobe target_core_user

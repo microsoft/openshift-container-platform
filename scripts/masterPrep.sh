@@ -143,6 +143,22 @@ parameters:
   storageaccounttype: Premium_LRS
 EOF
 fi
+yum install -y iscsi-initiator-utils device-mapper-multipath
+mpathconf --enable
+## Placeholder for /etc/multipath.conf entry and systemctl restart multipathd
+modprobe dm_thin_pool
+modprobe dm_multipath
+modprobe target_core_user
+modprobe dm_mirror
+modprobe dm_snapshot
+echo "dm_thin_pool" > /etc/modules-load.d/dm_thin_pool.conf
+echo "dm_multipath" > /etc/modules-load.d/dm_multipath.conf
+echo "target_core_user" > /etc/modules-load.d/target_core_user.conf
+echo "dm_mirror" > /etc/modules-load.d/dm_mirror.conf
+echo "dm_snapshot" > /etc/modules-load.d/dm_snapshot.conf
+systemctl add-wants multi-user rpcbind.service
+systemctl enable rpcbind.service
+systemctl start rpcbind.service
 yum install -y redhat-storage-server
 yum install -y gluster-block
 systemctl start sshd
@@ -151,4 +167,5 @@ systemctl start glusterd
 systemctl enable glusterd
 systemctl start gluster-blockd
 systemctl enable gluster-blockd
+
 echo $(date) " - Script Complete"

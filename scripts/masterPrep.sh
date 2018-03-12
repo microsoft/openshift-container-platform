@@ -168,5 +168,8 @@ systemctl start glusterd
 systemctl enable glusterd
 systemctl start gluster-blockd
 systemctl enable gluster-blockd
+## Heketi only on Master(s)
+yum install -y cns-deploy heketi-client
+
 
 echo $(date) " - Script Complete"

@@ -143,6 +143,7 @@ parameters:
   storageaccounttype: Premium_LRS
 EOF
 fi
+#gluster pre-reqs
 yum install -y iscsi-initiator-utils device-mapper-multipath
 mpathconf --enable
 ## Placeholder for /etc/multipath.conf entry and systemctl restart multipathd

@@ -123,6 +123,7 @@ os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 console_port=443
 openshift_cloudprovider_kind=azure
 osm_default_node_selector='type=app'
+## For Issue #48 
 openshift_disable_check=memory_availability,docker_image_availability,package_version
 
 # default selectors for router and registry services

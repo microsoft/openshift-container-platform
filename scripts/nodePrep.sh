@@ -47,7 +47,8 @@ subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
     --enable="rhel-7-server-ose-3.7-rpms" \
-    --enable="rhel-7-fast-datapath-rpms"
+    --enable="rhel-7-fast-datapath-rpms" \
+    --enable="rh-gluster-3-for-rhel-7-server-rpms"
 
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
@@ -73,8 +74,13 @@ xfs_growfs $rootdev
 
 # Install Docker 1.12.x
 echo $(date) " - Installing Docker 1.12.x"
-
-yum -y install docker
+## Pinning to 1.12.6 to support OCP v3.7 for the same and not use 1.13.x as default##
+## From @vincepower pull #50 on master ##
+#yum -y install docker
+yum -y install docker-1.12.6
+yum -y install yum-plugin-versionlock
+yum versionlock docker-client-1.12.6 docker-common-1.12.6 docker-rhel-push-plugin-1.12.6 docker-1.12.6
+## End Pinning
 sed -i -e "s#^OPTIONS='--selinux-enabled'#OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'#" /etc/sysconfig/docker
 
 # Create thin pool logical volume for Docker
@@ -97,6 +103,30 @@ fi
 
 systemctl enable docker
 systemctl start docker
-
+#gluster pre-reqs for all
+yum install -y iscsi-initiator-utils device-mapper-multipath
+mpathconf --enable
+## Placeholder for /etc/multipath.conf entry and systemctl restart multipathd
+modprobe dm_thin_pool
+modprobe dm_multipath
+modprobe target_core_user
+modprobe dm_mirror
+modprobe dm_snapshot
+echo "dm_thin_pool" > /etc/modules-load.d/dm_thin_pool.conf
+echo "dm_multipath" > /etc/modules-load.d/dm_multipath.conf
+echo "target_core_user" > /etc/modules-load.d/target_core_user.conf
+echo "dm_mirror" > /etc/modules-load.d/dm_mirror.conf
+echo "dm_snapshot" > /etc/modules-load.d/dm_snapshot.conf
+systemctl add-wants multi-user rpcbind.service
+systemctl enable rpcbind.service
+systemctl start rpcbind.service
+yum install -y redhat-storage-server
+yum install -y gluster-block
+systemctl start sshd
+systemctl enable sshd
+systemctl start glusterd
+systemctl enable glusterd
+systemctl start gluster-blockd
+systemctl enable gluster-blockd
 echo $(date) " - Script Complete"
 

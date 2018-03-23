@@ -50,8 +50,7 @@ subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
     --enable="rhel-7-server-ose-3.7-rpms" \
-    --enable="rhel-7-fast-datapath-rpms" \
-    --enable="rh-gluster-3-for-rhel-7-server-rpms"
+    --enable="rhel-7-fast-datapath-rpms"
 
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
@@ -160,14 +159,8 @@ echo "dm_snapshot" > /etc/modules-load.d/dm_snapshot.conf
 systemctl add-wants multi-user rpcbind.service
 systemctl enable rpcbind.service
 systemctl start rpcbind.service
-yum install -y redhat-storage-server
-yum install -y gluster-block
 systemctl start sshd
 systemctl enable sshd
-systemctl start glusterd
-systemctl enable glusterd
-systemctl start gluster-blockd
-systemctl enable gluster-blockd
 ## Heketi only on Master(s)
 yum install -y cns-deploy heketi-client
 

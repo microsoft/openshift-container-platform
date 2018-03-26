@@ -979,8 +979,7 @@
 				"count": "[variables(variables('storageLoopCount'))]"
 			},
 			"sku": {
-				"name": "[variables('newStorageAccountArray')[copyIndex()].skuName]",
-				"tier": "[variables('newStorageAccountArray')[copyIndex()].skuTier]"
+				"name": "[variables('newStorageAccountArray')[copyIndex()].skuName]"
 			}
 		}, {
 			"type": "Microsoft.Network/publicIPAddresses",

@@ -84,7 +84,7 @@
 		},
 		"storageKind": {
 			"type": "string",
-			"defaultValue": "managed",
+			"defaultValue": "unmanaged",
 			"allowedValues": ["managed", "unmanaged"],
 			"metadata": {
 				"description": "Use Managed or Unmanaged Disks"
@@ -1035,8 +1035,6 @@
 			"name": "[variables('availabilitySetArray')[copyIndex()].name]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
-            "sku": {
-				"name": "[variables(variables('availabilitySetSku'))]"
 			},
 			"properties": {
 				"platformFaultDomainCount": "[variables(variables('platformFaultDomainCount'))]",

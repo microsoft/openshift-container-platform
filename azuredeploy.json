@@ -777,32 +777,6 @@
 						"priority": 200,
 						"direction": "Inbound"
 					}
-				}, {
-					"name": "allowOpenShiftConsoleIn_all",
-					"properties": {
-						"description": "Allow OpenShift Console connections from all locations",
-						"protocol": "Tcp",
-						"sourcePortRange": "*",
-						"destinationPortRange": "8443",
-						"sourceAddressPrefix": "*",
-						"destinationAddressPrefix": "*",
-						"access": "Allow",
-						"priority": 300,
-						"direction": "Inbound"
-					}
-				}, {
-					"name": "allowCockpitIn_all",
-					"properties": {
-						"description": "Allow Cockpit connections from all locations",
-						"protocol": "Tcp",
-						"sourcePortRange": "*",
-						"destinationPortRange": "9090",
-						"sourceAddressPrefix": "*",
-						"destinationAddressPrefix": "*",
-						"access": "Allow",
-						"priority": 400,
-						"direction": "Inbound"
-					}
 				}]
 			}
 		}, {
@@ -855,19 +829,6 @@
 						"priority": 300,
 						"direction": "Inbound"
 					}
-				}, {
-					"name": "allowCockpitIn_all",
-					"properties": {
-						"description": "Allow Cockpit connections from all locations",
-						"protocol": "Tcp",
-						"sourcePortRange": "*",
-						"destinationPortRange": "9090",
-						"sourceAddressPrefix": "*",
-						"destinationAddressPrefix": "*",
-						"access": "Allow",
-						"priority": 400,
-						"direction": "Inbound"
-					}
 				}]
 			}
 		}, {
@@ -918,19 +879,6 @@
 						"destinationAddressPrefix": "*",
 						"access": "Allow",
 						"priority": 300,
-						"direction": "Inbound"
-					}
-				}, {
-					"name": "allowCockpitIn_all",
-					"properties": {
-						"description": "Allow Cockpit connections from all locations",
-						"protocol": "Tcp",
-						"sourcePortRange": "*",
-						"destinationPortRange": "9090",
-						"sourceAddressPrefix": "*",
-						"destinationAddressPrefix": "*",
-						"access": "Allow",
-						"priority": 400,
 						"direction": "Inbound"
 					}
 				}]

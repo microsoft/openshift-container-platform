@@ -261,7 +261,7 @@
 		"resourceGroupName": "[resourceGroup().id]",
 		"apiVersionCompute": "2015-06-15",
 		"apiVersionNetwork": "2015-06-15",
-		"apiVersionStorage": "2015-06-15",
+		"apiVersionStorage": "2016-01-01",
 		"apiVersionLinkTemplate": "2015-01-01",
 		"defaultSubDomain": "[toLower(parameters('defaultSubDomain'))]",
 		"namingInfix": "[toLower(parameters('openshiftClusterPrefix'))]",

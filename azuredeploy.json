@@ -109,7 +109,7 @@
 		},
 		"infraInstanceCount": {
 			"type": "int",
-			"defaultValue": 2,
+			"defaultValue": 3,
 			"allowedValues": [2, 3],
 			"metadata": {
 				"description": "Number of OpenShift infra nodes.  1 is non HA.  Choose 2 or 3 for HA"
@@ -164,16 +164,6 @@
 			],
 			"metadata": {
 				"description": "Enable OpenShift Logging: true or false"
-			}
-		},
-		"enableCockpit": {
-			"type": "string",
-			"defaultValue": "false",
-			"allowedValues": [
-				"true", "false"
-			],
-			"metadata": {
-				"description": "Enable Cockpit: true or false"
 			}
 		},
 		"rhsmUsernameOrOrgId": {
@@ -236,13 +226,14 @@
 		},
 		"aadClientId": {
 			"type": "string",
+			"defaultValue": "",
 			"metadata": {
 				"description": "Azure AD Client ID"
 			}
 		},
 		"aadClientSecret": {
 			"type": "securestring",
-			"minLength": 1,
+			"defaultValue": "",
 			"metadata": {
 				"description": "Azure AD Client Secret"
 			}
@@ -268,9 +259,9 @@
 	"variables": {
 		"location": "[resourceGroup().location]",
 		"resourceGroupName": "[resourceGroup().id]",
-		"apiVersionCompute": "2017-03-30",
-		"apiVersionNetwork": "2017-09-01",
-		"apiVersionStorage": "2017-06-01",
+		"apiVersionCompute": "2015-06-15",
+		"apiVersionNetwork": "2015-06-15",
+		"apiVersionStorage": "2015-06-15",
 		"apiVersionLinkTemplate": "2015-01-01",
 		"defaultSubDomain": "[toLower(parameters('defaultSubDomain'))]",
 		"namingInfix": "[toLower(parameters('openshiftClusterPrefix'))]",

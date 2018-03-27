@@ -376,9 +376,9 @@
 		"infraLbHttpProbeId": "[concat(variables('infraLbId'),'/probes/httpProbe')]",
 		"infraLbHttpsProbeId": "[concat(variables('infraLbId'),'/probes/httpsProbe')]",
 		"imageReference": {
-			"publisher": "RedHat",
+			"publisher": "Redhat",
 			"offer": "RHEL-OCP",
-			"sku": "7.4",
+			"sku": "7-4",
 			"version": "latest"
 		},
 		"redHatTags": {
@@ -980,7 +980,6 @@
 			"name": "[variables('availabilitySetArray')[copyIndex()].name]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
-			},
 			"properties": {
 				"platformFaultDomainCount": "[variables(variables('platformFaultDomainCount'))]",
                 "platformUpdateDomainCount": "5"
@@ -1822,9 +1821,6 @@
 					},
 					"enableLogging": {
 						"value": "[parameters('enableLogging')]"
-					},
-					"enableCockpit": {
-						"value": "[parameters('enableCockpit')]"
 					},
 					"enableAzure": {
 						"value": "[parameters('enableAzure')]"

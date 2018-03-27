@@ -219,9 +219,9 @@ runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/p
 echo $(date) " - Setting up NetworkManager on eth0"
 
 runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
-sleep 5
-runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\""
-runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
+# sleep 5
+# runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\""
+# runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
@@ -285,7 +285,7 @@ fi
 # Configure Docker Registry to use Azure Storage Account
 echo $(date) "- Configuring Docker Registry to use Azure Storage Account"
 
-runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
+# runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
 
 if [[ $AZURE == "true" ]]
 then

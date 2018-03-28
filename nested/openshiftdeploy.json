@@ -110,18 +110,6 @@
 				"description": "Administrator password for OpenShift Console"
 			}
 		},
-		"enableMetrics": {
-			"type": "string",
-			"metadata": {
-				"description": "Enable OpenShift Metrics: true or false"
-			}
-		},
-		"enableLogging": {
-			"type": "string",
-			"metadata": {
-				"description": "Enable OpenShift Logging: true or false"
-			}
-		},
 		"enableAzure": {
 			"type": "string",
 			"metadata": {

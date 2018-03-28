@@ -54,7 +54,7 @@ subscription-manager repos --disable="*"
 subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
-    --enable="rhel-7-server-ose-3.7-rpms" \
+    --enable="rhel-7-server-ose-3.9-rpms" \
     --enable="rhel-7-fast-datapath-rpms"
 
 # Install base packages and update system to latest packages
@@ -76,7 +76,7 @@ yum -y install atomic-openshift-utils
 # Run Ansible Playbook to update ansible.cfg file
 
 echo $(date) " - Updating ansible.cfg file"
-wget https://raw.githubusercontent.com/microsoft/openshift-container-platform-playbooks/master/updateansiblecfg.yaml
+wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 5 https://raw.githubusercontent.com/microsoft/openshift-container-platform-playbooks/master/updateansiblecfg.yaml
 ansible-playbook ./updateansiblecfg.yaml
 
 echo $(date) " - Script Complete"

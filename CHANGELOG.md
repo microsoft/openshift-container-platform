@@ -1,5 +1,10 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES for Release 3.9 - March 28, 2018
+
+1.  Create Release 3.7 branch
+2.  Updating scripts for 3.9 repository
+
 # UPDATES for Master (Release 3.7) - February 14, 2018
 
 1.  Created Release 3.7 Branch

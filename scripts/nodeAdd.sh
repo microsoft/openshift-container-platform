@@ -20,6 +20,6 @@ ansible-playbook ./updatenodehosts.yaml
 
 echo $(date) " - Adding new Node to OpenShift Cluster via Ansible Playbook"
 
-runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-node/scaleup.yml"
+runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-node/scaleup.yml"
 
 echo $(date) " - Script complete"

@@ -17,17 +17,15 @@ export MASTERCOUNT=${10}
 export ROUTING=${11}
 export REGISTRYSA=${12}
 export ACCOUNTKEY="${13}"
-export METRICS=${14}
-export LOGGING=${15}
-export TENANTID=${16}
-export SUBSCRIPTIONID=${17}
-export AADCLIENTID=${18}
-export AADCLIENTSECRET="${19}"
-export RESOURCEGROUP=${20}
-export LOCATION=${21}
-export COCKPIT=${22}
-export AZURE=${23}
-export STORAGEKIND=${24}
+export TENANTID=${14}
+export SUBSCRIPTIONID=${15}
+export AADCLIENTID=${16}
+export AADCLIENTSECRET="${17}"
+export RESOURCEGROUP=${18}
+export LOCATION=${19}
+export COCKPIT=${20}
+export AZURE=${21}
+export STORAGEKIND=${22}
 
 export BASTION=$(hostname)
 
@@ -223,9 +221,12 @@ runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ip
 runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
-echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
+echo $(date) " - Running Prerequisites via Ansible Playbook"
+runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml"
 
-runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml"
+# Initiating installation of OpenShift Container Platform using Ansible Playbook
+echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
+runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml"
 
 if [ $? -eq 0 ]
 then
@@ -362,48 +363,6 @@ then
 	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker"
 	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker"
 
-fi
-
-# Configure Metrics
-
-if [ $METRICS == "true" ]
-then
-	sleep 30
-	echo $(date) "- Deploying Metrics"
-	if [ $AZURE == "true" ]
-	then
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
-	else
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True"
-	fi
-	if [ $? -eq 0 ]
-	then
-	   echo $(date) " - Metrics configuration completed successfully"
-	else
-	   echo $(date) "- Metrics configuration failed"
-	   exit 11
-	fi
-fi
-
-# Configure Logging
-
-if [ $LOGGING == "true" ]
-then
-	sleep 60
-	echo $(date) "- Deploying Logging"
-	if [ $AZURE == "true" ]
-	then
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True -e openshift_hosted_logging_storage_kind=dynamic"
-	else
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True"
-	fi
-	if [ $? -eq 0 ]
-	then
-	   echo $(date) " - Logging configuration completed successfully"
-	else
-	   echo $(date) "- Logging configuration failed"
-	   exit 12
-	fi
 fi
 
 # Delete yaml files

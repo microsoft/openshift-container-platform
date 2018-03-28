@@ -1933,12 +1933,6 @@
 					"openshiftPassword": {
 						"value": "[parameters('openshiftPassword')]"
 					},
-					"enableMetrics": {
-						"value": "[parameters('enableMetrics')]"
-					},
-					"enableLogging": {
-						"value": "[parameters('enableLogging')]"
-					},
 					"enableCockpit": {
 						"value": "[parameters('enableCockpit')]"
 					},

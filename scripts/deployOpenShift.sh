@@ -25,15 +25,10 @@ export AADCLIENTID=${18}
 export AADCLIENTSECRET="${19}"
 export RESOURCEGROUP=${20}
 export LOCATION=${21}
-export COCKPIT=${22}
-export AZURE=${23}
-export STORAGEKIND=${24}
+export AZURE=${22}
+export STORAGEKIND=${23}
 
 export BASTION=$(hostname)
-
-# Determine if Commercial Azure or Azure Government
-CLOUD=$( curl -H Metadata:true "http://169.254.169.254/metadata/instance/compute/location?api-version=2017-04-02&format=text" | cut -c 1-2 )
-export CLOUD=${CLOUD^^}
 
 export MASTERLOOP=$((MASTERCOUNT - 1))
 export INFRALOOP=$((INFRACOUNT - 1))
@@ -60,15 +55,8 @@ echo $(date) " - Create Ansible Playbooks for Post Installation tasks"
 # Run on MASTER-0 node - configure registry to use Azure Storage
 # Create docker registry config based on Commercial Azure or Azure Government
 
-if [[ $CLOUD == "US" ]]
-then
-  DOCKERREGISTRYYAML=dockerregistrygov.yaml
-  export CLOUDNAME="AzureUSGovernmentCloud"
-else
-  DOCKERREGISTRYYAML=dockerregistrypublic.yaml
-  export CLOUDNAME="AzurePublicCloud"
-
-fi
+DOCKERREGISTRYYAML=dockerregistryazurestack.yaml
+export CLOUDNAME="AzureStack"
 
 # Cloning Ansible playbook repository
 (cd /home/$SUDOUSER && git clone https://github.com/Microsoft/openshift-container-platform-playbooks.git)
@@ -118,7 +106,6 @@ docker_udev_workaround=True
 openshift_use_dnsmasq=true
 openshift_master_default_subdomain=$ROUTING
 openshift_override_hostname_check=true
-osm_use_cockpit=${COCKPIT}
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 openshift_master_api_port=443
 openshift_master_console_port=443
@@ -273,17 +260,8 @@ echo $(date) "- Assigning cluster admin rights to user"
 
 runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
 
-if [[ $COCKPIT == "true" ]]
-then
-
-# Setting password for root if Cockpit is enabled
-echo $(date) "- Assigning password for root, which is used to login to Cockpit"
-
-runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/assignrootpassword.yaml"
-fi
-
 # Configure Docker Registry to use Azure Storage Account
-echo $(date) "- Configuring Docker Registry to use Azure Storage Account"
+# echo $(date) "- Configuring Docker Registry to use Azure Storage Account"
 
 # runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
 

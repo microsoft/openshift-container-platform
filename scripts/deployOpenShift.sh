@@ -23,9 +23,8 @@ export AADCLIENTID=${16}
 export AADCLIENTSECRET="${17}"
 export RESOURCEGROUP=${18}
 export LOCATION=${19}
-export COCKPIT=${20}
-export AZURE=${21}
-export STORAGEKIND=${22}
+export AZURE=${20}
+export STORAGEKIND=${21}
 
 export BASTION=$(hostname)
 
@@ -116,7 +115,7 @@ docker_udev_workaround=True
 openshift_use_dnsmasq=true
 openshift_master_default_subdomain=$ROUTING
 openshift_override_hostname_check=true
-osm_use_cockpit=${COCKPIT}
+osm_use_cockpit=true
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 console_port=443
 openshift_cloudprovider_kind=azure

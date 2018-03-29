@@ -38,6 +38,12 @@
 		"openshiftPassword": {
 			"value": "changeme"
 		},
+		"enableMetrics": {
+			"value": "false"
+		},
+		"enableLogging": {
+			"value": "false"
+		},
 		"rhsmUsernameOrOrgId": {
 			"value": "changeme"
 		},

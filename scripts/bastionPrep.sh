@@ -78,6 +78,6 @@ yum -y install atomic-openshift-utils
 
 echo $(date) " - Updating ansible.cfg file"
 wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 5 https://raw.githubusercontent.com/microsoft/openshift-container-platform-playbooks/master/updateansiblecfg.yaml
-ansible-playbook ./updateansiblecfg.yaml
+ansible-playbook -f 10 ./updateansiblecfg.yaml
 
 echo $(date) " - Script Complete"

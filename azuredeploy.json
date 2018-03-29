@@ -146,6 +146,26 @@
 				"description": "Password for OpenShift user to login to OpenShift Console"
 			}
 		},
+		"enableMetrics": {
+			"type": "string",
+			"defaultValue": "false",
+			"allowedValues": [
+				"true", "false"
+			],
+			"metadata": {
+				"description": "Enable OpenShift Metrics: true or false"
+			}
+		},
+		"enableLogging": {
+			"type": "string",
+			"defaultValue": "false",
+			"allowedValues": [
+				"true", "false"
+			],
+			"metadata": {
+				"description": "Enable OpenShift Logging: true or false"
+			}
+		},
 		"rhsmUsernameOrOrgId": {
 			"type": "string",
 			"minLength": 1,
@@ -1902,6 +1922,12 @@
 					},
 					"openshiftPassword": {
 						"value": "[parameters('openshiftPassword')]"
+					},
+					"enableMetrics": {
+						"value": "[parameters('enableMetrics')]"
+					},
+					"enableLogging": {
+						"value": "[parameters('enableLogging')]"
 					},
 					"enableAzure": {
 						"value": "[parameters('enableAzure')]"

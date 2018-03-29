@@ -38,6 +38,12 @@
 		"openshiftPassword": {
 			"value": "GEN-PASSWORD"
 		},
+		"enableMetrics": {
+			"value": "false"
+		},
+		"enableLogging": {
+			"value": "false"
+		},
 		"rhsmUsernameOrOrgId": {
 			"value": "rhsmuser"
 		},

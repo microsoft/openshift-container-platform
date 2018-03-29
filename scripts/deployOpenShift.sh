@@ -17,14 +17,16 @@ export MASTERCOUNT=${10}
 export ROUTING=${11}
 export REGISTRYSA=${12}
 export ACCOUNTKEY="${13}"
-export TENANTID=${14}
-export SUBSCRIPTIONID=${15}
-export AADCLIENTID=${16}
-export AADCLIENTSECRET="${17}"
-export RESOURCEGROUP=${18}
-export LOCATION=${19}
-export AZURE=${20}
-export STORAGEKIND=${21}
+export METRICS=${14}
+export LOGGING=${15}
+export TENANTID=${16}
+export SUBSCRIPTIONID=${17}
+export AADCLIENTID=${18}
+export AADCLIENTSECRET="${19}"
+export RESOURCEGROUP=${20}
+export LOCATION=${21}
+export AZURE=${22}
+export STORAGEKIND=${23}
 
 export BASTION=$(hostname)
 
@@ -209,19 +211,19 @@ EOF
 #echo $(date) " - Running network_manager.yml playbook"
 DOMAIN=`domainname -d`
 
-# Create /etc/azure/azure.conf on all hosts
-runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
+# Create /etc/origin/cloudprovider/azure.conf on all hosts
+runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
 
 if [ $? -eq 0 ]
 then
-    echo $(date) " - Cloud Provider setup of node config on App Nodes completed successfully"
+	echo $(date) " - Cloud Provider setup of node config on App Nodes completed successfully"
 else
-    echo $(date) " - Cloud Provider setup of node config on App Nodes failed to completed"
-    exit 11
+	echo $(date) " - Cloud Provider setup of node config on App Nodes failed to completed"
+	exit 13
 fi
 
 # Setup NetworkManager to manage eth0
-runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-node/network_manager.yml"
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-node/network_manager.yml"
 
 # Configure resolv.conf on all hosts through NetworkManager
 echo $(date) " - Setting up NetworkManager on eth0"
@@ -233,11 +235,11 @@ runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager stat
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Running Prerequisites via Ansible Playbook"
-runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml"
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
-runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml"
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml"
 
 if [ $? -eq 0 ]
 then
@@ -277,12 +279,12 @@ yum -y install atomic-openshift-clients
 # Adding user to OpenShift authentication file
 echo $(date) " - Adding OpenShift user"
 
-runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/addocpuser.yaml"
+runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/addocpuser.yaml"
 
 # Assigning cluster admin rights to OpenShift user
 echo $(date) " - Assigning cluster admin rights to user"
 
-runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
+runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
 
 if [[ $COCKPIT == "true" ]]
 then
@@ -290,89 +292,131 @@ then
 # Setting password for root if Cockpit is enabled
 echo $(date) " - Assigning password for root, which is used to login to Cockpit"
 
-runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/assignrootpassword.yaml"
+runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignrootpassword.yaml"
 fi
 
 # Configure Docker Registry to use Azure Storage Account
 echo $(date) " - Configuring Docker Registry to use Azure Storage Account"
 
-runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
+runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
 
 if [[ $AZURE == "true" ]]
 then
 
-    # Create Storage Classes
-    echo $(date) " - Creating Storage Classes"
+	# Create Storage Classes
+	echo $(date) " - Creating Storage Classes"
 
-    runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
 
-    echo $(date) " - Sleep for 120"
+	echo $(date) " - Sleep for 120"
 
-    sleep 120
+	sleep 120
 
-    # Execute setup-azure-master and setup-azure-node playbooks to configure Azure Cloud Provider
-    echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
+	# Execute setup-azure-master and setup-azure-node playbooks to configure Azure Cloud Provider
+	echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
 
-    runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/setup-azure-master.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-master.yaml"
 
-    if [ $? -eq 0 ]
-    then
-        echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
-    else
-        echo $(date) " - Cloud Provider setup of master config on Master Nodes failed to completed"
-        exit 7
-    fi
+	if [ $? -eq 0 ]
+	then
+	    echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
+	else
+	    echo $(date) " - Cloud Provider setup of master config on Master Nodes failed to completed"
+	    exit 7
+	fi
 
-    echo $(date) " - Sleep for 60"
+	echo $(date) " - Sleep for 60"
 
-    sleep 60
-    runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/setup-azure-node-master.yaml"
+	sleep 60
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-node-master.yaml"
 
-    if [ $? -eq 0 ]
-    then
-        echo $(date) " - Cloud Provider setup of node config on Master Nodes completed successfully"
-    else
-        echo $(date) " - Cloud Provider setup of node config on Master Nodes failed to completed"
-        exit 8
-    fi
+	if [ $? -eq 0 ]
+	then
+	    echo $(date) " - Cloud Provider setup of node config on Master Nodes completed successfully"
+	else
+	    echo $(date) " - Cloud Provider setup of node config on Master Nodes failed to completed"
+	    exit 8
+	fi
 
-    echo $(date) " - Sleep for 60"
+	echo $(date) " - Sleep for 60"
 
-    sleep 60
-    runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/setup-azure-node.yaml"
+	sleep 60
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-node.yaml"
 
-    if [ $? -eq 0 ]
-    then
-        echo $(date) " - Cloud Provider setup of node config on App Nodes completed successfully"
-    else
-        echo $(date) " - Cloud Provider setup of node config on App Nodes failed to completed"
-        exit 9
-    fi
+	if [ $? -eq 0 ]
+	then
+	    echo $(date) " - Cloud Provider setup of node config on App Nodes completed successfully"
+	else
+	    echo $(date) " - Cloud Provider setup of node config on App Nodes failed to completed"
+	    exit 9
+	fi
 
-    echo $(date) " - Sleep for 120"
+	echo $(date) " - Sleep for 120"
 
-    sleep 120
+	sleep 120
 
-    runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/deletestucknodes.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/deletestucknodes.yaml"
 
-    if [ $? -eq 0 ]
-    then
-        echo $(date) " - Cloud Provider setup of OpenShift Cluster completed successfully"
-    else
-        echo $(date) " - Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
-        exit 10
-    fi
+	if [ $? -eq 0 ]
+	then
+	    echo $(date) " - Cloud Provider setup of OpenShift Cluster completed successfully"
+	else
+	    echo $(date) " - Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
+	    exit 10
+	fi
 
-    echo $(date) " - Rebooting cluster to complete installation"
+	echo $(date) " - Rebooting cluster to complete installation"
 
-    runuser -l $SUDOUSER -c  "oc label nodes $MASTER-0 openshift-infra=apiserver"
-    runuser -l $SUDOUSER -c  "oc label nodes --all logging-infra-fluentd=true logging=true"
-    runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/reboot-master.yaml"
-    runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
-    sleep 10
-    runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker"
-    runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker"
+	runuser -l $SUDOUSER -c  "oc label nodes $MASTER-0 openshift-infra=apiserver"
+	runuser -l $SUDOUSER -c  "oc label nodes --all logging-infra-fluentd=true logging=true"
+	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master.yaml"
+	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
+	sleep 10
+	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker"
+	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker"
 
+fi
+
+# Configure Metrics
+
+if [ $METRICS == "true" ]
+then
+	sleep 30
+	echo $(date) "- Deploying Metrics"
+	if [ $AZURE == "true" ]
+	then
+		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
+	else
+		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True"
+	fi
+	if [ $? -eq 0 ]
+	then
+	    echo $(date) " - Metrics configuration completed successfully"
+	else
+	    echo $(date) " - Metrics configuration failed"
+	    exit 11
+	fi
+fi
+
+# Configure Logging
+
+if [ $LOGGING == "true" ]
+then
+	sleep 60
+	echo $(date) "- Deploying Logging"
+	if [ $AZURE == "true" ]
+	then
+		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True -e openshift_hosted_logging_storage_kind=dynamic"
+	else
+		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True"
+	fi
+	if [ $? -eq 0 ]
+	then
+	    echo $(date) " - Logging configuration completed successfully"
+	else
+	    echo $(date) " - Logging configuration failed"
+	    exit 12
+	fi
 fi
 
 # Delete yaml files

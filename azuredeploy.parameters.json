@@ -3,7 +3,7 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"_artifactsLocation": {
-			"value": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/master"
+			"value": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/azurestack-release-3.7"
 		},
 		"masterVmSize": {
 			"value": "Standard_DS2_v2"
@@ -15,7 +15,7 @@
 			"value": "Standard_DS2_v2"
 		},
 		"storageKind": {
-			"value": "changeme"
+			"value": "unmanaged"
 		},
 		"openshiftClusterPrefix": {
 			"value": "changeme"
@@ -42,9 +42,6 @@
 			"value": "false"
 		},
 		"enableLogging": {
-			"value": "false"
-		},
-		"enableCockpit": {
 			"value": "false"
 		},
 		"rhsmUsernameOrOrgId": {

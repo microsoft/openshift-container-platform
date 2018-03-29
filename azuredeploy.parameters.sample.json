@@ -3,7 +3,7 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"_artifactsLocation": {
-			"value": "https://raw.githubusercontent.com/Microsoft/openshift-containerplatform/master"
+			"value": "https://raw.githubusercontent.com/Microsoft/openshift-containerplatform/azurestack-release-3.7"
 		},
 		"masterVmSize": {
 			"value": "Standard_DS2_v2"
@@ -15,7 +15,7 @@
 			"value": "Standard_DS2_v2"
 		},
 		"storageKind": {
-			"value": "managed"
+			"value": "unmanaged"
 		},
 		"openshiftClusterPrefix": {
 			"value": "ocpcluster"
@@ -44,9 +44,6 @@
 		"enableLogging": {
 			"value": "false"
 		},
-		"enableCockpit": {
-			"value": "false"
-		},
 		"rhsmUsernameOrOrgId": {
 			"value": "rhsmuser"
 		},
@@ -69,13 +66,13 @@
 			"value": "mysecret"
 		},
 		"enableAzure": {
-			"value": "true"
+			"value": "false"
 		},
 		"aadClientId": {
-			"value": "12345678-abcd-47bf-9b6f-12345678abcd"
+			"value": "notused"
 		},
 		"aadClientSecret": {
-			"value": "GEN-PASSWORD"
+			"value": "notused"
 		},
 		"defaultSubDomainType": {
 			"value": "nipio"

@@ -23,6 +23,8 @@ This template deploys OpenShift Container Platform in Azure Stack with basic use
 
 ## READ the instructions in its entirety before deploying!
 
+This template is referencing a RHEL image that will most likely not be valid for you. In order to deploy OpenShift to your Azure Stack, please fork this repo and update the imageReference variable at line 378 to reference your image.
+
 Currently, the Azure Cloud Provider does not work in Azure Stack. This means you will not be able to use disk attach for persistent storage in Azure Stack. You can always configure other storage options such as NFS, iSCSI, Gluster, etc. that can be used for persistent storage. We are exploring options to address the Azure Cloud Provider in Azure Stack but this will take a little bit of time.
 
 Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started

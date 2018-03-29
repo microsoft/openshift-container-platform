@@ -1,5 +1,14 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES for Azure Stack Release 3.7 - March 29, 2018
+
+1.  Create Azure Stack Release 3.7 Branch
+2.  Disable Azure Cloud Provider
+3.  Revert to older API versions where appropriate
+4.  Remove Cockpit
+5.  Reference custom side loaded image for RHEL
+6.  Lock to docker 1.12.6
+
 # UPDATES for Master (Release 3.7) - February 14, 2018
 
 1.  Created Release 3.7 Branch

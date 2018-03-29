@@ -92,7 +92,7 @@ fi
 # Filename: setup-azure-node.yaml
 
 # Create Playbook to delete stuck Master nodes and set as not schedulable
-# Filename: deletestucknodes.yaml
+# Filename: reset-masters-non-schedulable.yaml
 
 # Create Ansible Hosts File
 echo $(date) " - Create Ansible Hosts file"
@@ -355,13 +355,13 @@ then
 
 	sleep 120
 
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/deletestucknodes.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reset-masters-non-schedulable.yaml"
 
 	if [ $? -eq 0 ]
 	then
-	    echo $(date) " - Cloud Provider setup of OpenShift Cluster completed successfully"
+	    echo $(date) " - Cloud Provider setup successfullly made the Master Nodes unschedulable"
 	else
-	    echo $(date) " - Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
+	    echo $(date) " - Cloud Provider setup was not able to set the Masters Nodes as unschedulable"
 	    exit 10
 	fi
 

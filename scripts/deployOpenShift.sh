@@ -70,7 +70,7 @@ else
 fi
 
 # Cloning Ansible playbook repository
-(cd /home/$SUDOUSER && git clone https://github.com/vincepower/openshift-container-platform-playbooks.git)
+(cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git)
 
 # Run on MASTER-0 node - configure Storage Class
 # Filename: configurestorageclass.yaml
@@ -119,8 +119,8 @@ openshift_master_default_subdomain=$ROUTING
 openshift_override_hostname_check=true
 osm_use_cockpit=true
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
-openshift_master_api_port=443
-openshift_master_console_port=443
+#openshift_master_api_port=443
+#openshift_master_console_port=443
 openshift_cloudprovider_kind=azure
 osm_default_node_selector='type=app'
 openshift_disable_check=memory_availability,docker_image_availability

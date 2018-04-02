@@ -85,7 +85,7 @@
 		"storageKind": {
 			"type": "string",
 			"defaultValue": "unmanaged",
-			"allowedValues": ["managed", "unmanaged"],
+			"allowedValues": ["unmanaged"],
 			"metadata": {
 				"description": "Use Managed or Unmanaged Disks"
 			}

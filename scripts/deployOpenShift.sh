@@ -355,20 +355,24 @@ then
 
 	sleep 120
 
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reset-masters-non-schedulable.yaml"
-
-	if [ $? -eq 0 ]
-	then
-	    echo $(date) " - Cloud Provider setup successfullly made the Master Nodes unschedulable"
-	else
-	    echo $(date) " - Cloud Provider setup was not able to set the Masters Nodes as unschedulable"
-	    exit 10
-	fi
+#
+# Has to be schedulable to install Web Console, haven't had confirmation if you can disable it afterwards
+#
+#	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reset-masters-non-schedulable.yaml"
+#
+#	if [ $? -eq 0 ]
+#	then
+#	    echo $(date) " - Cloud Provider setup successfullly made the Master Nodes unschedulable"
+#	else
+#	    echo $(date) " - Cloud Provider setup was not able to set the Masters Nodes as unschedulable"
+#	    exit 10
+#	fi
+#
 
 	echo $(date) " - Rebooting cluster to complete installation"
 
-	runuser -l $SUDOUSER -c  "oc label nodes $MASTER-0 openshift-infra=apiserver"
-	runuser -l $SUDOUSER -c  "oc label nodes --all logging-infra-fluentd=true logging=true"
+	runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
+	runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master.yaml"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
 	sleep 10

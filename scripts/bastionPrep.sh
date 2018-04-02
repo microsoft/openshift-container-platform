@@ -71,6 +71,12 @@ echo $(date) " - Installing OpenShift utilities"
 
 yum -y install atomic-openshift-utils
 
+# Installing Azure CLI
+# From https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-yum
+sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+sudo sh -c 'echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo'
+sudo yum update -y azure-cli
+
 # Create playbook to update ansible.cfg file to include path to library
 # Filename: updateansiblecfg.yaml
 

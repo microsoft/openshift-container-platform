@@ -769,7 +769,7 @@
 						"description": "Allow HTTPS connections from all locations",
 						"protocol": "Tcp",
 						"sourcePortRange": "*",
-						"destinationPortRange": "8443",
+						"destinationPortRange": "443",
 						"sourceAddressPrefix": "*",
 						"destinationAddressPrefix": "*",
 						"access": "Allow",
@@ -834,7 +834,7 @@
 						"description": "Allow HTTPS connections from all locations",
 						"protocol": "Tcp",
 						"sourcePortRange": "*",
-						"destinationPortRange": "8443",
+						"destinationPortRange": "443",
 						"sourceAddressPrefix": "*",
 						"destinationAddressPrefix": "*",
 						"access": "Allow",
@@ -899,7 +899,7 @@
 						"description": "Allow HTTPS connections from all locations",
 						"protocol": "Tcp",
 						"sourcePortRange": "*",
-						"destinationPortRange": "8443",
+						"destinationPortRange": "443",
 						"sourceAddressPrefix": "*",
 						"destinationAddressPrefix": "*",
 						"access": "Allow",
@@ -1204,8 +1204,8 @@
 							"id": "[variables('infraLbBackendPoolId')]"
 						},
 						"protocol": "Tcp",
-						"frontendPort": 8443,
-						"backendPort": 8443,
+						"frontendPort": 443,
+						"backendPort": 443,
 						"probe": {
 							"id": "[variables('infraLbHttpsProbeId')]"
 						}
@@ -1239,7 +1239,7 @@
 					"name": "httpsProbe",
 					"properties": {
 						"protocol": "Tcp",
-						"port": 8443,
+						"port": 443,
 						"intervalInSeconds": 5,
 						"numberOfProbes": 2
 					}

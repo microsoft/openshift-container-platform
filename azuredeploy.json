@@ -365,7 +365,7 @@
 		"masterLbFrontEndConfigId": "[concat(variables('masterLbId'), '/frontendIPConfigurations/loadBalancerFrontEnd')]",
 		"masterLbBackendPoolId": "[concat(variables('masterLbId'),'/backendAddressPools/loadBalancerBackend')]",
 		"masterLbHttpProbeId": "[concat(variables('masterLbId'),'/probes/httpProbe')]",
-		"masterLb8443ProbeId": "[concat(variables('masterLbId'),'/probes/8443Probe')]",
+		"masterLb443ProbeId": "[concat(variables('masterLbId'),'/probes/443Probe')]",
 		"masterLbCockpitProbeId": "[concat(variables('masterLbId'),'/probes/cockpitProbe')]",
 
 		"infraLoadBalancerName": "[concat(variables('openshiftInfraHostname'), 'lb')]",
@@ -782,7 +782,7 @@
 						"description": "Allow OpenShift Console connections from all locations",
 						"protocol": "Tcp",
 						"sourcePortRange": "*",
-						"destinationPortRange": "8443",
+						"destinationPortRange": "443",
 						"sourceAddressPrefix": "*",
 						"destinationAddressPrefix": "*",
 						"access": "Allow",
@@ -1087,10 +1087,10 @@
 						"protocol": "Tcp",
 						"loadDistribution": "SourceIP",
 						"idleTimeoutInMinutes": 30,
-						"frontendPort": 8443,
-						"backendPort": 8443,
+						"frontendPort": 443,
+						"backendPort": 443,
 						"probe": {
-							"id": "[variables('masterLb8443ProbeId')]"
+							"id": "[variables('masterLb443ProbeId')]"
 						}
 					}
 				}, {
@@ -1113,10 +1113,10 @@
 					}
 				}],
 				"probes": [{
-					"name": "8443Probe",
+					"name": "443Probe",
 					"properties": {
 						"protocol": "Tcp",
-						"port": 8443,
+						"port": 443,
 						"intervalInSeconds": 5,
 						"numberOfProbes": 2
 					}
@@ -1957,7 +1957,7 @@
 	"outputs": {
 		"Openshift Console Url": {
 			"type": "string",
-			"value": "[concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, ':8443/console')]"
+			"value": "[concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, ':443/console')]"
 		},
 		"Bastion DNS FQDN": {
 			"type": "string",

@@ -89,7 +89,6 @@ fi
 # Filename: reboot-nodes.yaml
 
 # Create Azure Cloud Provider configuration Playbook for Master Config
-
 # Filename: setup-azure-master.yaml
 
 # Create Azure Cloud Provider configuration Playbook for Node Config (Master Nodes)
@@ -126,8 +125,8 @@ openshift_master_default_subdomain=$ROUTING
 openshift_override_hostname_check=true
 osm_use_cockpit=true
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
-openshift_master_api_port=8443
-openshift_master_console_port=8443
+openshift_master_api_port=443
+openshift_master_console_port=443
 openshift_cloudprovider_kind=azure
 osm_default_node_selector='type=app'
 openshift_disable_check=memory_availability,docker_image_availability
@@ -166,7 +165,7 @@ openshift_logging_es_nodeselector={"type":"infra"}
 openshift_logging_kibana_nodeselector={"type":"infra"}
 openshift_logging_curator_nodeselector={"type":"infra"}
 openshift_master_logging_public_url=https://kibana.$ROUTING
-openshift_logging_master_public_url=https://$MASTERPUBLICIPHOSTNAME:8443
+openshift_logging_master_public_url=https://$MASTERPUBLICIPHOSTNAME:443
 
 # host group for masters
 [masters]
@@ -220,9 +219,9 @@ runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-play
 
 if [ $? -eq 0 ]
 then
-	echo $(date) " - Cloud Provider setup of node config on App Nodes completed successfully"
+	echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes successfully"
 else
-	echo $(date) " - Cloud Provider setup of node config on App Nodes failed to completed"
+	echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes failed to complete"
 	exit 13
 fi
 

@@ -71,6 +71,12 @@ fi
 
 # Cloning Ansible playbook repository
 (cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git)
+if [ -d /home/${SUDOUSER}/openshift-container-platform-playbooks ]
+  echo " - Retrieved playbooks successfully"
+else
+  echo " - Retrieval of playbooks failed"
+  exit 99
+fi
 
 # Run on MASTER-0 node - configure Storage Class
 # Filename: configurestorageclass.yaml
@@ -425,8 +431,6 @@ fi
 
 # Delete yaml files
 echo $(date) " - Deleting unecessary files"
-
-mkdir /home/${SUDOUSER}/openshift-container-platform-playbooks || true
 rm -rf /home/${SUDOUSER}/openshift-container-platform-playbooks
 
 echo $(date) " - Sleep for 30"

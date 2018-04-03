@@ -158,18 +158,15 @@ openshift_metrics_hawkular_nodeselector={"type":"infra"}
 openshift_metrics_cassandra_nodeselector={"type":"infra"}
 openshift_metrics_heapster_nodeselector={"type":"infra"}
 openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
-#openshift_metrics_storage_labels={'storage': 'metrics'}
 
 # Setup logging
 openshift_logging_install_logging=false
-#openshift_hosted_logging_storage_kind=dynamic
 openshift_logging_fluentd_nodeselector={"logging":"true"}
 openshift_logging_es_nodeselector={"type":"infra"}
 openshift_logging_kibana_nodeselector={"type":"infra"}
 openshift_logging_curator_nodeselector={"type":"infra"}
 openshift_master_logging_public_url=https://kibana.$ROUTING
 openshift_logging_master_public_url=https://$MASTERPUBLICIPHOSTNAME:8443
-#openshift_logging_storage_labels={'storage': 'logging'}
 
 # host group for masters
 [masters]
@@ -420,7 +417,7 @@ then
 	echo $(date) "- Deploying Logging"
 	if [ $AZURE == "true" ]
 	then
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True -e openshift_hosted_logging_storage_kind=dynamic"
+		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true"
 	else
 		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True"
 	fi

@@ -322,7 +322,6 @@ then
 	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
 
 	echo $(date) " - Sleep for 120"
-
 	sleep 120
 
 	# Execute setup-azure-master and setup-azure-node playbooks to configure Azure Cloud Provider
@@ -339,8 +338,8 @@ then
 	fi
 
 	echo $(date) " - Sleep for 60"
-
 	sleep 60
+
 	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-node-master.yaml"
 
 	if [ $? -eq 0 ]
@@ -352,8 +351,8 @@ then
 	fi
 
 	echo $(date) " - Sleep for 60"
-
 	sleep 60
+
 	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-node.yaml"
 
 	if [ $? -eq 0 ]
@@ -398,12 +397,12 @@ spec:
       storage: 1G
 EOF
 	runuser -l $SUDOUSER -c "oc create -f /tmp/$ASBPID.asb-etcd-storage.yaml"
-	echo " - Created new PVC for ASB (Sleeping for 30 seconds)"
-	sleep 30
+	echo $(date) " - Created new PVC for ASB (Sleeping for 60 seconds)"
+	sleep 60
 	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --add --type pvc --claim-name etcd --mount-path /data --name etcd -n openshift-ansible-service-broker" || true
 	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker" || true
-	echo " - Assigned new PVC for ASB and starting (Sleeping for 60 seconds)"
-	sleep 60
+	echo $(date) " - Assigned new PVC for ASB and starting (Sleeping for 120 seconds)"
+	sleep 120
 	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker" || true
 
 # End of Azure specific section

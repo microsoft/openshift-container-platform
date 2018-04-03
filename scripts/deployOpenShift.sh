@@ -365,7 +365,6 @@ then
 	fi
 
 	echo $(date) " - Sleep for 120"
-
 	sleep 120
 
 	echo $(date) " - Rebooting cluster to complete installation"
@@ -377,12 +376,12 @@ then
 
 	# Updating the storage on Ansible Service Broker (Stop, delete PVC, create PVC, start)
 	echo " - Deleted PVC for ASB (Will recreate as Azure Storage)"
-	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --remove --name etcd -n openshift-ansible-service-broker"
+	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --remove --name etcd -n openshift-ansible-service-broker" || true
 	sleep 5
-	runuser -l $SUDOUSER -c "oc delete pvc/etcd -n openshift-ansible-service-broker"
+	runuser -l $SUDOUSER -c "oc delete pvc/etcd -n openshift-ansible-service-broker" || true
 	sleep 5
-	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb -n openshift-ansible-service-broker"
-	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb-etcd -n openshift-ansible-service-broker"
+	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb -n openshift-ansible-service-broker" || true
+	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb-etcd -n openshift-ansible-service-broker" || true
 	sleep 5
 	ASBPID=$$
 	cat > /tmp/$ASBPID.asb-etcd-storage.yaml <<EOF
@@ -401,11 +400,11 @@ EOF
 	runuser -l $SUDOUSER -c "oc create -f /tmp/$ASBPID.asb-etcd-storage.yaml"
 	echo " - Created new PVC for ASB (Sleeping for 30 seconds)"
 	sleep 30
-	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --add --type pvc --claim-name etcd --mount-path /data --name etcd -n openshift-ansible-service-broker"
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker"
+	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --add --type pvc --claim-name etcd --mount-path /data --name etcd -n openshift-ansible-service-broker" || true
+	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker" || true
 	echo " - Assigned new PVC for ASB and starting (Sleeping for 60 seconds)"
 	sleep 60
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker"
+	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker" || true
 
 # End of Azure specific section
 fi 

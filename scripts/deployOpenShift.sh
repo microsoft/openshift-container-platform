@@ -72,6 +72,7 @@ fi
 # Cloning Ansible playbook repository
 (cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git)
 if [ -d /home/${SUDOUSER}/openshift-container-platform-playbooks ]
+then
   echo " - Retrieved playbooks successfully"
 else
   echo " - Retrieval of playbooks failed"
@@ -233,11 +234,14 @@ runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ans
 
 # Configure resolv.conf on all hosts through NetworkManager
 echo $(date) " - Setting up NetworkManager on eth0"
-
 runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
 sleep 5
 runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\""
 runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
+
+# Updating all hosts
+echo $(date) " - Updating rpms on all hosts to latest release"
+runuser -l $SUDOUSER -c "ansible all -m yum -a \"name=* state=latest\" -b"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Running Prerequisites via Ansible Playbook"

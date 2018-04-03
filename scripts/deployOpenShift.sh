@@ -70,8 +70,8 @@ else
 fi
 
 # Cloning Ansible playbook repository
-#(cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git)
-(cd /home/$SUDOUSER && git clone https://github.com/vincepower/openshift-container-platform-playbooks.git)
+#(cd /home/$SUDOUSER && git clone https://github.com/vincepower/openshift-container-platform-playbooks.git)
+(cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git)
 if [ -d /home/${SUDOUSER}/openshift-container-platform-playbooks ]
 then
   echo " - Retrieved playbooks successfully"
@@ -129,20 +129,23 @@ os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 openshift_master_api_port=443
 openshift_master_console_port=443
 openshift_cloudprovider_kind=azure
-osm_default_node_selector='type=app'
+osm_default_node_selector='region=app'
 openshift_disable_check=memory_availability,docker_image_availability
 
 # default selectors for router and registry services
-openshift_router_selector='type=infra'
-openshift_registry_selector='type=infra'
+openshift_router_selector='region=infra'
+openshift_registry_selector='region=infra'
 
 # Deploy Service Catalog
 # openshift_enable_service_catalog=false
 
 # template_service_broker_install=false
-template_service_broker_selector={"type":"infra"}
+template_service_broker_selector={"region":"infra"}
 
+# Type of clustering being used by OCP
 openshift_master_cluster_method=native
+
+# Addresses for connecting to the OpenShift master nodes
 openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
 openshift_master_cluster_public_hostname=$MASTERPUBLICIPHOSTNAME
 openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
@@ -152,19 +155,18 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Setup metrics
 openshift_metrics_install_metrics=false
-#openshift_metrics_cassandra_storage_type=dynamic
 openshift_metrics_start_cluster=true
-openshift_metrics_hawkular_nodeselector={"type":"infra"}
-openshift_metrics_cassandra_nodeselector={"type":"infra"}
-openshift_metrics_heapster_nodeselector={"type":"infra"}
+openshift_metrics_hawkular_nodeselector={"region":"infra"}
+openshift_metrics_cassandra_nodeselector={"region":"infra"}
+openshift_metrics_heapster_nodeselector={"region":"infra"}
 openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 
 # Setup logging
 openshift_logging_install_logging=false
 openshift_logging_fluentd_nodeselector={"logging":"true"}
-openshift_logging_es_nodeselector={"type":"infra"}
-openshift_logging_kibana_nodeselector={"type":"infra"}
-openshift_logging_curator_nodeselector={"type":"infra"}
+openshift_logging_es_nodeselector={"region":"infra"}
+openshift_logging_kibana_nodeselector={"region":"infra"}
+openshift_logging_curator_nodeselector={"region":"infra"}
 openshift_master_logging_public_url=https://kibana.$ROUTING
 openshift_logging_master_public_url=https://$MASTERPUBLICIPHOSTNAME:443
 
@@ -187,21 +189,21 @@ EOF
 
 for (( c=0; c<$MASTERCOUNT; c++ ))
 do
-  echo "$MASTER-$c openshift_node_labels=\"{'type': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c" >> /etc/ansible/hosts
+  echo "$MASTER-$c openshift_node_labels=\"{'region': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c" >> /etc/ansible/hosts
 done
 
 # Loop to add Infra Nodes
 
 for (( c=0; c<$INFRACOUNT; c++ ))
 do
-  echo "$INFRA-$c openshift_node_labels=\"{'type': 'infra', 'zone': 'default', 'region': 'infra'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
+  echo "$INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
 done
 
 # Loop to add Nodes
 
 for (( c=0; c<$NODECOUNT; c++ ))
 do
-  echo "$NODE-$c openshift_node_labels=\"{'type': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
+  echo "$NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
 done
 
 # Create new_nodes group
@@ -366,31 +368,47 @@ then
 
 	sleep 120
 
-#
-# Has to be schedulable to install Web Console, haven't had confirmation if you can disable it afterwards
-#
-#	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reset-masters-non-schedulable.yaml"
-#
-#	if [ $? -eq 0 ]
-#	then
-#	    echo $(date) " - Cloud Provider setup successfullly made the Master Nodes unschedulable"
-#	else
-#	    echo $(date) " - Cloud Provider setup was not able to set the Masters Nodes as unschedulable"
-#	    exit 10
-#	fi
-#
-
 	echo $(date) " - Rebooting cluster to complete installation"
-
 	runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
 	runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master.yaml"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
 	sleep 10
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker"
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker"
 
-fi
+	# Updating the storage on Ansible Service Broker (Stop, delete PVC, create PVC, start)
+	echo " - Deleted PVC for ASB (Will recreate as Azure Storage)"
+	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --remove --name etcd -n openshift-ansible-service-broker"
+	sleep 5
+	runuser -l $SUDOUSER -c "oc delete pvc/etcd -n openshift-ansible-service-broker"
+	sleep 5
+	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb -n openshift-ansible-service-broker"
+	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb-etcd -n openshift-ansible-service-broker"
+	sleep 5
+	ASBPID=$$
+	cat > /tmp/$ASBPID.asb-etcd-storage.yaml <<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: etcd
+  namespace: openshift-ansible-service-broker
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1G
+EOF
+	runuser -l $SUDOUSER -c "oc create -f /tmp/$ASBPID.asb-etcd-storage.yaml"
+	echo " - Created new PVC for ASB (Sleeping for 30 seconds)"
+	sleep 30
+	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --add --type pvc --claim-name etcd --mount-path /data --name etcd -n openshift-ansible-service-broker"
+	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker"
+	echo " - Assigned new PVC for ASB and starting (Sleeping for 60 seconds)"
+	sleep 60
+	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker"
+
+# End of Azure specific section
+fi 
 
 # Configure Metrics
 

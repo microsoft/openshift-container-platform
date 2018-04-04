@@ -101,7 +101,7 @@ ansible_ssh_user=$SUDOUSER
 ansible_become=yes
 openshift_install_examples=true
 deployment_type=openshift-enterprise
-openshift_release=v3.7
+openshift_release=v3.9
 docker_udev_workaround=True
 openshift_use_dnsmasq=true
 openshift_master_default_subdomain=$ROUTING
@@ -110,18 +110,18 @@ os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 openshift_master_api_port=443
 openshift_master_console_port=443
 openshift_cloudprovider_kind=azure
-osm_default_node_selector='type=app'
+osm_default_node_selector='region=app'
 openshift_disable_check=memory_availability,docker_image_availability
 
 # default selectors for router and registry services
-openshift_router_selector='type=infra'
-openshift_registry_selector='type=infra'
+openshift_router_selector='region=infra'
+openshift_registry_selector='region=infra'
 
 # Deploy Service Catalog
-# openshift_enable_service_catalog=false
+openshift_enable_service_catalog=false
 
-# template_service_broker_install=false
-template_service_broker_selector={"type":"infra"}
+template_service_broker_install=false
+template_service_broker_selector={"region":"infra"}
 
 openshift_master_cluster_method=native
 openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
@@ -135,9 +135,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 openshift_metrics_install_metrics=false
 #openshift_metrics_cassandra_storage_type=dynamic
 openshift_metrics_start_cluster=true
-openshift_metrics_hawkular_nodeselector={"type":"infra"}
-openshift_metrics_cassandra_nodeselector={"type":"infra"}
-openshift_metrics_heapster_nodeselector={"type":"infra"}
+openshift_metrics_hawkular_nodeselector={"region":"infra"}
+openshift_metrics_cassandra_nodeselector={"region":"infra"}
+openshift_metrics_heapster_nodeselector={"region":"infra"}
 openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 #openshift_metrics_storage_labels={'storage': 'metrics'}
 
@@ -145,9 +145,9 @@ openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 openshift_logging_install_logging=false
 #openshift_hosted_logging_storage_kind=dynamic
 openshift_logging_fluentd_nodeselector={"logging":"true"}
-openshift_logging_es_nodeselector={"type":"infra"}
-openshift_logging_kibana_nodeselector={"type":"infra"}
-openshift_logging_curator_nodeselector={"type":"infra"}
+openshift_logging_es_nodeselector={"region":"infra"}
+openshift_logging_kibana_nodeselector={"region":"infra"}
+openshift_logging_curator_nodeselector={"region":"infra"}
 openshift_master_logging_public_url=https://kibana.$ROUTING
 openshift_logging_master_public_url=https://$MASTERPUBLICIPHOSTNAME:443
 #openshift_logging_storage_labels={'storage': 'logging'}
@@ -171,21 +171,21 @@ EOF
 
 for (( c=0; c<$MASTERCOUNT; c++ ))
 do
-  echo "$MASTER-$c openshift_node_labels=\"{'type': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c" >> /etc/ansible/hosts
+  echo "$MASTER-$c openshift_node_labels=\"{'region': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c" >> /etc/ansible/hosts
 done
 
 # Loop to add Infra Nodes
 
 for (( c=0; c<$INFRACOUNT; c++ ))
 do
-  echo "$INFRA-$c openshift_node_labels=\"{'type': 'infra', 'zone': 'default', 'region': 'infra'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
+  echo "$INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
 done
 
 # Loop to add Nodes
 
 for (( c=0; c<$NODECOUNT; c++ ))
 do
-  echo "$NODE-$c openshift_node_labels=\"{'type': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
+  echo "$NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
 done
 
 # Create new_nodes group
@@ -200,7 +200,7 @@ EOF
 DOMAIN=`domainname -d`
 
 # Setup NetworkManager to manage eth0
-runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-node/network_manager.yml"
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-node/network_manager.yml"
 
 # Configure resolv.conf on all hosts through NetworkManager
 echo $(date) " - Setting up NetworkManager on eth0"
@@ -210,10 +210,22 @@ runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager stat
 # runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\""
 # runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
 
+# Updating all hosts
+echo $(date) " - Updating rpms on all hosts to latest release"
+runuser -l $SUDOUSER -c "ansible all -f 10 -b -m yum -a \"name=* state=latest\""
+
+# Install Ansible on all hosts
+echo $(date) " - Install ansible on all hosts with dependancies"
+runuser -l $SUDOUSER -c "ansible all -f 10 -b -m yum -a \"name=ansible state=latest\""
+
+# Initiating installation of OpenShift Container Platform prerequisites using Ansible Playbook
+echo $(date) " - Running Prerequisites via Ansible Playbook"
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml"
+
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
 
-runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml"
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml"
 
 if [ $? -eq 0 ]
 then
@@ -253,17 +265,17 @@ yum -y install atomic-openshift-clients
 # Adding user to OpenShift authentication file
 echo $(date) "- Adding OpenShift user"
 
-runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/addocpuser.yaml"
+runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/addocpuser.yaml"
 
 # Assigning cluster admin rights to OpenShift user
 echo $(date) "- Assigning cluster admin rights to user"
 
-runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
+runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
 
 # Configure Docker Registry to use Azure Storage Account
 # echo $(date) "- Configuring Docker Registry to use Azure Storage Account"
 
-# runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
+# runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
 
 if [[ $AZURE == "true" ]]
 then
@@ -271,7 +283,7 @@ then
 	# Create Storage Classes
 	echo $(date) "- Creating Storage Classes"
 
-	runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
 
 	echo $(date) "- Sleep for 120"
 
@@ -280,7 +292,7 @@ then
 	# Execute setup-azure-master and setup-azure-node playbooks to configure Azure Cloud Provider
 	echo $(date) "- Configuring OpenShift Cloud Provider to be Azure"
 
-	runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/setup-azure-master.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-master.yaml"
 
 	if [ $? -eq 0 ]
 	then
@@ -293,7 +305,7 @@ then
 	echo $(date) "- Sleep for 60"
 
 	sleep 60
-	runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/setup-azure-node-master.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-node-master.yaml"
 
 	if [ $? -eq 0 ]
 	then
@@ -306,7 +318,7 @@ then
 	echo $(date) "- Sleep for 60"
 
 	sleep 60
-	runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/setup-azure-node.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-node.yaml"
 
 	if [ $? -eq 0 ]
 	then
@@ -320,23 +332,23 @@ then
 
 	sleep 120
 
-	runuser $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/deletestucknodes.yaml"
+	# runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/deletestucknodes.yaml"
 
 
-	if [ $? -eq 0 ]
-	then
-	   echo $(date) " - Cloud Provider setup of OpenShift Cluster completed successfully"
-	else
-	   echo $(date) "- Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
-	   exit 10
-	fi
+	# if [ $? -eq 0 ]
+	# then
+	   # echo $(date) " - Cloud Provider setup of OpenShift Cluster completed successfully"
+	# else
+	   # echo $(date) "- Cloud Provider setup failed to delete stuck Master nodes or was not able to set them as unschedulable"
+	   # exit 10
+	# fi
 
 	echo $(date) "- Rebooting cluster to complete installation"
 
-	runuser -l $SUDOUSER -c  "oc label nodes $MASTER-0 openshift-infra=apiserver"
-	runuser -l $SUDOUSER -c  "oc label nodes --all logging-infra-fluentd=true logging=true"
-	runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/reboot-master.yaml"
-	runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
+	runuser -l $SUDOUSER -c  "oc label nodes $MASTER-0 openshift-infra=apiserver --overwrite=true"
+	runuser -l $SUDOUSER -c  "oc label nodes --all logging-infra-fluentd=true logging=true --overwrite=true"
+	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master.yaml"
+	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
 	sleep 10
 	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker"
 	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker"
@@ -351,9 +363,9 @@ then
 	echo $(date) "- Deploying Metrics"
 	if [ $AZURE == "true" ]
 	then
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
+		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
 	else
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True"
+		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True"
 	fi
 	if [ $? -eq 0 ]
 	then
@@ -372,9 +384,9 @@ then
 	echo $(date) "- Deploying Logging"
 	if [ $AZURE == "true" ]
 	then
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True -e openshift_hosted_logging_storage_kind=dynamic"
+		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True -e openshift_hosted_logging_storage_kind=dynamic"
 	else
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True"
+		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True"
 	fi
 	if [ $? -eq 0 ]
 	then
@@ -388,11 +400,11 @@ fi
 # Delete yaml files
 echo $(date) "- Deleting unecessary files"
 
-mkdir /home/${SUDOUSER}/openshift-container-platform-playbooks || true
+# mkdir /home/${SUDOUSER}/openshift-container-platform-playbooks || true
 rm -rf /home/${SUDOUSER}/openshift-container-platform-playbooks
 
 echo $(date) "- Sleep for 60"
 
-sleep 60
+sleep 30
 
 echo $(date) " - Script complete"

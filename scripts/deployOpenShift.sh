@@ -58,7 +58,6 @@ echo $(date) " - Create Ansible Playbooks for Post Installation tasks"
 
 # Run on MASTER-0 node - configure registry to use Azure Storage
 # Create docker registry config based on Commercial Azure or Azure Government
-
 if [[ $CLOUD == "US" ]]
 then
   DOCKERREGISTRYYAML=dockerregistrygov.yaml
@@ -66,7 +65,6 @@ then
 else
   DOCKERREGISTRYYAML=dockerregistrypublic.yaml
   export CLOUDNAME="AzurePublicCloud"
-
 fi
 
 # Cloning Ansible playbook repository
@@ -101,6 +99,14 @@ fi
 # Create Playbook to delete stuck Master nodes and set as not schedulable
 # Filename: reset-masters-non-schedulable.yaml
 
+# Setting the default openshift_cloudprovider_kind
+if [[ $AZURE == "true" ]]
+then
+	export CLOUDKIND=azure
+else
+	export CLOUDKIND=undefined
+fi
+
 # Create Ansible Hosts File
 echo $(date) " - Create Ansible Hosts file"
 
@@ -128,7 +134,7 @@ osm_use_cockpit=true
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 openshift_master_api_port=443
 openshift_master_console_port=443
-openshift_cloudprovider_kind=azure
+openshift_cloudprovider_kind=$CLOUDKIND
 osm_default_node_selector='region=app'
 openshift_disable_check=memory_availability,docker_image_availability
 
@@ -217,15 +223,17 @@ EOF
 #echo $(date) " - Running network_manager.yml playbook"
 DOMAIN=`domainname -d`
 
-# Create /etc/origin/cloudprovider/azure.conf on all hosts
-runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
-
-if [ $? -eq 0 ]
+# Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
+if [[ $AZURE == "true" ]]
 then
-	echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes successfully"
-else
-	echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes failed to complete"
-	exit 13
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
+	if [ $? -eq 0 ]
+	then
+		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes successfully"
+	else
+		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes failed to complete"
+		exit 13
+	fi
 fi
 
 # Setup NetworkManager to manage eth0
@@ -253,7 +261,6 @@ runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ans
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml"
-
 if [ $? -eq 0 ]
 then
    echo $(date) " - OpenShift Cluster installed successfully"

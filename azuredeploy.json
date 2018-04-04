@@ -366,7 +366,6 @@
 		"masterLbBackendPoolId": "[concat(variables('masterLbId'),'/backendAddressPools/loadBalancerBackend')]",
 		"masterLbHttpProbeId": "[concat(variables('masterLbId'),'/probes/httpProbe')]",
 		"masterLb443ProbeId": "[concat(variables('masterLbId'),'/probes/443Probe')]",
-		"masterLbCockpitProbeId": "[concat(variables('masterLbId'),'/probes/cockpitProbe')]",
 
 		"infraLoadBalancerName": "[concat(variables('openshiftInfraHostname'), 'lb')]",
 		"infraPublicIpAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('infraLbPublicIpDnsLabel'))]",
@@ -375,7 +374,6 @@
 		"infraLbBackendPoolId": "[concat(variables('infraLbId'),'/backendAddressPools/loadBalancerBackend')]",
 		"infraLbHttpProbeId": "[concat(variables('infraLbId'),'/probes/httpProbe')]",
 		"infraLbHttpsProbeId": "[concat(variables('infraLbId'),'/probes/httpsProbe')]",
-		"infraLbCockpitProbeId": "[concat(variables('infraLbId'),'/probes/cockpitProbe')]",
 		"imageReference": {
 			"publisher": "RedHat",
 			"offer": "RHEL",
@@ -383,7 +381,7 @@
 			"version": "latest"
 		},
 		"redHatTags": {
-			"app": "OpenShift",
+			"app": "OpenShiftContainerPlatform",
 			"provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
 		},
 		"bastionVmSize": "Standard_DS2_v2",
@@ -1093,38 +1091,12 @@
 							"id": "[variables('masterLb443ProbeId')]"
 						}
 					}
-				}, {
-					"name": "CockpitConsole",
-					"properties": {
-						"frontendIPConfiguration": {
-							"id": "[variables('masterLbFrontEndConfigId')]"
-						},
-						"backendAddressPool": {
-							"id": "[variables('masterLbBackendPoolId')]"
-						},
-						"protocol": "Tcp",
-						"loadDistribution": "SourceIP",
-						"idleTimeoutInMinutes": 30,
-						"frontendPort": 9090,
-						"backendPort": 9090,
-						"probe": {
-							"id": "[variables('masterLbCockpitProbeId')]"
-						}
-					}
 				}],
 				"probes": [{
 					"name": "443Probe",
 					"properties": {
 						"protocol": "Tcp",
 						"port": 443,
-						"intervalInSeconds": 5,
-						"numberOfProbes": 2
-					}
-				}, {
-					"name": "cockpitProbe",
-					"properties": {
-						"protocol": "Tcp",
-						"port": 9090,
 						"intervalInSeconds": 5,
 						"numberOfProbes": 2
 					}
@@ -1210,22 +1182,6 @@
 							"id": "[variables('infraLbHttpsProbeId')]"
 						}
 					}
-				}, {
-					"name": "CockpitConsole",
-					"properties": {
-						"frontendIPConfiguration": {
-							"id": "[variables('infraLbFrontEndConfigId')]"
-						},
-						"backendAddressPool": {
-							"id": "[variables('infraLbBackendPoolId')]"
-						},
-						"protocol": "Tcp",
-						"frontendPort": 9090,
-						"backendPort": 9090,
-						"probe": {
-							"id": "[variables('infraLbCockpitProbeId')]"
-						}
-					}
 				}],
 				"probes": [{
 					"name": "httpProbe",
@@ -1240,14 +1196,6 @@
 					"properties": {
 						"protocol": "Tcp",
 						"port": 443,
-						"intervalInSeconds": 5,
-						"numberOfProbes": 2
-					}
-				}, {
-					"name": "cockpitProbe",
-					"properties": {
-						"protocol": "Tcp",
-						"port": 9090,
 						"intervalInSeconds": 5,
 						"numberOfProbes": 2
 					}

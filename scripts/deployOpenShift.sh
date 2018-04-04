@@ -99,12 +99,13 @@ fi
 # Create Playbook to delete stuck Master nodes and set as not schedulable
 # Filename: reset-masters-non-schedulable.yaml
 
-# Setting the default openshift_cloudprovider_kind
+# Setting the default openshift_cloudprovider_kind if Azure enabled
+# Disabling the Service Catalog if it isn't
 if [[ $AZURE == "true" ]]
 then
-	export CLOUDKIND=azure
+	export CLOUDKIND="openshift_cloudprovider_kind=azure"
 else
-	export CLOUDKIND=undefined
+	export CLOUDKIND="openshift_enable_service_catalog=false"
 fi
 
 # Create Ansible Hosts File
@@ -134,9 +135,9 @@ osm_use_cockpit=true
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 openshift_master_api_port=443
 openshift_master_console_port=443
-openshift_cloudprovider_kind=$CLOUDKIND
 osm_default_node_selector='region=app'
 openshift_disable_check=memory_availability,docker_image_availability
+$CLOUDKIND
 
 # default selectors for router and registry services
 openshift_router_selector='region=infra'

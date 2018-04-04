@@ -8,6 +8,7 @@ We will now have branches for the stable releases:
 - Release-3.6
 - Release-3.7
 - Release-3.9
+- azurestack-release-3.7
 - etc.
 
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
@@ -16,15 +17,13 @@ Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
 ## OpenShift Container Platform 3.9 with Username / Password authentication for OpenShift
 
-Currently, there is an issue when enabling the Azure Cloud Provider.  The cluster works fine with the exception that the Service Catalog does not display all templates.  The workaround at this time is to select from the openshift project to view all original templates.  We have a bugzilla bug open with Red Hat and will update the templates once the solution is available.
-
 This template deploys OpenShift Container Platform with basic username / password for authentication to OpenShift. It includes the following resources:
 
 |Resource           	|Properties                                                                                                                          |
 |-----------------------|------------------------------------------------------------------------------------------------------------------------------------|
 |Virtual Network   		|**Address prefix:** 10.0.0.0/8<br />**Master subnet:** 10.1.0.0/16<br />**Node subnet:** 10.2.0.0/16                      |
-|Master Load Balancer	|2 probes and 2 rules for TCP 8443 and TCP 9090 <br/> NAT rules for SSH on Ports 2200-220X                                           |
-|Infra Load Balancer	|3 probes and 3 rules for TCP 80, TCP 443 and TCP 9090 									                                             |
+|Master Load Balancer	|1 probe and 1 rule for TCP 443<br/> NAT rules for SSH on Ports 2200-220X                                           |
+|Infra Load Balancer	|2 probes and 2 rules for TCP 80 and TCP 443									                                           |
 |Public IP Addresses	|Bastion Public IP for Bastion Node<br />OpenShift Master public IP attached to Master Load Balancer<br />OpenShift Router public IP attached to Infra Load Balancer            |
 |Storage Accounts <br />Unmanaged Disks  	|1 Storage Account for Bastion VM <br />1 Storage Account for Master VMs <br />1 Storage Account for Infra VMs<br />2 Storage Accounts for Node VMs<br />2 Storage Accounts for Diagnostics Logs <br />1 Storage Account for Private Docker Registry<br />1 Storage Account for Persistent Volumes  |
 |Storage Accounts <br />Managed Disks      |2 Storage Accounts for Diagnostics Logs <br />1 Storage Account for Private Docker Registry |
@@ -40,7 +39,7 @@ Additional documentation for deploying OpenShift in Azure can be found here: htt
 
 This template deploys multiple VMs and requires some pre-work before you can successfully deploy the OpenShift Cluster.  If you don't get the pre-work done correctly, you will most likely fail to deploy the cluster using this template.  Please read the instructions completely before you proceed. 
 
-This template allows you to choose between a custom VHD image in an existing Storage Account or the On-Demand Red Hat Enterprise Linux image from the Azure Gallery. 
+This template uses the On-Demand Red Hat Enterprise Linux image from the Azure Gallery. 
 >If you use the On-Demand image, there is an hourly charge for using this image.  At the same time, the instance will be registered to your Red Hat subscription, so you will also be using one of your entitlements. This will lead to "double billing".
 
 After successful deployment, the Bastion Node is no longer required unless you want to use it to add nodes or run other playbooks in the future.  You can turn it off and delete it or keep it around for running future playbooks.  You can also use this as the jump host for managing your OpenShift cluster.
@@ -57,20 +56,13 @@ From a Linux or Mac, you can just use the ssh-keygen command.  Once you are fini
 
 You will need to create a Key Vault to store your SSH Private Key that will then be used as part of the deployment.  This extra work is to provide security around the Private Key - especially since it does not have a passphrase.  I recommend creating a Resource Group specifically to store the KeyVault.  This way, you can reuse the KeyVault for other deployments and you won't have to create this every time you chose to deploy another OpenShift cluster.
 
-1. Create KeyVault using PowerShell <br/>
-  a.  Create new resource group: `New-AzureRMResourceGroup -Name 'ResourceGroupName' -Location 'West US'`<br/>
-  b.  Create key vault: `New-AzureRmKeyVault -VaultName 'KeyVaultName' -ResourceGroup 'ResourceGroupName' -Location 'West US'`<br/>
-  c.  Create variable with sshPrivateKey: `$securesecret = ConvertTo-SecureString -String '[copy ssh Private Key here - including line feeds]' -AsPlainText -Force`<br/>
-  d.  Create Secret: `Set-AzureKeyVaultSecret -Name 'SecretName' -SecretValue $securesecret -VaultName 'KeyVaultName'`<br/>
-  e.  Enable for Template Deployment: `Set-AzureRMKeyVaultAccessPolicy -VaultName 'KeyVaultName' -ResourceGroupName 'ResourceGroupName' -EnabledForTemplateDeployment`<br/>
-
-2. **Create Key Vault using Azure CLI 2.0**<br/>
-  a.  Create new Resource Group: az group create -n \<name\> -l \<location\><br/>
-         Ex: `az group create -n ResourceGroupName -l 'East US'`<br/>
-  b.  Create Key Vault: az keyvault create -n \<vault-name\> -g \<resource-group\> -l \<location\> --enabled-for-template-deployment true<br/>
-         Ex: `az keyvault create -n KeyVaultName -g ResourceGroupName -l 'East US' --enabled-for-template-deployment true`<br/>
-  c.  Create Secret: az keyvault secret set --vault-name \<vault-name\> -n \<secret-name\> --file \<private-key-file-name\><br/>
-         Ex: `az keyvault secret set --vault-name KeyVaultName -n SecretName --file ~/.ssh/id_rsa`<br/>
+**Create Key Vault using Azure CLI 2.0**<br/>
+1.  Create new Resource Group: az group create -n \<name\> -l \<location\><br/>
+    Ex: `az group create -n ResourceGroupName -l 'East US'`<br/>
+1.  Create Key Vault: az keyvault create -n \<vault-name\> -g \<resource-group\> -l \<location\> --enabled-for-template-deployment true<br/>
+    Ex: `az keyvault create -n KeyVaultName -g ResourceGroupName -l 'East US' --enabled-for-template-deployment true`<br/>
+1.  Create Secret: az keyvault secret set --vault-name \<vault-name\> -n \<secret-name\> --file \<private-key-file-name\><br/>
+    Ex: `az keyvault secret set --vault-name KeyVaultName -n SecretName --file ~/.ssh/id_rsa`<br/>
 
 ### Generate Azure Active Directory (AAD) Service Principal
 
@@ -133,7 +125,6 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 11. openshiftPassword: Password for OpenShift user and root user
 11. enableMetrics: Enable Metrics - value is either "true" or "false"
 11. enableLogging: Enable Logging - value is either "true" or "false"
-11. enableCockpit: Enable Cockpit - value is either "true" or "false"
 12. rhsmUsernameOrOrgId: Red Hat Subscription Manager Username or Organization ID. To find your Organization ID, run on registered server: `subscription-manager identity`.
 13. rhsmPasswordOrActivationKey: Red Hat Subscription Manager Password or Activation Key for your Cloud Access subscription. You can get this from [here](https://access.redhat.com/management/activation_keys).
 14. rhsmPoolId: The Red Hat Subscription Manager Pool ID that contains your OpenShift entitlements
@@ -167,7 +158,7 @@ Ex: `az group deployment create --name ocpdeployment --template-file azuredeploy
 
 ### NOTE
 
-The OpenShift Ansible playbook does take a while to run when using VMs backed by Standard Storage. VMs backed by Premium Storage are faster. If you want Premium Storage, select a DS or GS series VM.
+The OpenShift Ansible playbook does take a while to run when using VMs backed by Standard Storage. VMs backed by Premium Storage are faster. If you want Premium Storage, select a DS, or GS series VM.
 <hr />
 
 Be sure to follow the OpenShift instructions to create the necessary DNS entry for the OpenShift Router for access to applications. <br />
@@ -217,12 +208,6 @@ Once the deployment is complete, log into the OpenShift Web Console and complete
 To create additional (non-admin) users in your environment, login to your master server(s) via SSH and run:
 <br><i>htpasswd /etc/origin/master/htpasswd mynewuser</i>
 
-### Access to Cockpit
-
-If you enable Cockpit, then the password for 'root' is set to be the same as the password for the first OpenShift user.
-
-Use user 'root' and the same password as you assigned to your OpenShift admin to login to Cockpit ( use port 9090 instead of 8443 from Web Console ).
-   
 ### Additional OpenShift Configuration Options
  
 You can configure additional settings per the official (<a href="https://docs.openshift.com/container-platform/3.9/welcome/index.html" target="_blank">OpenShift Enterprise Documentation</a>).

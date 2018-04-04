@@ -1,9 +1,12 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
-# UPDATES for Release 3.9 - March 28, 2018
+# UPDATES for Master (Release 3.9) - March 28, 2018
 
-1.  Create Release 3.7 branch
+1.  Create Release 3.9 Branch
 2.  Updating scripts for 3.9 repository
+3.  Switch to port 443 for web console
+4.  Remove old unused resources
+
 
 # UPDATES for Master (Release 3.7) - February 14, 2018
 

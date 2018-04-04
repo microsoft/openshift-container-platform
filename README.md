@@ -4,7 +4,7 @@ Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
 **For OpenShift Origin refer to https://github.com/Microsoft/openshift-origin**
 
-## OpenShift Container Platform 3.7 with Username / Password authentication for OpenShift in Azure Stack
+## OpenShift Container Platform 3.9 with Username / Password authentication for OpenShift in Azure Stack
 
 This template deploys OpenShift Container Platform in Azure Stack with basic username / password for authentication to OpenShift. It includes the following resources:
 
@@ -116,6 +116,8 @@ Ex: `az group deployment create --name ocpdeployment --template-file azuredeploy
 
 
 ### NOTE
+
+The Service Catalog and Ansible Template Service Broker does not deploy as there is no persistent storage available for Service Catalog etcd.
 
 Be sure to follow the OpenShift instructions to create the necessary DNS entry for the OpenShift Router for access to applications. <br />
 

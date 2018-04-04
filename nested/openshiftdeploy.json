@@ -2,10 +2,10 @@
 	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
 	"contentVersion": "1.0.0.0",
 	"parameters": {
-		"_artifactsLocation": {
+		"location": {
 			"type": "string",
 			"metadata": {
-				"description": "Base URL for script location"
+				"description": "Datacenter Region Location"
 			}
 		},
 		"apiVersionCompute": {
@@ -110,17 +110,17 @@
 				"description": "Administrator password for OpenShift Console"
 			}
 		},
-		"enableMetrics": {	
-			"type": "string",	
-			"metadata": {	
-				"description": "Enable OpenShift Metrics: true or false"	
-			}	
-		},	
-		"enableLogging": {	
-			"type": "string",	
-			"metadata": {	
-				"description": "Enable OpenShift Logging: true or false"	
-			}	
+		"enableMetrics": {
+			"type": "string",
+			"metadata": {
+				"description": "Enable OpenShift Metrics: true or false"
+			}
+		},
+		"enableLogging": {
+			"type": "string",
+			"metadata": {
+				"description": "Enable OpenShift Logging: true or false"
+			}
 		},
 		"enableAzure": {
 			"type": "string",
@@ -169,13 +169,13 @@
 		"singlequote": "'",
 		"tenantId": "[subscription().tenantId]",
 		"subscriptionId": "[subscription().subscriptionId]",
-		"location": "[resourceGroup().location]",
+		"location": "[parameters('location')]",
 		"resourceGroupName": "[resourceGroup().name]"
 	},
 	"resources": [{
 		"type": "Microsoft.Compute/virtualMachines/extensions",
 		"name": "[concat(parameters('openshiftBastionHostname'), '/deployOpenShift')]",
-		"location": "[resourceGroup().location]",
+		"location": "[parameters('location')]",
 		"apiVersion": "[parameters('apiVersionCompute')]",
 		"tags": {
 			"displayName": "DeployOpenShift",

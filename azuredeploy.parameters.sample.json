@@ -44,9 +44,6 @@
 		"enableLogging": {
 			"value": "false"
 		},
-		"enableCockpit": {
-			"value": "false"
-		},
 		"rhsmUsernameOrOrgId": {
 			"value": "rhsmuser"
 		},

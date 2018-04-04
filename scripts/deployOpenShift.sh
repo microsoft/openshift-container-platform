@@ -60,6 +60,13 @@ export CLOUDNAME="AzureStack"
 
 # Cloning Ansible playbook repository
 (cd /home/$SUDOUSER && git clone https://github.com/Microsoft/openshift-container-platform-playbooks.git)
+if [ -d /home/${SUDOUSER}/openshift-container-platform-playbooks ]
+then
+  echo " - Retrieved playbooks successfully"
+else
+  echo " - Retrieval of playbooks failed"
+  exit 99
+fi
 
 # Run on MASTER-0 node - configure Storage Class
 # Filename: configurestorageclass.yaml
@@ -109,7 +116,7 @@ openshift_override_hostname_check=true
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 openshift_master_api_port=443
 openshift_master_console_port=443
-openshift_cloudprovider_kind=azure
+#openshift_cloudprovider_kind=azure
 osm_default_node_selector='region=app'
 openshift_disable_check=memory_availability,docker_image_availability
 
@@ -403,7 +410,7 @@ echo $(date) "- Deleting unecessary files"
 # mkdir /home/${SUDOUSER}/openshift-container-platform-playbooks || true
 rm -rf /home/${SUDOUSER}/openshift-container-platform-playbooks
 
-echo $(date) "- Sleep for 60"
+echo $(date) "- Sleep for 30"
 
 sleep 30
 

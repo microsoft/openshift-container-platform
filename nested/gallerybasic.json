@@ -134,8 +134,8 @@
 			"Role": "[parameters('role')]",
 				"provider": "[parameters('redHatTags').provider]",
 				"app": "[parameters('redHatTags').app]",
-				"version": "[variables('redHatTags').version]",
-				"platform": "[variables('redHatTags').platform]"
+				"version": "[parameters('redHatTags').version]",
+				"platform": "[parameters('redHatTags').platform]"
 		},
 		"properties": {
 			"hardwareProfile": {

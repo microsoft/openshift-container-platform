@@ -23,7 +23,7 @@ This template deploys OpenShift Container Platform in Azure Stack with basic use
 
 ## READ the instructions in its entirety before deploying!
 
-This template is referencing a RHEL image that will most likely not be valid for you. In order to deploy OpenShift to your Azure Stack, please fork this repo and update the imageReference variable at line 378 to reference your image.
+This template is referencing a RHEL image that will most likely not be valid for you. In order to deploy OpenShift to your Azure Stack, please fork this repo and update azuredeploy.json for the imageReference variable at line 378 to reference your image.
 
 Currently, the Azure Cloud Provider does not work in Azure Stack. This means you will not be able to use disk attach for persistent storage in Azure Stack. You can always configure other storage options such as NFS, iSCSI, Gluster, etc. that can be used for persistent storage. We are exploring options to address the Azure Cloud Provider in Azure Stack but this will take a little bit of time.
 
@@ -88,8 +88,8 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 9.  dataDiskSize: Size of data disk to attach to nodes for Docker volume - valid sizes are 32 GB, 64 GB, 128 GB, 256 GB, 512 GB, 1024 GB, and 2048 GB
 10. adminUsername: Admin username for both OS (VM) login and initial OpenShift user
 11. openshiftPassword: Password for OpenShift user
-11. enableMetrics: Enable Metrics - value is either "true" or "false"
-11. enableLogging: Enable Logging - value is either "true" or "false"
+11. enableMetrics: Enable Metrics - value is either "true" or "false".  If set to true, Metrics will use ephemeral storage
+11. enableLogging: Enable Logging - value is either "true" or "false".  If set to true, Logging will use ephemeral storage
 12. rhsmUsernameOrOrgId: Red Hat Subscription Manager Username or Organization ID. To find your Organization ID, run on registered server: `subscription-manager identity`.
 13. rhsmPasswordOrActivationKey: Red Hat Subscription Manager Password or Activation Key for your Cloud Access subscription. You can get this from [here](https://access.redhat.com/management/activation_keys).
 14. rhsmPoolId: The Red Hat Subscription Manager Pool ID that contains your OpenShift entitlements
@@ -117,7 +117,7 @@ Ex: `az group deployment create --name ocpdeployment --template-file azuredeploy
 
 ### NOTE
 
-The Service Catalog and Ansible Template Service Broker does not deploy as there is no persistent storage available for Service Catalog etcd.
+The Service Catalog and Ansible Template Service Broker does not deploy as there is no persistent storage available for etcd required for Service Catalog.
 
 Be sure to follow the OpenShift instructions to create the necessary DNS entry for the OpenShift Router for access to applications. <br />
 

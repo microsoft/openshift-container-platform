@@ -2,10 +2,10 @@
 	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
 	"contentVersion": "1.0.0.0",
 	"parameters": {
-		"_artifactsLocation": {
+		"location": {
 			"type": "string",
 			"metadata": {
-				"description": "Base URL for script location"
+				"description": "Datacenter Region Location"
 			}
 		},
 		"apiVersionCompute": {
@@ -169,18 +169,19 @@
 		"singlequote": "'",
 		"tenantId": "[subscription().tenantId]",
 		"subscriptionId": "[subscription().subscriptionId]",
-		"location": "[resourceGroup().location]",
 		"resourceGroupName": "[resourceGroup().name]"
 	},
 	"resources": [{
 		"type": "Microsoft.Compute/virtualMachines/extensions",
 		"name": "[concat(parameters('openshiftBastionHostname'), '/deployOpenShift')]",
-		"location": "[resourceGroup().location]",
+		"location": "[parameters('location')]",
 		"apiVersion": "[parameters('apiVersionCompute')]",
 		"tags": {
 			"displayName": "DeployOpenShift",
 				"provider": "[parameters('redHatTags').provider]",
-				"app": "[parameters('redHatTags').app]"
+				"app": "[parameters('redHatTags').app]",
+				"version": "[parameters('redHatTags').version]",
+				"platform": "[parameters('redHatTags').platform]"
 		},
 		"properties": {
 			"publisher": "Microsoft.Azure.Extensions",
@@ -193,7 +194,7 @@
 				]
 			},
 			"protectedSettings": {
-				"commandToExecute": "[concat('bash ', parameters('openshiftDeploymentScriptFileName'), ' \"', parameters('adminUsername'), '\" ', variables('singlequote'), parameters('openshiftPassword'), variables('singlequote'), ' \"', parameters('openshiftMasterHostname'), '\" \"', parameters('openshiftMasterPublicIpFqdn'), '\" \"', parameters('openshiftMasterPublicIpAddress'), '\" \"', parameters('openshiftInfraHostname'), '\" \"', parameters('openshiftNodeHostname'), '\" \"', parameters('nodeInstanceCount'), '\" \"', parameters('infraInstanceCount'), '\" \"', parameters('MasterInstanceCount'), '\" \"', parameters(parameters('subDomainChosen')), '\" \"', parameters('newStorageAccountRegistry'), '\" ', variables('singlequote'), parameters('newStorageAccountKey'), variables('singlequote'), ' \"', parameters('enableMetrics'), '\" \"', parameters('enableLogging'), '\" ', variables('singlequote'), variables('tenantId'), variables('singlequote'), ' ', variables('singlequote'), variables('subscriptionId'), variables('singlequote'), ' ', variables('singlequote'), parameters('aadClientId'), variables('singlequote'), ' ', variables('singlequote'), parameters('aadClientSecret'), variables('singlequote'), ' ', variables('singlequote'), variables('resourceGroupName'), variables('singlequote'), ' ', variables('singlequote'), variables('location'), variables('singlequote'), ' ', variables('singlequote'), parameters('enableAzure'), variables('singlequote'), ' ', variables('singlequote'), parameters('storageKind'), variables('singlequote'))]"
+				"commandToExecute": "[concat('bash ', parameters('openshiftDeploymentScriptFileName'), ' \"', parameters('adminUsername'), '\" ', variables('singlequote'), parameters('openshiftPassword'), variables('singlequote'), ' \"', parameters('openshiftMasterHostname'), '\" \"', parameters('openshiftMasterPublicIpFqdn'), '\" \"', parameters('openshiftMasterPublicIpAddress'), '\" \"', parameters('openshiftInfraHostname'), '\" \"', parameters('openshiftNodeHostname'), '\" \"', parameters('nodeInstanceCount'), '\" \"', parameters('infraInstanceCount'), '\" \"', parameters('MasterInstanceCount'), '\" \"', parameters(parameters('subDomainChosen')), '\" \"', parameters('newStorageAccountRegistry'), '\" ', variables('singlequote'), parameters('newStorageAccountKey'), variables('singlequote'), ' \"', parameters('enableMetrics'), '\" \"', parameters('enableLogging'), '\" ', variables('singlequote'), variables('tenantId'), variables('singlequote'), ' ', variables('singlequote'), variables('subscriptionId'), variables('singlequote'), ' ', variables('singlequote'), parameters('aadClientId'), variables('singlequote'), ' ', variables('singlequote'), parameters('aadClientSecret'), variables('singlequote'), ' ', variables('singlequote'), variables('resourceGroupName'), variables('singlequote'), ' ', variables('singlequote'), parameters('location'), variables('singlequote'), ' ', variables('singlequote'), parameters('enableAzure'), variables('singlequote'), ' ', variables('singlequote'), parameters('storageKind'), variables('singlequote'))]"
 			}
 		}
 	}],

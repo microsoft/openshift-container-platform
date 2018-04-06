@@ -26,6 +26,9 @@ subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_A
 if [ $? -eq 0 ]
 then
    echo "Subscribed successfully"
+elif [ $? -eq 64 ]
+then
+   echo "This system is already registered."
 else
    echo "Incorrect Username / Password or Organization ID / Activation Key specified"
    exit 3

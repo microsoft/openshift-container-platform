@@ -24,6 +24,9 @@ fi
 if [ $? -eq 0 ]
 then
    echo "Subscribed successfully"
+elif [ $? -eq 64 ]
+then
+       echo "This system is already registered."
 else
    echo "Incorrect Username and Password or Organization ID and / or Activation Key specified"
    exit 3

@@ -26,6 +26,8 @@ subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_A
 if [ $? -eq 0 ]
 then
    echo "Subscribed successfully"
+elif [ $? -eq 64 ]
+   echo "System already subscribed"
 else
    echo "Incorrect Username / Password or Organization ID / Activation Key specified"
    exit 3
@@ -56,7 +58,8 @@ subscription-manager repos \
     --enable="rhel-7-server-extras-rpms" \
     --enable="rhel-7-server-ose-3.9-rpms" \
 	--enable="rhel-7-server-ansible-2.4-rpms" \
-    --enable="rhel-7-fast-datapath-rpms"
+    --enable="rhel-7-fast-datapath-rpms" \
+	--enable=rh-gluster-3-client-for-rhel-7-server-rpms
 
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
@@ -65,6 +68,7 @@ yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash
 yum -y update --exclude=WALinuxAgent
 yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
 atomic-openshift-excluder unexclude
+yum -y update glusterfs-fuse
 
 # Install OpenShift utilities
 echo $(date) " - Installing OpenShift utilities"

@@ -100,6 +100,7 @@ masters
 nodes
 etcd
 master0
+glusterfs
 new_nodes
 
 # Set variables common for all OSEv3 hosts
@@ -195,6 +196,15 @@ do
   echo "$NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
 done
 
+# Loop to add CNS Nodes
+
+for (( c=0; c<$CNSCOUNT; c++ ))
+do
+  runuser $SUDOUSER -c "ssh-keyscan -H $CNS-$c >> ~/.ssh/known_hosts"
+  drive=$(runuser $SUDOUSER -c "ssh $CNS-$c 'sudo /usr/sbin/fdisk -l'" | awk '$1 == "Disk" && $2 ~ /^\// && ! /mapper/ {if (drive) print drive; drive = $2; sub(":", "", drive);} drive && /^\// {drive = ""} END {if (drive) print drive;}')
+  echo "$CNS-$c glusterfs_devices='[ \"${drive}\" ]' openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
+done
+
 # Create new_nodes group
 
 cat >> /etc/ansible/hosts <<EOF
@@ -228,6 +238,10 @@ runuser -l $SUDOUSER -c "ansible all -f 10 -b -m yum -a \"name=ansible state=lat
 # Initiating installation of OpenShift Container Platform prerequisites using Ansible Playbook
 echo $(date) " - Running Prerequisites via Ansible Playbook"
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml"
+
+# Break out of script
+
+exit 50
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"

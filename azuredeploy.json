@@ -864,7 +864,7 @@
 			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[concat(variables('openshiftCnsHostname'), '-nsg')]",
-			"condition": "[parameters('enableCNS'), "true"]",
+			"condition": "[parameters('enableCNS'), 'true']",
 			"location": "[variables('location')]",
 			"tags": {
 				"displayName": "InfraNSG",
@@ -996,7 +996,7 @@
 		}, {
 			"type": "Microsoft.Storage/storageAccounts",
 			"name": "[variables('newStorageAccountCns')]",
-			"condition": "[parameters('enableCNS'), "true"]",
+			"condition": "[parameters('enableCNS'), 'true']",
 			"location": "[variables('location')]",
 			"kind": "Storage",
 			"apiVersion": "[variables('apiVersionStorage')]",
@@ -1087,7 +1087,7 @@
 		}, {
 			"type": "Microsoft.Compute/availabilitySets",
 			"name": "cnsavailabilityset",
-			"condition": "[parameters('enableCNS'), "true"]",
+			"condition": "[parameters('enableCNS'), 'true']",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
 			"properties": {
@@ -1754,7 +1754,7 @@
 			}
 		}, {
 			"name": "[concat('cnsVmDeployment', copyindex())]",
-			"condition": "[parameters('enableCNS'), "true"]",
+			"condition": "[parameters('enableCNS'), 'true']",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [
@@ -1961,7 +1961,7 @@
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
 			"name": "[concat(variables('openshiftCnsHostname'), '-', copyIndex(), '/prepNodes')]",
-			"condition": "[parameters('enableCNS'), "true"]",
+			"condition": "[parameters('enableCNS'), 'true']",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
 			"tags": {
@@ -1976,7 +1976,7 @@
 			],
 			"copy": {
 				"name": "cnsPrepLoop",
-				"count": "[parameters('cnsInstanceCount')]"
+				"count": "[variables('cnsInstanceCount')]"
 			},
 			"properties": {
 				"publisher": "Microsoft.Azure.Extensions",

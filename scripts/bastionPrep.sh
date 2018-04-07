@@ -27,6 +27,7 @@ if [ $? -eq 0 ]
 then
    echo "Subscribed successfully"
 elif [ $? -eq 64 ]
+then
    echo "System already subscribed"
 else
    echo "Incorrect Username / Password or Organization ID / Activation Key specified"

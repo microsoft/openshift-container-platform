@@ -223,7 +223,7 @@ runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ans
 
 # Break out of script
 
-exit 50
+# exit 50
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"

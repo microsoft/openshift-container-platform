@@ -1792,7 +1792,7 @@
 						"value": "[parameters('adminUsername')]"
 					},
 					"vmSize": {
-						"value": "[parameters('cnsVmSize')]"
+						"value": "[variables('cnsVmSize')]"
 					},
 					"availabilitySet": {
 						"value": "cnsavailabilityset"
@@ -1810,7 +1810,7 @@
 						"value": "cnsnode"
 					},
 					"vmStorageType": {
-						"value": "[variables('vmSizesMap')[parameters('cnsVmSize')].storageAccountType]"
+						"value": "[variables('vmSizesMap')[variables('cnsVmSize')].storageAccountType]"
 					},
 					"storageKind": {
 						"value": "[parameters('storageKind')]"

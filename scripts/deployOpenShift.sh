@@ -27,14 +27,15 @@ export RESOURCEGROUP=${20}
 export LOCATION=${21}
 export AZURE=${22}
 export STORAGEKIND=${23}
+export ENABLECNS=${24}
+export CNS=${25}
+export CNSCOUNT=${26}
 
 export BASTION=$(hostname)
 
 export MASTERLOOP=$((MASTERCOUNT - 1))
-export INFRALOOP=$((INFRACOUNT - 1))
-export NODELOOP=$((NODECOUNT - 1))
 
-echo "Configuring SSH ControlPath to use shorter path name"
+echo $(date) " - Configuring SSH ControlPath to use shorter path name"
 
 sed -i -e "s/^# control_path = %(directory)s\/%%h-%%r/control_path = %(directory)s\/%%h-%%r/" /etc/ansible/ansible.cfg
 sed -i -e "s/^#host_key_checking = False/host_key_checking = False/" /etc/ansible/ansible.cfg
@@ -42,21 +43,6 @@ sed -i -e "s/^#pty=False/pty=False/" /etc/ansible/ansible.cfg
 
 # Create Ansible Playbooks for Post Installation tasks
 echo $(date) " - Create Ansible Playbooks for Post Installation tasks"
-
-# Run on all masters - Create Initial OpenShift User on all Masters
-# Filename: addocpuser.yaml
-
-# Run on only MASTER-0 - Make initial OpenShift User a Cluster Admin
-# Filename: assignclusteradminrights.yaml
-
-# Run on all nodes - Set Root password on all nodes
-# Filename: assignrootpassword.yaml
-
-# Run on MASTER-0 node - configure registry to use Azure Storage
-# Create docker registry config based on Commercial Azure or Azure Government
-
-DOCKERREGISTRYYAML=dockerregistryazurestack.yaml
-export CLOUDNAME="AzureStack"
 
 # Cloning Ansible playbook repository
 (cd /home/$SUDOUSER && git clone https://github.com/Microsoft/openshift-container-platform-playbooks.git)
@@ -68,27 +54,55 @@ else
   exit 99
 fi
 
-# Run on MASTER-0 node - configure Storage Class
-# Filename: configurestorageclass.yaml
+# Create glusterfs configuration
+echo $(date) " - Creating glusterfs configuration"
 
-# Create playbook to reboot master nodes
-# Filename: reboot-master.yaml
+for (( c=0; c<$CNSCOUNT; c++ ))
+do
+  # runuser $SUDOUSER -c "ssh-keyscan -H $CNS-$c >> ~/.ssh/known_hosts"
+  drive=$(runuser $SUDOUSER -c "ssh $CNS-$c 'sudo /usr/sbin/fdisk -l'" | awk '$1 == "Disk" && $2 ~ /^\// && ! /mapper/ {if (drive) print drive; drive = $2; sub(":", "", drive);} drive && /^\// {drive = ""} END {if (drive) print drive;}')
+  drive1=$(echo $drive | cut -d ' ' -f 1)
+  drive2=$(echo $drive | cut -d ' ' -f 2)
+  drive3=$(echo $drive | cut -d ' ' -f 3)
+  cnsglusterinfo="$cnsglusterinfo
+$CNS-$c glusterfs_devices='[ \"${drive1}\", \"${drive2}\", \"${drive3}\" ]'"
+done
 
-# Create playbook to reboot infra and app nodes
-# Filename: reboot-nodes.yaml
+# Create Master nodes grouping
+echo $(date) " - Creating Master nodes grouping"
 
-# Create Azure Cloud Provider configuration Playbook for Master Config
+for (( c=0; c<$MASTERCOUNT; c++ ))
+do
+  mastergroup="$mastergroup
+$MASTER-$c openshift_node_labels=\"{'region': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c"
+done
 
-# Filename: setup-azure-master.yaml
+# Create Infra nodes grouping 
+echo $(date) " - Creating Infra nodes grouping"
 
-# Create Azure Cloud Provider configuration Playbook for Node Config (Master Nodes)
-# Filename: setup-azure-node-master.yaml
+for (( c=0; c<$INFRACOUNT; c++ ))
+do
+  infragroup="$infragroup
+$INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c"
+done
 
-# Create Azure Cloud Provider configuration Playbook for Node Config (Non-Master Nodes)
-# Filename: setup-azure-node.yaml
+# Create Nodes grouping 
+echo $(date) " - Creating Nodes grouping"
 
-# Create Playbook to delete stuck Master nodes and set as not schedulable
-# Filename: deletestucknodes.yaml
+for (( c=0; c<$NODECOUNT; c++ ))
+do
+  nodegroup="$nodegroup
+$NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c"
+done
+
+# Create CNS nodes grouping 
+echo $(date) " - Creating CNS nodes grouping"
+
+for (( c=0; c<$CNSCOUNT; c++ ))
+do
+  cnsgroup="$cnsgroup
+$CNS-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$CNS-$c"
+done
 
 # Create Ansible Hosts File
 echo $(date) " - Create Ansible Hosts file"
@@ -122,6 +136,7 @@ osm_default_node_selector='region=app'
 openshift_disable_check=memory_availability,docker_image_availability
 
 # default selectors for router and registry services
+openshift_hosted_registry_storage_kind=glusterfs
 openshift_router_selector='region=infra'
 openshift_registry_selector='region=infra'
 
@@ -171,45 +186,16 @@ $MASTER-[0:${MASTERLOOP}]
 [master0]
 $MASTER-0
 
+[glusterfs]
+$cnsglusterinfo
+
 # host group for nodes
 [nodes]
-EOF
+$mastergroup
+$infragroup
+$nodegroup
+$cnsgroup
 
-# Loop to add Masters
-
-for (( c=0; c<$MASTERCOUNT; c++ ))
-do
-  echo "$MASTER-$c openshift_node_labels=\"{'region': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c" >> /etc/ansible/hosts
-done
-
-# Loop to add Infra Nodes
-
-for (( c=0; c<$INFRACOUNT; c++ ))
-do
-  echo "$INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
-done
-
-# Loop to add Nodes
-
-for (( c=0; c<$NODECOUNT; c++ ))
-do
-  echo "$NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
-done
-
-# Loop to add CNS Nodes
-
-for (( c=0; c<$CNSCOUNT; c++ ))
-do
-  runuser $SUDOUSER -c "ssh-keyscan -H $CNS-$c >> ~/.ssh/known_hosts"
-  drive=$(runuser $SUDOUSER -c "ssh $CNS-$c 'sudo /usr/sbin/fdisk -l'" | awk '$1 == "Disk" && $2 ~ /^\// && ! /mapper/ {if (drive) print drive; drive = $2; sub(":", "", drive);} drive && /^\// {drive = ""} END {if (drive) print drive;}')
-  echo "$CNS-$c glusterfs_devices='[ \"${drive}\" ]' openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
-done
-
-# Create new_nodes group
-
-cat >> /etc/ansible/hosts <<EOF
-
-# host group for adding new nodes
 [new_nodes]
 EOF
 
@@ -221,11 +207,7 @@ runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ans
 
 # Configure resolv.conf on all hosts through NetworkManager
 echo $(date) " - Setting up NetworkManager on eth0"
-
 runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
-# sleep 5
-# runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\""
-# runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
 
 # Updating all hosts
 echo $(date) " - Updating rpms on all hosts to latest release"

@@ -407,7 +407,7 @@
 			"provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
 		},
 		"bastionVmSize": "Standard_DS2_v2",
-		"cnsVmSize": "Standard_DS13_v2",
+		"cnsVmSize": "Standard_DS12_v2",
 		"glusterDiskSize": 128,
 		"cnsInstanceCount": 3,
 		"singlequote": "'",
@@ -2078,6 +2078,9 @@
 					"openshiftNodeHostname": {
 						"value": "[variables('openshiftNodeHostname')]"
 					},
+					"openshiftCnsHostname": {
+						"value": "[variables('openshiftCnsHostname')]"
+					},
 					"masterInstanceCount": {
 						"value": "[parameters('masterInstanceCount')]"
 					},
@@ -2087,6 +2090,9 @@
 					"nodeInstanceCount": {
 						"value": "[parameters('nodeInstanceCount')]"
 					},
+					"cnsInstanceCount": {
+						"value": "[variables('cnsInstanceCount')]"
+					},
 					"storageKind": {
 						"value": "[parameters('storageKind')]"
 					},
@@ -2095,6 +2101,9 @@
 					},
 					"openshiftPassword": {
 						"value": "[parameters('openshiftPassword')]"
+					},
+					"enableCNS": {
+						"value": "[parameters('enableCNS')]"
 					},
 					"enableMetrics": {
 						"value": "[parameters('enableMetrics')]"

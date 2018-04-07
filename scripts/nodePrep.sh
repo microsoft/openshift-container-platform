@@ -20,7 +20,7 @@ then
    echo "Subscribed successfully"
 elif [ $? -eq 64 ]
 then
-   echo "System already subscribed"
+   echo "This system is already registered."
 else
    echo "Incorrect Username / Password or Organization ID / Activation Key specified"
    exit 3

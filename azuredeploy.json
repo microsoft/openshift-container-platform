@@ -407,7 +407,7 @@
 			"provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
 		},
 		"bastionVmSize": "Standard_DS2_v2",
-		"cnsVmSize": "Standard_E4s_v3",
+		"cnsVmSize": "Standard_DS13_v2",
 		"glusterDiskSize": 128,
 		"cnsInstanceCount": 3,
 		"singlequote": "'",
@@ -1786,7 +1786,7 @@
 						"value": "[parameters('dataDiskSize')]"
 					},
 					"glusterDiskSize": {
-						"value": "[variables('dataDiskSize')]"
+						"value": "[variables('glusterDiskSize')]"
 					},
 					"adminUsername": {
 						"value": "[parameters('adminUsername')]"

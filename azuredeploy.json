@@ -2033,7 +2033,8 @@
 				"bastionPrep",
 				"masterPrepLoop",
 				"infraPrepLoop",
-				"nodePrepLoop"
+				"nodePrepLoop",
+				"cnsPrepLoop"
 			],
 			"properties": {
 				"mode": "Incremental",

@@ -358,7 +358,7 @@ fi
 if [ $ENABLECNS == "true" ]
 then
 	echo $(date) "- Reconfiguring glusterfs storage class"
-	cat > ~/home/$SUDOUSER/glusterfs-storage.yaml <<EOF
+	cat > /home/$SUDOUSER/glusterfs-storage.yaml <<EOF
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -374,7 +374,8 @@ provisioner: kubernetes.io/glusterfs
 reclaimPolicy: Delete
 EOF
 
-	runuser -l $SUDOUSER -c "oc apply -f ~/home/$SUDOUSER/glusterfs-storage.yaml"
+	runuser -l $SUDOUSER -c "oc delete sc glusterfs-storage"
+	runuser -l $SUDOUSER -c "oc create -f /home/$SUDOUSER/glusterfs-storage.yaml"
 	sleep 10
 	
 	# Installing Service Catalog, Ansible Service Broker and Template Service Broker

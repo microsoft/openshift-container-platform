@@ -58,6 +58,7 @@ fi
 if [ $ENABLECNS == "true" ]
 then
 echo $(date) " - Creating glusterfs configuration"
+registrygluster="openshift_hosted_registry_storage_kind=glusterfs"
 
 for (( c=0; c<$CNSCOUNT; c++ ))
 do
@@ -142,15 +143,12 @@ osm_default_node_selector='region=app'
 openshift_disable_check=memory_availability,docker_image_availability
 
 # default selectors for router and registry services
-openshift_hosted_registry_storage_kind=glusterfs
+$registrygluster
 openshift_router_selector='region=infra'
 openshift_registry_selector='region=infra'
 
 # Deploy Service Catalog
 openshift_enable_service_catalog=false
-
-template_service_broker_install=false
-template_service_broker_selector={"region":"infra"}
 
 openshift_master_cluster_method=native
 openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
@@ -227,10 +225,6 @@ runuser -l $SUDOUSER -c "ansible all -f 10 -b -m yum -a \"name=ansible state=lat
 echo $(date) " - Running Prerequisites via Ansible Playbook"
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml"
 
-# Break out of script
-
-# exit 50
-
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
 
@@ -280,11 +274,6 @@ runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-play
 echo $(date) "- Assigning cluster admin rights to user"
 
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
-
-# Configure Docker Registry to use Azure Storage Account
-# echo $(date) "- Configuring Docker Registry to use Azure Storage Account"
-
-# runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
 
 if [[ $AZURE == "true" ]]
 then
@@ -364,6 +353,37 @@ then
 
 fi
 
+# Reconfigure glusterfs storage class
+
+if [ $ENABLECNS == "true" ]
+then
+	echo $(date) "- Reconfiguring glusterfs storage class"
+	cat > ~/home/$SUDOUSER/glusterfs-storage.yaml <<EOF
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+  name: glusterfs-storage
+parameters:
+  resturl: http://heketi-storage-glusterfs.${ROUTING}
+  restuser: admin
+  secretName: heketi-storage-admin-secret
+  secretNamespace: glusterfs
+provisioner: kubernetes.io/glusterfs
+reclaimPolicy: Delete
+EOF
+
+	runuser -l $SUDOUSER -c "oc update -f ~/home/$SUDOUSER/glusterfs-storage.yaml"
+	sleep 10
+	
+	# Installing Service Catalog, Ansible Service Broker and Template Service Broker
+	
+	echo $(date) "- Installing Service Catalog, Ansible Service Broker and Template Service Broker"
+	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-service-catalog/config.yml"
+	
+fi
+	
 # Configure Metrics
 
 if [ $METRICS == "true" ]
@@ -393,7 +413,7 @@ then
 	echo $(date) "- Deploying Logging"
 	if [ $ENABLECNS == "true" ]
 	then
-		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml  -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true -e openshift_master_dynamic_provisioning_enabled=true"
+		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml  -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=True -e openshift_master_dynamic_provisioning_enabled=True"
 	else
 		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml  -e openshift_logging_install_logging=True"
 	fi

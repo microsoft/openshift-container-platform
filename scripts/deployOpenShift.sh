@@ -102,7 +102,9 @@ $NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshif
 done
 fi
 
-# Create CNS nodes grouping 
+# Create CNS nodes grouping if CNS is enabled
+if [ $ENABLECNS == "true" ]
+then
 echo $(date) " - Creating CNS nodes grouping"
 
 for (( c=0; c<$CNSCOUNT; c++ ))
@@ -110,6 +112,7 @@ do
   cnsgroup="$cnsgroup
 $CNS-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$CNS-$c"
 done
+fi
 
 # Create Ansible Hosts File
 echo $(date) " - Create Ansible Hosts file"

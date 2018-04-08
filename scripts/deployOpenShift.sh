@@ -357,14 +357,14 @@ fi
 
 if [ $ENABLECNS == "true" ]
 then
-	echo $(date) "- Reconfiguring glusterfs storage class"
-	cat > /home/$SUDOUSER/glusterfs-storage.yaml <<EOF
+	echo $(date) "- Create default glusterfs storage class"
+	cat > /home/$SUDOUSER/default-glusterfs-storage.yaml <<EOF
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
-  name: glusterfs-storage
+  name: default-glusterfs-storage
 parameters:
   resturl: http://heketi-storage-glusterfs.${ROUTING}
   restuser: admin
@@ -374,8 +374,7 @@ provisioner: kubernetes.io/glusterfs
 reclaimPolicy: Delete
 EOF
 
-	runuser -l $SUDOUSER -c "oc delete sc glusterfs-storage"
-	runuser -l $SUDOUSER -c "oc create -f /home/$SUDOUSER/glusterfs-storage.yaml"
+	runuser -l $SUDOUSER -c "oc create -f /home/$SUDOUSER/default-glusterfs-storage.yaml"
 	sleep 10
 	
 	# Installing Service Catalog, Ansible Service Broker and Template Service Broker

@@ -54,7 +54,9 @@ else
   exit 99
 fi
 
-# Create glusterfs configuration
+# Create glusterfs configuration if CNS is enabled
+if [ $ENABLECNS == "true" ]
+then
 echo $(date) " - Creating glusterfs configuration"
 
 for (( c=0; c<$CNSCOUNT; c++ ))
@@ -67,6 +69,7 @@ do
   cnsglusterinfo="$cnsglusterinfo
 $CNS-$c glusterfs_devices='[ \"${drive1}\", \"${drive2}\", \"${drive3}\" ]'"
 done
+fi
 
 # Create Master nodes grouping
 echo $(date) " - Creating Master nodes grouping"
@@ -86,7 +89,9 @@ do
 $INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c"
 done
 
-# Create Nodes grouping 
+# Create Nodes grouping if CNS is enabled
+if [ $ENABLECNS == "true" ]
+then
 echo $(date) " - Creating Nodes grouping"
 
 for (( c=0; c<$NODECOUNT; c++ ))
@@ -94,6 +99,7 @@ do
   nodegroup="$nodegroup
 $NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c"
 done
+fi
 
 # Create CNS nodes grouping 
 echo $(date) " - Creating CNS nodes grouping"
@@ -364,11 +370,11 @@ if [ $METRICS == "true" ]
 then
 	sleep 30
 	echo $(date) "- Deploying Metrics"
-	if [ $AZURE == "true" ]
+	if [ $ENABLECNS == "true" ]
 	then
-		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
+		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml  -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
 	else
-		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True"
+		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True"
 	fi
 	if [ $? -eq 0 ]
 	then
@@ -385,11 +391,11 @@ if [ $LOGGING == "true" ]
 then
 	sleep 60
 	echo $(date) "- Deploying Logging"
-	if [ $AZURE == "true" ]
+	if [ $ENABLECNS == "true" ]
 	then
-		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True -e openshift_hosted_logging_storage_kind=dynamic"
+		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml  -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true -e openshift_master_dynamic_provisioning_enabled=true"
 	else
-		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/openshift-logging.yml -e openshift_logging_install_logging=True"
+		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml  -e openshift_logging_install_logging=True"
 	fi
 	if [ $? -eq 0 ]
 	then
@@ -403,7 +409,6 @@ fi
 # Delete yaml files
 echo $(date) "- Deleting unecessary files"
 
-# mkdir /home/${SUDOUSER}/openshift-container-platform-playbooks || true
 rm -rf /home/${SUDOUSER}/openshift-container-platform-playbooks
 
 echo $(date) "- Sleep for 30"

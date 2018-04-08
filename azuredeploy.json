@@ -2034,7 +2034,7 @@
 				"masterPrepLoop",
 				"infraPrepLoop",
 				"nodePrepLoop",
-				"[if(equals(parameters('enableCNS'), 'true'), cnsPrepLoop, json('null'))]"
+				"[if(equals(parameters('enableCNS'), 'true'), 'cnsPrepLoop', json('null'))]"
 			],
 			"properties": {
 				"mode": "Incremental",

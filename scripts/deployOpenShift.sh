@@ -374,7 +374,7 @@ provisioner: kubernetes.io/glusterfs
 reclaimPolicy: Delete
 EOF
 
-	runuser -l $SUDOUSER -c "oc update -f ~/home/$SUDOUSER/glusterfs-storage.yaml"
+	runuser -l $SUDOUSER -c "oc apply -f ~/home/$SUDOUSER/glusterfs-storage.yaml"
 	sleep 10
 	
 	# Installing Service Catalog, Ansible Service Broker and Template Service Broker

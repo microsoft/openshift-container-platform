@@ -996,7 +996,6 @@
 		}, {
 			"type": "Microsoft.Storage/storageAccounts",
 			"name": "[variables('newStorageAccountCns')]",
-			"condition": "[equals(parameters('enableCNS'), 'true')]",
 			"location": "[variables('location')]",
 			"kind": "Storage",
 			"apiVersion": "[variables('apiVersionStorage')]",
@@ -1376,6 +1375,7 @@
 		}, {
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('openshiftCnsHostname'), '-', copyIndex(), '-nic')]",
+			"condition": "[equals(parameters('enableCNS'), 'true')]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionNetwork')]",
 			"tags": {
@@ -1447,6 +1447,7 @@
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('diagStorageAccount1'))]",
+				"[if(equals(parameters('storageKind'), 'unmanaged'), concat(resourceId('Microsoft.Storage/storageAccounts', variables('diagStorageAccount1'))), json('null'))]",
 				"[concat('Microsoft.Network/networkInterfaces/', variables('openshiftBastionHostname'), '-nic')]"
 			],
 			"properties": {
@@ -1758,6 +1759,7 @@
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [
+				"[resourceId('Microsoft.Storage/storageAccounts', variables('newStorageAccountCns'))]",
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('diagStorageAccount1'))]",
 				"cnsNicLoop",
 				"cnsavailabilityset"

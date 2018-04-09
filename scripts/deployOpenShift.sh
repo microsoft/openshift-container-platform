@@ -90,9 +90,7 @@ do
 $INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c"
 done
 
-# Create Nodes grouping if CNS is enabled
-if [ $ENABLECNS == "true" ]
-then
+# Create Nodes grouping
 echo $(date) " - Creating Nodes grouping"
 
 for (( c=0; c<$NODECOUNT; c++ ))
@@ -100,7 +98,6 @@ do
   nodegroup="$nodegroup
 $NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c"
 done
-fi
 
 # Create CNS nodes grouping if CNS is enabled
 if [ $ENABLECNS == "true" ]

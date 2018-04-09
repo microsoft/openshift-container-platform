@@ -16,7 +16,7 @@ sleep 10
 # Register Host with Cloud Access Subscription
 echo $(date) " - Register host with Cloud Access Subscription"
 
-subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
+subscription-manager register --force --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --force --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
 
 if [ $? -eq 0 ]
 then
@@ -54,7 +54,8 @@ subscription-manager repos \
     --enable="rhel-7-server-extras-rpms" \
     --enable="rhel-7-server-ose-3.9-rpms" \
 	--enable="rhel-7-server-ansible-2.4-rpms" \
-    --enable="rhel-7-fast-datapath-rpms" 
+    --enable="rhel-7-fast-datapath-rpms" \
+	--enable=rh-gluster-3-client-for-rhel-7-server-rpms
 
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
@@ -63,6 +64,7 @@ yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash
 yum -y install cloud-utils-growpart.noarch
 yum -y update --exclude=WALinuxAgent
 yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
+yum -y update glusterfs-fuse
 
 atomic-openshift-excluder unexclude
 
@@ -93,7 +95,7 @@ sed -i -e "s#^OPTIONS='--selinux-enabled'#OPTIONS='--selinux-enabled --insecure-
 # Create thin pool logical volume for Docker
 echo $(date) " - Creating thin pool logical volume for Docker and staring service"
 
-DOCKERVG=$( parted -m /dev/sda print all 2>/dev/null | grep unknown | grep /dev/sd | cut -d':' -f1 )
+DOCKERVG=$( parted -m /dev/sda print all 2>/dev/null | grep unknown | grep /dev/sd | cut -d':' -f1 | head -n1 )
 
 echo "DEVS=${DOCKERVG}" >> /etc/sysconfig/docker-storage-setup
 echo "VG=docker-vg" >> /etc/sysconfig/docker-storage-setup

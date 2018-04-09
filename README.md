@@ -27,6 +27,8 @@ This template is referencing a RHEL image that will most likely not be valid for
 
 Currently, the Azure Cloud Provider does not work in Azure Stack. This means you will not be able to use disk attach for persistent storage in Azure Stack. You can always configure other storage options such as NFS, iSCSI, Gluster, etc. that can be used for persistent storage. We are exploring options to address the Azure Cloud Provider in Azure Stack but this will take a little bit of time.
 
+As an alternative, you can choose to enable CNS and use Gluster for persistent storage.  If CNS is enabled, three additional nodes will be deployed with additional storage for Gluster. 
+
 Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started
 
 This template deploys multiple VMs and requires some pre-work before you can successfully deploy the OpenShift Cluster.  If you don't get the pre-work done correctly, you will most likely fail to deploy the cluster using this template.  Please read the instructions completely before you proceed. 
@@ -88,8 +90,9 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 9.  dataDiskSize: Size of data disk to attach to nodes for Docker volume - valid sizes are 32 GB, 64 GB, 128 GB, 256 GB, 512 GB, 1024 GB, and 2048 GB
 10. adminUsername: Admin username for both OS (VM) login and initial OpenShift user
 11. openshiftPassword: Password for OpenShift user
-11. enableMetrics: Enable Metrics - value is either "true" or "false".  If set to true, Metrics will use ephemeral storage
-11. enableLogging: Enable Logging - value is either "true" or "false".  If set to true, Logging will use ephemeral storage
+11. enableMetrics: Enable Metrics - value is either "true" or "false"
+11. enableLogging: Enable Logging - value is either "true" or "false"
+11. enableCNS: Enable Container Native Storage (CNS) - value is either "true" or "false".  If set to true, 3 additional nodes will be deployed for CNS
 12. rhsmUsernameOrOrgId: Red Hat Subscription Manager Username or Organization ID. To find your Organization ID, run on registered server: `subscription-manager identity`.
 13. rhsmPasswordOrActivationKey: Red Hat Subscription Manager Password or Activation Key for your Cloud Access subscription. You can get this from [here](https://access.redhat.com/management/activation_keys).
 14. rhsmPoolId: The Red Hat Subscription Manager Pool ID that contains your OpenShift entitlements
@@ -117,7 +120,7 @@ Ex: `az group deployment create --name ocpdeployment --template-file azuredeploy
 
 ### NOTE
 
-The Service Catalog and Ansible Template Service Broker does not deploy as there is no persistent storage available for etcd required for Service Catalog.
+The Service Catalog, Ansible Service Broker, and Template Service Broker will only deploy if CNS is enabled due to requirement for persistent storage.
 
 Be sure to follow the OpenShift instructions to create the necessary DNS entry for the OpenShift Router for access to applications. <br />
 
@@ -142,13 +145,13 @@ You should see a folder named '0' and '1'.  In each of these folders, you will s
 
 **Metrics**
 
-If you deployed Metrics, it will take a few extra minutes deployment to complete. Please be patient.
+If you deployed Metrics, it will take a few extra minutes deployment to complete. Please be patient.  If enableCNS is set to true, then Metrics will use Gluster for persistent storage.  Otherwise, it will use ephemeral storage.
 
 Once the deployment is complete, log into the OpenShift Web Console and complete an addition configuration step.  Go to the openshift-infra project, click on Hawkster metrics route, and accept the SSL exception in your browser.
 
 **Logging**
 
-If you deployed Logging, it will take a few extra minutes deployment to complete. Please be patient.
+If you deployed Logging, it will take a few extra minutes deployment to complete. Please be patient.  If enableCNS is set to true, then Logging will use Gluster for persistent storage.  Otherwise, it will use ephemeral storage.
 
 Once the deployment is complete, log into the OpenShift Web Console and complete an addition configuration step.  Go to the logging project, click on the Kubana route, and accept the SSL exception in your browser.
 

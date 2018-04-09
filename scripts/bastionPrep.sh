@@ -21,7 +21,7 @@ sleep 10
 # Register Host with Cloud Access Subscription
 echo $(date) " - Register host with Cloud Access Subscription"
 
-subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
+subscription-manager register --force --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --force --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
 
 if [ $? -eq 0 ]
 then
@@ -59,7 +59,8 @@ subscription-manager repos \
     --enable="rhel-7-server-extras-rpms" \
     --enable="rhel-7-server-ose-3.9-rpms" \
 	--enable="rhel-7-server-ansible-2.4-rpms" \
-    --enable="rhel-7-fast-datapath-rpms"
+    --enable="rhel-7-fast-datapath-rpms" \
+	--enable=rh-gluster-3-client-for-rhel-7-server-rpms
 
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
@@ -68,6 +69,7 @@ yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash
 yum -y update --exclude=WALinuxAgent
 yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
 atomic-openshift-excluder unexclude
+yum -y update glusterfs-fuse
 
 # Install OpenShift utilities
 echo $(date) " - Installing OpenShift utilities"

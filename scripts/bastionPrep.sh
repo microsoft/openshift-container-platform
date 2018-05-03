@@ -68,6 +68,7 @@ yum -y update --exclude=WALinuxAgent
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages"
 yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion httpd-tools kexec-tools sos psacct
+yum -y install ansible
 yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
 atomic-openshift-excluder unexclude
 
@@ -82,11 +83,7 @@ sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 sudo sh -c 'echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo'
 sudo yum install -y azure-cli
 
-# Create playbook to update ansible.cfg file to include path to library
-# Filename: updateansiblecfg.yaml
-
 # Run Ansible Playbook to update ansible.cfg file
-
 echo $(date) " - Updating ansible.cfg file"
 wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 5 https://raw.githubusercontent.com/microsoft/openshift-container-platform-playbooks/master/updateansiblecfg.yaml
 ansible-playbook -f 10 ./updateansiblecfg.yaml

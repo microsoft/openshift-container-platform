@@ -1,0 +1,273 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"location": {
+			"type": "string",
+			"metadata": {
+				"description": "Datacenter Region Location"
+			}
+		},
+		"sshKeyPath": {
+			"type": "string",
+			"metadata": {
+				"description": "SSH Public Key Path"
+			}
+		},
+		"sshPublicKey": {
+			"type": "string",
+			"metadata": {
+				"description": "SSH Public Key"
+			}
+		},
+		"dataDiskSize": {
+			"type": "int",
+			"metadata": {
+				"description": "Size of Data Disk"
+			}
+		},
+		"glusterDiskSize": {
+			"type": "int",
+			"metadata": {
+				"description": "Size of Data Disks for Gluster"
+			}
+		},
+		"adminUsername": {
+			"type": "string",
+			"metadata": {
+				"description": "Admin Username"
+			}
+		},
+		"vmSize": {
+			"type": "string",
+			"metadata": {
+				"description": "VM Size"
+			}
+		},
+		"availabilitySet": {
+			"type": "string",
+			"metadata": {
+				"description": "Name of Availibility Set"
+			}
+		},
+		"hostName": {
+			"type": "string",
+			"metadata": {
+				"description": "VM Hostname"
+			}
+		},
+		"unmanagedOsDiskUri": {
+			"type": "string",
+			"metadata": {
+				"description": "Unmanaged OS disk uri"
+			}
+		},
+		"unmanagedDataDiskUri": {
+			"type": "string",
+			"metadata": {
+				"description": "Unmanaged data disk uri"
+			}
+		},
+		"role": {
+			"type": "string",
+			"metadata": {
+				"description": "VM Role for tag"
+			}
+		},
+		"vmStorageType": {
+			"type": "string",
+			"metadata": {
+				"description": "VM Storage Type"
+			}
+		},
+		"storageKind": {
+			"type": "string",
+			"metadata": {
+				"description": "Managed or Unmanaged disk"
+			}
+		},
+		"newStorageAccountOs": {
+			"type": "string",
+			"metadata": {
+				"description": "Storage Account for OS disk"
+			}
+		},
+		"newStorageAccountData": {
+			"type": "string",
+			"metadata": {
+				"description": "Storage Account for data disk"
+			}
+		},
+		"diagStorageAccount": {
+			"type": "string",
+			"metadata": {
+				"description": "Diagnostics Storage Account"
+			}
+		},
+		"apiVersionStorage": {
+			"type": "string",
+			"metadata": {
+				"description": "Storage API Version"
+			}
+		},
+		"apiVersionCompute": {
+			"type": "string",
+			"metadata": {
+				"description": "Compute API Version"
+			}
+		},
+		"imageReference": {
+			"type": "object",
+			"metadata": {
+				"description": "Image Reference"
+			}
+		},
+		"redHatTags": {
+			"type": "object",
+			"metadata": {
+				"description": "Red Hat Tags"
+			}
+		}
+	},
+	"variables": {
+		"managedStorageProfile": {
+			"imageReference": "[parameters('imageReference')]",
+			"osDisk": {
+				"name": "[concat(parameters('hostName'), '-osdisk')]",
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"caching": "ReadWrite",
+				"createOption": "FromImage",
+				"diskSizeGB": 64,
+				"osType": "Linux"
+			},
+			"dataDisks": [{
+				"name": "[concat(parameters('hostName'), '-docker-pool')]",
+				"diskSizeGB": "[parameters('dataDiskSize')]",
+				"lun": 0,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostName'), '-gluster-disk0')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 1,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostName'), '-gluster-disk1')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 2,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostName'), '-gluster-disk2')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 3,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			}]
+		},
+		"unmanagedStorageProfile": {
+			"imageReference": "[parameters('imageReference')]",
+			"osDisk": {
+				"name": "[concat(parameters('hostName'), '-osdisk')]",
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedOsDiskUri'), 'vhds/', parameters('hostname'), '-osdisk.vhd')]"
+				},
+				"caching": "ReadWrite",
+				"createOption": "FromImage",
+				"diskSizeGB": 64
+			},
+			"dataDisks": [{
+				"name": "[concat(parameters('hostname'), '-docker-pool')]",
+				"diskSizeGB": "[parameters('dataDiskSize')]",
+				"lun": 0,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-docker-pool.vhd')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostname'), '-gluster-disk0')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 1,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-gluster-disk0.vhd')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostname'), '-gluster-disk1')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 2,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-gluster-disk1.vhd')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostname'), '-gluster-disk2')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 3,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-gluster-disk2.vhd')]"
+				},
+				"createOption": "Empty"
+			}]
+		},
+		"storageProfile": "[concat(parameters('storageKind'), 'StorageProfile')]"
+	},
+	"resources": [{
+		"type": "Microsoft.Compute/virtualMachines",
+		"name": "[parameters('hostName')]",
+		"location": "[parameters('location')]",
+		"apiVersion": "[parameters('apiVersionCompute')]",
+		"tags": {
+			"Role": "[parameters('role')]",
+				"provider": "[parameters('redHatTags').provider]",
+				"app": "[parameters('redHatTags').app]",
+				"version": "[parameters('redHatTags').version]",
+				"platform": "[parameters('redHatTags').platform]"
+		},
+		"properties": {
+			"availabilitySet": {
+				"id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySet'))]"
+			},
+			"hardwareProfile": {
+				"vmSize": "[parameters('vmSize')]"
+			},
+			"osProfile": {
+				"computerName": "[parameters('hostName')]",
+				"adminUsername": "[parameters('adminUsername')]",
+				"linuxConfiguration": {
+					"disablePasswordAuthentication": true,
+					"ssh": {
+						"publicKeys": [{
+							"path": "[parameters('sshKeyPath')]",
+							"keyData": "[parameters('sshPublicKey')]"
+						}]
+					}
+				}
+			},
+			"storageProfile": "[variables(variables('storageProfile'))]",
+			"networkProfile": {
+				"networkInterfaces": [{
+					"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('hostName'), '-nic'))]"
+				}]
+			},
+			"diagnosticsProfile": {
+				"bootDiagnostics": {
+					"enabled": true,
+					"storageUri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('diagStorageAccount')), parameters('apiVersionStorage')).primaryEndpoints['blob']))]"
+				}
+			}
+		}
+	}],
+	"outputs": {}
+}

@@ -44,6 +44,9 @@
 		"enableLogging": {
 			"value": "false"
 		},
+		"enableCNS": {
+			"value": "false"
+		},
 		"rhsmUsernameOrOrgId": {
 			"value": "changeme"
 		},

@@ -58,6 +58,7 @@ echo $(date) " - Install base packages and update system to latest packages"
 
 yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion kexec-tools sos psacct
 yum -y install cloud-utils-growpart.noarch
+yum -y install ansible
 yum -y update --exclude=WALinuxAgent
 yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
 
@@ -79,15 +80,24 @@ xfs_growfs $rootdev
 echo $(date) " - Installing Docker"
 yum -y install docker
 
-sed -i -e "s#^OPTIONS='--selinux-enabled'#OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'#" /etc/sysconfig/docker
+# Update docker storage
+echo "
+# Adding insecure-registry option required by OpenShift
+OPTIONS=\"\$OPTIONS --insecure-registry 172.30.0.0/16\"
+" >> /etc/sysconfig/docker
 
 # Create thin pool logical volume for Docker
 echo $(date) " - Creating thin pool logical volume for Docker and staring service"
 
 DOCKERVG=$( parted -m /dev/sda print all 2>/dev/null | grep unknown | grep /dev/sd | cut -d':' -f1 )
 
-echo "DEVS=${DOCKERVG}" >> /etc/sysconfig/docker-storage-setup
-echo "VG=docker-vg" >> /etc/sysconfig/docker-storage-setup
+echo "
+# Adding OpenShift data disk for docker
+DEVS=${DOCKERVG}
+VG=docker-vg
+" >> /etc/sysconfig/docker-storage-setup
+
+# Running setup for docker storage
 docker-storage-setup
 if [ $? -eq 0 ]
 then

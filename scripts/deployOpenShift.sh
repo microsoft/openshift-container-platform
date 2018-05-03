@@ -316,7 +316,7 @@ echo $(date) " - Configuring Docker Registry to use Azure Storage Account"
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
 
 # Handing Azure specific storage requirements if it is enabled
-if [[ $AZURE == "true" ]]
+if [[ $AZURE == "true-disable-for-testing" ]]
 then
 
 	# Create Storage Classes
@@ -366,17 +366,6 @@ then
 	echo $(date) " - Sleep for 60"
 	sleep 60
 
-        # Adding some labels back because they go missing
-	echo $(date) " - Adding api and logging labels"
-	runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
-	runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
-
-        # Restarting things so everything is clean
-	echo $(date) " - Rebooting cluster to complete installation"
-	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master.yaml"
-	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
-	sleep 10
-
 # End of Azure specific section
 fi 
 
@@ -403,6 +392,17 @@ EOF
 	runuser -l $SUDOUSER -c "oc create -f /home/$SUDOUSER/default-glusterfs-storage.yaml"
 	sleep 10
 fi
+
+# Adding some labels back because they go missing
+echo $(date) " - Adding api and logging labels"
+runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
+runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
+
+# Restarting things so everything is clean before installing anything else
+echo $(date) " - Rebooting cluster to complete installation"
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master.yaml"
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
+sleep 20
 
 # Installing Service Catalog, Ansible Service Broker and Template Service Broker
 if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]

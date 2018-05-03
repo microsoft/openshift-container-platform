@@ -102,6 +102,18 @@ do
 $NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c"
 done
 
+# Create CNS nodes grouping if CNS is enabled
+if [ $ENABLECNS == "true" ]
+then
+	echo $(date) " - Creating CNS nodes grouping"
+
+	for (( c=0; c<$CNSCOUNT; c++ ))
+	do
+		cnsgroup="$cnsgroup
+$CNS-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$CNS-$c"
+	done
+fi
+
 # Create glusterfs configuration if CNS is enabled
 if [ $ENABLECNS == "true" ]
 then
@@ -155,9 +167,10 @@ $CLOUDKIND
 # default selectors for router and registry services
 openshift_router_selector='region=infra'
 openshift_registry_selector='region=infra'
+$registrygluster
 
 # Deploy Service Catalog
-# openshift_enable_service_catalog=false
+openshift_enable_service_catalog=false
 
 # template_service_broker_install=false
 template_service_broker_selector={"region":"infra"}
@@ -210,6 +223,7 @@ $cnsglusterinfo
 $mastergroup
 $infragroup
 $nodegroup
+$cnsgroup
 
 # host group for adding new nodes
 [new_nodes]
@@ -307,17 +321,14 @@ then
 
 	# Create Storage Classes
 	echo $(date) " - Creating Storage Classes"
-
 	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
 
-	echo $(date) " - Sleep for 120"
-	sleep 120
+	echo $(date) " - Sleep for 60"
+	sleep 60
 
-	# Execute setup-azure-master and setup-azure-node playbooks to configure Azure Cloud Provider
+	# Execute setup-azure-master playbooks to configure Azure Cloud Provider
 	echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
-
 	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-master.yaml"
-
 	if [ $? -eq 0 ]
 	then
 	    echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
@@ -329,8 +340,8 @@ then
 	echo $(date) " - Sleep for 60"
 	sleep 60
 
+	# Execute setup-azure-master-node playbooks to configure Azure Cloud Provider
 	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-node-master.yaml"
-
 	if [ $? -eq 0 ]
 	then
 	    echo $(date) " - Cloud Provider setup of node config on Master Nodes completed successfully"
@@ -342,8 +353,8 @@ then
 	echo $(date) " - Sleep for 60"
 	sleep 60
 
+	# Execute setup-azure-node playbooks to configure Azure Cloud Provider
 	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-node.yaml"
-
 	if [ $? -eq 0 ]
 	then
 	    echo $(date) " - Cloud Provider setup of node config on App Nodes completed successfully"
@@ -352,47 +363,19 @@ then
 	    exit 9
 	fi
 
-	echo $(date) " - Sleep for 120"
-	sleep 120
+	echo $(date) " - Sleep for 60"
+	sleep 60
 
-	echo $(date) " - Rebooting cluster to complete installation"
+        # Adding some labels back because they go missing
+	echo $(date) " - Adding api and logging labels"
 	runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
 	runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
+
+        # Restarting things so everything is clean
+	echo $(date) " - Rebooting cluster to complete installation"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master.yaml"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
 	sleep 10
-
-	# Updating the storage on Ansible Service Broker (Stop, delete PVC, create PVC, start)
-	echo " - Deleted PVC for ASB (Will recreate as Azure Storage)"
-	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --remove --name etcd -n openshift-ansible-service-broker" || true
-	sleep 5
-	runuser -l $SUDOUSER -c "oc delete pvc/etcd -n openshift-ansible-service-broker" || true
-	sleep 5
-	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb -n openshift-ansible-service-broker" || true
-	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb-etcd -n openshift-ansible-service-broker" || true
-	sleep 5
-	ASBPID=$$
-	cat > /tmp/$ASBPID.asb-etcd-storage.yaml <<EOF
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: etcd
-  namespace: openshift-ansible-service-broker
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1G
-EOF
-	runuser -l $SUDOUSER -c "oc create -f /tmp/$ASBPID.asb-etcd-storage.yaml"
-	echo $(date) " - Created new PVC for ASB (Sleeping for 60 seconds)"
-	sleep 60
-	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --add --type pvc --claim-name etcd --mount-path /data --name etcd -n openshift-ansible-service-broker" || true
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker" || true
-	echo $(date) " - Assigned new PVC for ASB and starting (Sleeping for 120 seconds)"
-	sleep 120
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker" || true
 
 # End of Azure specific section
 fi 
@@ -417,18 +400,17 @@ parameters:
 provisioner: kubernetes.io/glusterfs
 reclaimPolicy: Delete
 EOF
-
 	runuser -l $SUDOUSER -c "oc create -f /home/$SUDOUSER/default-glusterfs-storage.yaml"
 	sleep 10
+fi
 
-	# Installing Service Catalog, Ansible Service Broker and Template Service Broker
-
-	echo $(date) "- Installing Service Catalog, Ansible Service Broker and Template Service Broker"
-	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-service-catalog/config.yml"
-	fi
+# Installing Service Catalog, Ansible Service Broker and Template Service Broker
+if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
+then
+	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-service-catalog/config.yml -e openshift_enable_service_catalog=true"
+fi
 
 # Configure Metrics
-
 if [ $METRICS == "true" ]
 then
 	sleep 30

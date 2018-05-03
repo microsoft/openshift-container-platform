@@ -12,7 +12,7 @@
 		},
 		"masterVmSize": {
 			"type": "string",
-			"defaultValue": "Standard_DS2_v2",
+			"defaultValue": "Standard_E2s_v3",
 			"allowedValues": [
 				"Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_A8", "Standard_A9", "Standard_A10", "Standard_A11",
 				"Standard_D2", "Standard_D3", "Standard_D4",
@@ -36,7 +36,7 @@
 		},
 		"infraVmSize": {
 			"type": "string",
-			"defaultValue": "Standard_DS2_v2",
+			"defaultValue": "Standard_D4s_v3",
 			"allowedValues": [
 				"Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_A8", "Standard_A9", "Standard_A10", "Standard_A11",
 				"Standard_D2", "Standard_D3", "Standard_D4",
@@ -60,7 +60,7 @@
 		},
 		"nodeVmSize": {
 			"type": "string",
-			"defaultValue": "Standard_DS2_v2",
+			"defaultValue": "Standard_D2s_v3",
 			"allowedValues": [
 				"Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_A8", "Standard_A9", "Standard_A10", "Standard_A11",
 				"Standard_D2", "Standard_D3", "Standard_D4",
@@ -264,6 +264,27 @@
 			"metadata": {
 				"description": "Default Subdomain for application routing (Wildcard DNS) - must enter something even if you are using nip.io. Must be all lowercase"
 			}
+		},
+		"addressPrefix": {
+			"type": "string",
+			"defaultValue": "10.0.0.0/8",
+			"metadata": {
+				"description": "Base subnet used for the virtual network needs to be in CIDR format and be an IP range specified in the RFC1918 range and we recommend at least a /23 - default is 10.0.0.0/8"
+			}
+		},
+		"masterSubnetPrefix": {
+			"type": "string",
+			"defaultValue": "10.1.0.0/16",
+			"metadata": {
+				"description": "Base subnet used for the master servers, and needs to be a subset of the addressPrefix - default is 10.1.0.0/16"
+			}
+		},
+		"nodeSubnetPrefix": {
+			"type": "string",
+			"defaultValue": "10.2.0.0/16",
+			"metadata": {
+				"description": "Base subnet used for the infra, node, and CNS servers, and needs to be a subset of the addressPrefix - default is 10.2.0.0/16"
+			}
 		}
 	},
 	"variables": {
@@ -367,9 +388,6 @@
 		"nodeOsUri": "[concat(parameters('storageKind'), 'NodeOsUri')]",
 		"nodeDataUri": "[concat(parameters('storageKind'), 'NodeDataUri')]",
 		"cnsUri": "[concat(parameters('storageKind'), 'CnsUri')]",
-		"addressPrefix": "10.0.0.0/8",
-		"masterSubnetPrefix": "10.1.0.0/16",
-		"nodeSubnetPrefix": "10.2.0.0/16",
 		"virtualNetworkName": "openshiftvnet",
 		"masterSubnetName": "mastersubnet",
 		"nodeSubnetName": "nodesubnet",
@@ -406,8 +424,8 @@
 			"platform": "Azure",
 			"provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
 		},
-		"bastionVmSize": "Standard_DS2_v2",
-		"cnsVmSize": "Standard_DS12_v2",
+		"bastionVmSize": "Standard_D2s_v3",
+		"cnsVmSize": "Standard_E4s_v3",
 		"glusterDiskSize": 128,
 		"cnsInstanceCount": 3,
 		"singlequote": "'",
@@ -954,18 +972,18 @@
 			"properties": {
 				"addressSpace": {
 					"addressPrefixes": [
-						"[variables('addressPrefix')]"
+						"[parameters('addressPrefix')]"
 					]
 				},
 				"subnets": [{
 					"name": "[variables('masterSubnetName')]",
 					"properties": {
-						"addressPrefix": "[variables('masterSubnetPrefix')]"
+						"addressPrefix": "[parameters('masterSubnetPrefix')]"
 					}
 				}, {
 					"name": "[variables('nodeSubnetName')]",
 					"properties": {
-						"addressPrefix": "[variables('nodeSubnetPrefix')]"
+						"addressPrefix": "[parameters('nodeSubnetPrefix')]"
 					}
 				}]
 			}

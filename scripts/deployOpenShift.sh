@@ -241,11 +241,11 @@ runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ans
 
 # Configure DNS so it always has the domain name
 echo $(date) " - Adding $DOMAIN to search for resolv.conf"
-runuser -l $SUDOUSER -c "ansible all -f 10 -b -m lineinfile -a 'dest=/etc/sysconfig/network-scripts/ifcfg-eth0 line=\"DOMAIN=$DOMAIN\"'"
+runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -m lineinfile -a 'dest=/etc/sysconfig/network-scripts/ifcfg-eth0 line=\"DOMAIN=$DOMAIN\"'"
 
 # Configure resolv.conf on all hosts through NetworkManager
 echo $(date) " - Restarting NetworkManager"
-runuser -l $SUDOUSER -c "ansible all -f 10 -b -m service -a \"name=NetworkManager state=restarted\""
+runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -m service -a \"name=NetworkManager state=restarted\""
 
 # Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
 if [[ $AZURE == "true" ]]

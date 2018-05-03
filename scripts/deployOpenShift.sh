@@ -208,7 +208,7 @@ $cnsglusterinfo
 # host group for nodes
 [nodes]
 $mastergroup
-$mastergroup
+$infragroup
 $nodegroup
 
 # host group for adding new nodes

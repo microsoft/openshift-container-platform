@@ -1447,7 +1447,6 @@
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('diagStorageAccount1'))]",
-				"[if(equals(parameters('storageKind'), 'unmanaged'), concat(resourceId('Microsoft.Storage/storageAccounts', variables('diagStorageAccount1'))), json('null'))]",
 				"[concat('Microsoft.Network/networkInterfaces/', variables('openshiftBastionHostname'), '-nic')]"
 			],
 			"properties": {

@@ -331,7 +331,7 @@ then
 
 	# Execute setup-azure-master playbooks to configure Azure Cloud Provider
 	echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
-	#runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configure-master-for-azure.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configure-master-for-azure.yaml"
 	if [ $? -eq 0 ]
 	then
 	    echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"

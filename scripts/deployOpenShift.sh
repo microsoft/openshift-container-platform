@@ -77,8 +77,6 @@ fi
 if [[ $AZURE == "true" ]]
 then
 	export CLOUDKIND="openshift_cloudprovider_kind=azure"
-else
-	export CLOUDKIND="openshift_enable_service_catalog=false"
 fi
 
 # Create Master nodes grouping
@@ -277,7 +275,6 @@ else
 fi
 
 echo $(date) " - Modifying sudoers"
-
 sed -i -e "s/Defaults    requiretty/# Defaults    requiretty/" /etc/sudoers
 sed -i -e '/Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"/aDefaults    env_keep += "PATH"' /etc/sudoers
 
@@ -319,7 +316,6 @@ runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-play
 # Handing Azure specific storage requirements if it is enabled
 if [[ $AZURE == "true" ]]
 then
-
 	# Create Storage Classes
 	echo $(date) " - Creating Storage Classes"
 	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
@@ -339,12 +335,10 @@ then
 	fi
 	echo $(date) " - Sleep for 60"
 	sleep 60
-
 # End of Azure specific section
 fi 
 
 # Reconfigure glusterfs storage class
-
 if [ $ENABLECNS == "true" ]
 then
 	echo $(date) "- Create default glusterfs storage class"
@@ -364,11 +358,14 @@ provisioner: kubernetes.io/glusterfs
 reclaimPolicy: Delete
 EOF
 	runuser -l $SUDOUSER -c "oc create -f /home/$SUDOUSER/default-glusterfs-storage.yaml"
-	sleep 10
 
-	# Configure DNS so it always has the domain name
-	echo $(date) " - Adding $DOMAIN to search for resolv.conf"
+	echo $(date) " - Sleep for 60"
+	sleep 60
+
+	# Setting selinux to allow gluster-fusefs access
+	echo $(date) " - Setting selinux to allow gluster-fuse access"
 	runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -a 'sudo setsebool -P virt_sandbox_use_fusefs on'" || true
+# End of CNS specific section
 fi
 
 # Adding some labels back because they go missing

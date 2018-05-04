@@ -130,7 +130,7 @@ cat <<EOF > /home/${SUDOUSER}/scunmanaged.yml
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: generic
+  name: azure
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: kubernetes.io/azure-disk
@@ -143,7 +143,7 @@ cat <<EOF > /home/${SUDOUSER}/scmanaged.yml
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: generic
+  name: azure
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: kubernetes.io/azure-disk

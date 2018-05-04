@@ -249,7 +249,7 @@ runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -m service -a \"name=NetworkMan
 # Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
 if [[ $AZURE == "true" ]]
 then
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
+	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
 	if [ $? -eq 0 ]
 	then
 		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes successfully"
@@ -313,9 +313,15 @@ runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-play
 echo $(date) " - Configuring Docker Registry to use Azure Storage Account"
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
 
+# Setting CNS as default storage, only AZURE being true will override it
+CNS_DEFAULT_STORAGE=true
+
 # Handing Azure specific storage requirements if it is enabled
 if [[ $AZURE == "true" ]]
 then
+	# Azure wants to be primary, so let us let it be
+	CNS_DEFAULT_STORAGE=false
+
 	# Create Storage Classes
 	echo $(date) " - Creating Storage Classes"
 	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
@@ -325,7 +331,7 @@ then
 
 	# Execute setup-azure-master playbooks to configure Azure Cloud Provider
 	echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configure-master-for-azure.yaml"
+	#runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configure-master-for-azure.yaml"
 	if [ $? -eq 0 ]
 	then
 	    echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
@@ -347,7 +353,7 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
+    storageclass.kubernetes.io/is-default-class: "$CNS_DEFAULT_STORAGE"
   name: default-glusterfs-storage
 parameters:
   resturl: http://heketi-storage-glusterfs.${ROUTING}

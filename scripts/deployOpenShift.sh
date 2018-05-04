@@ -59,8 +59,8 @@ else
 fi
 
 # Cloning Ansible playbook repository
-#(cd /home/$SUDOUSER && git clone https://github.com/vincepower/openshift-container-platform-playbooks.git)
-(cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git)
+(cd /home/$SUDOUSER && git clone https://github.com/vincepower/openshift-container-platform-playbooks.git)
+#(cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git)
 if [ -d /home/${SUDOUSER}/openshift-container-platform-playbooks ]
 then
   echo " - Retrieved playbooks successfully"
@@ -316,7 +316,7 @@ echo $(date) " - Configuring Docker Registry to use Azure Storage Account"
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
 
 # Handing Azure specific storage requirements if it is enabled
-if [[ $AZURE == "true-disable-for-testing" ]]
+if [[ $AZURE == "true" ]]
 then
 
 	# Create Storage Classes
@@ -328,7 +328,7 @@ then
 
 	# Execute setup-azure-master playbooks to configure Azure Cloud Provider
 	echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-master.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configure-master-for-azure.yaml"
 	if [ $? -eq 0 ]
 	then
 	    echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
@@ -336,33 +336,6 @@ then
 	    echo $(date) " - Cloud Provider setup of master config on Master Nodes failed to completed"
 	    exit 7
 	fi
-
-	echo $(date) " - Sleep for 60"
-	sleep 60
-
-	# Execute setup-azure-master-node playbooks to configure Azure Cloud Provider
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-node-master.yaml"
-	if [ $? -eq 0 ]
-	then
-	    echo $(date) " - Cloud Provider setup of node config on Master Nodes completed successfully"
-	else
-	    echo $(date) " - Cloud Provider setup of node config on Master Nodes failed to completed"
-	    exit 8
-	fi
-
-	echo $(date) " - Sleep for 60"
-	sleep 60
-
-	# Execute setup-azure-node playbooks to configure Azure Cloud Provider
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/setup-azure-node.yaml"
-	if [ $? -eq 0 ]
-	then
-	    echo $(date) " - Cloud Provider setup of node config on App Nodes completed successfully"
-	else
-	    echo $(date) " - Cloud Provider setup of node config on App Nodes failed to completed"
-	    exit 9
-	fi
-
 	echo $(date) " - Sleep for 60"
 	sleep 60
 
@@ -391,6 +364,10 @@ reclaimPolicy: Delete
 EOF
 	runuser -l $SUDOUSER -c "oc create -f /home/$SUDOUSER/default-glusterfs-storage.yaml"
 	sleep 10
+
+	# Configure DNS so it always has the domain name
+	echo $(date) " - Adding $DOMAIN to search for resolv.conf"
+	runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -a 'sudo setsebool -P virt_sandbox_use_fusefs on'" || true
 fi
 
 # Adding some labels back because they go missing

@@ -144,10 +144,10 @@ openshift_router_selector='region=infra'
 openshift_registry_selector='region=infra'
 
 # Deploy Service Catalog
-# openshift_enable_service_catalog=false
+openshift_enable_service_catalog=false
 
 # template_service_broker_install=false
-template_service_broker_selector={"region":"infra"}
+# template_service_broker_selector={"region":"infra"}
 
 # Type of clustering being used by OCP
 openshift_master_cluster_method=native
@@ -383,36 +383,36 @@ then
 	sleep 10
 
 	# Updating the storage on Ansible Service Broker (Stop, delete PVC, create PVC, start)
-	echo " - Deleted PVC for ASB (Will recreate as Azure Storage)"
-	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --remove --name etcd -n openshift-ansible-service-broker" || true
-	sleep 5
-	runuser -l $SUDOUSER -c "oc delete pvc/etcd -n openshift-ansible-service-broker" || true
-	sleep 5
-	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb -n openshift-ansible-service-broker" || true
-	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb-etcd -n openshift-ansible-service-broker" || true
-	sleep 5
-	ASBPID=$$
-	cat > /tmp/$ASBPID.asb-etcd-storage.yaml <<EOF
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: etcd
-  namespace: openshift-ansible-service-broker
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1G
-EOF
-	runuser -l $SUDOUSER -c "oc create -f /tmp/$ASBPID.asb-etcd-storage.yaml"
-	echo $(date) " - Created new PVC for ASB (Sleeping for 60 seconds)"
-	sleep 60
-	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --add --type pvc --claim-name etcd --mount-path /data --name etcd -n openshift-ansible-service-broker" || true
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker" || true
-	echo $(date) " - Assigned new PVC for ASB and starting (Sleeping for 120 seconds)"
-	sleep 120
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker" || true
+	# echo " - Deleted PVC for ASB (Will recreate as Azure Storage)"
+	# runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --remove --name etcd -n openshift-ansible-service-broker" || true
+	# sleep 5
+	# runuser -l $SUDOUSER -c "oc delete pvc/etcd -n openshift-ansible-service-broker" || true
+	# sleep 5
+	# runuser -l $SUDOUSER -c "oc rollout cancel dc/asb -n openshift-ansible-service-broker" || true
+	# runuser -l $SUDOUSER -c "oc rollout cancel dc/asb-etcd -n openshift-ansible-service-broker" || true
+	# sleep 5
+	# ASBPID=$$
+	# cat > /tmp/$ASBPID.asb-etcd-storage.yaml <<EOF
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+  # name: etcd
+  # namespace: openshift-ansible-service-broker
+# spec:
+  # accessModes:
+    # - ReadWriteOnce
+  # resources:
+    # requests:
+      # storage: 1G
+# EOF
+	# runuser -l $SUDOUSER -c "oc create -f /tmp/$ASBPID.asb-etcd-storage.yaml"
+	# echo $(date) " - Created new PVC for ASB (Sleeping for 60 seconds)"
+	# sleep 60
+	# runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --add --type pvc --claim-name etcd --mount-path /data --name etcd -n openshift-ansible-service-broker" || true
+	# runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker" || true
+	# echo $(date) " - Assigned new PVC for ASB and starting (Sleeping for 120 seconds)"
+	# sleep 120
+	# runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker" || true
 
 # End of Azure specific section
 fi 

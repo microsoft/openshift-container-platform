@@ -92,7 +92,7 @@ OPTIONS=\"\$OPTIONS --insecure-registry 172.30.0.0/16\"
 # Create thin pool logical volume for Docker
 echo $(date) " - Creating thin pool logical volume for Docker and staring service"
 
-DOCKERVG=$( parted -m /dev/sda print all 2>/dev/null | grep unknown | grep /dev/sd | cut -d':' -f1 )
+DOCKERVG=$( parted -m /dev/sda print all 2>/dev/null | grep unknown | grep /dev/sd | cut -d':' -f1 | head -n1 )
 
 echo "
 # Adding OpenShift data disk for docker

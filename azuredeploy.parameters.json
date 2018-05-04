@@ -82,6 +82,16 @@
 		},
 		"defaultSubDomain": {
 			"value": "changeme"
+		},
+		"addressPrefix": {
+			"value": "10.128.0.0/9"
+		},
+		"masterSubnetPrefix": {
+			"value": "10.129.0.0/16"
+		},
+		"nodeSubnetPrefix": {
+			"value": "10.130.0.0/16"
 		}
+
 	}
 }

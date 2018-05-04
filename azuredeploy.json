@@ -1107,6 +1107,9 @@
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
+			"sku": {
+				"name": "[variables(variables('availabilitySetSku'))]"
+			},
 			"properties": {
 				"platformFaultDomainCount": "[variables(variables('platformFaultDomainCount'))]",
 				"platformUpdateDomainCount": "5"

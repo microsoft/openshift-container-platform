@@ -221,6 +221,10 @@ cat >> /etc/ansible/hosts <<EOF
 [new_nodes]
 EOF
 
+# Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
+echo $(date) " - Running DNS Hostname resolution check"
+runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
+
 #echo $(date) " - Running network_manager.yml playbook"
 DOMAIN=`domainname -d`
 

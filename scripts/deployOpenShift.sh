@@ -27,6 +27,9 @@ export RESOURCEGROUP=${20}
 export LOCATION=${21}
 export AZURE=${22}
 export STORAGEKIND=${23}
+export ENABLECNS=${24}
+export CNS=${25}
+export CNSCOUNT=${26}
 
 export BASTION=$(hostname)
 

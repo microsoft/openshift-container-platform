@@ -67,6 +67,33 @@ else
   export CLOUDNAME="AzurePublicCloud"
 fi
 
+# Create Master nodes grouping
+echo $(date) " - Creating Master nodes grouping"
+
+for (( c=0; c<$MASTERCOUNT; c++ ))
+do
+  mastergroup="$mastergroup
+$MASTER-$c openshift_node_labels=\"{'region': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c"
+done
+
+# Create Infra nodes grouping 
+echo $(date) " - Creating Infra nodes grouping"
+
+for (( c=0; c<$INFRACOUNT; c++ ))
+do
+  infragroup="$infragroup
+$INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c"
+done
+
+# Create Nodes grouping
+echo $(date) " - Creating Nodes grouping"
+
+for (( c=0; c<$NODECOUNT; c++ ))
+do
+  nodegroup="$nodegroup
+$NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c"
+done
+
 # Cloning Ansible playbook repository
 #(cd /home/$SUDOUSER && git clone https://github.com/vincepower/openshift-container-platform-playbooks.git)
 (cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git)
@@ -78,34 +105,10 @@ else
   exit 99
 fi
 
-# Run on MASTER-0 node - configure Storage Class
-# Filename: configurestorageclass.yaml
-
-# Create playbook to reboot master nodes
-# Filename: reboot-master.yaml
-
-# Create playbook to reboot infra and app nodes
-# Filename: reboot-nodes.yaml
-
-# Create Azure Cloud Provider configuration Playbook for Master Config
-# Filename: setup-azure-master.yaml
-
-# Create Azure Cloud Provider configuration Playbook for Node Config (Master Nodes)
-# Filename: setup-azure-node-master.yaml
-
-# Create Azure Cloud Provider configuration Playbook for Node Config (Non-Master Nodes)
-# Filename: setup-azure-node.yaml
-
-# Create Playbook to delete stuck Master nodes and set as not schedulable
-# Filename: reset-masters-non-schedulable.yaml
-
 # Setting the default openshift_cloudprovider_kind if Azure enabled
-# Disabling the Service Catalog if it isn't
 if [[ $AZURE == "true" ]]
 then
 	export CLOUDKIND="openshift_cloudprovider_kind=azure"
-else
-	export CLOUDKIND="openshift_enable_service_catalog=false"
 fi
 
 # Create Ansible Hosts File
@@ -144,10 +147,10 @@ openshift_router_selector='region=infra'
 openshift_registry_selector='region=infra'
 
 # Deploy Service Catalog
-# openshift_enable_service_catalog=false
+openshift_enable_service_catalog=false
 
 # template_service_broker_install=false
-template_service_broker_selector={"region":"infra"}
+# template_service_broker_selector={"region":"infra"}
 
 # Type of clustering being used by OCP
 openshift_master_cluster_method=native
@@ -166,7 +169,7 @@ openshift_metrics_start_cluster=true
 openshift_metrics_hawkular_nodeselector={"region":"infra"}
 openshift_metrics_cassandra_nodeselector={"region":"infra"}
 openshift_metrics_heapster_nodeselector={"region":"infra"}
-openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
+# openshift_metrics_hawkular_hostname=https://hawkular-metrics.$ROUTING
 
 # Setup logging
 openshift_logging_install_logging=false
@@ -190,38 +193,19 @@ $MASTER-0
 
 # host group for nodes
 [nodes]
-EOF
+$mastergroup
+$infragroup
+$nodegroup
 
-# Loop to add Masters
-
-for (( c=0; c<$MASTERCOUNT; c++ ))
-do
-  echo "$MASTER-$c openshift_node_labels=\"{'region': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c" >> /etc/ansible/hosts
-done
-
-# Loop to add Infra Nodes
-
-for (( c=0; c<$INFRACOUNT; c++ ))
-do
-  echo "$INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
-done
-
-# Loop to add Nodes
-
-for (( c=0; c<$NODECOUNT; c++ ))
-do
-  echo "$NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
-done
-
-# Create new_nodes group
-
-cat >> /etc/ansible/hosts <<EOF
-
-# host group for adding new nodes
+# host group for new nodes
 [new_nodes]
 EOF
 
-#echo $(date) " - Running network_manager.yml playbook"
+# Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
+echo $(date) " - Running DNS Hostname resolution check"
+runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
+echo $(date) " - DNS Hostname resolution check complete"
+
 DOMAIN=`domainname -d`
 
 # Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
@@ -304,15 +288,6 @@ echo $(date) " - Assigning cluster admin rights to user"
 
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
 
-if [[ $COCKPIT == "true" ]]
-then
-
-# Setting password for root if Cockpit is enabled
-echo $(date) " - Assigning password for root, which is used to login to Cockpit"
-
-runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignrootpassword.yaml"
-fi
-
 # Configure Docker Registry to use Azure Storage Account
 echo $(date) " - Configuring Docker Registry to use Azure Storage Account"
 
@@ -378,39 +353,13 @@ then
 	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
 	sleep 10
 
-	# Updating the storage on Ansible Service Broker (Stop, delete PVC, create PVC, start)
-	echo " - Deleted PVC for ASB (Will recreate as Azure Storage)"
-	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --remove --name etcd -n openshift-ansible-service-broker" || true
-	sleep 5
-	runuser -l $SUDOUSER -c "oc delete pvc/etcd -n openshift-ansible-service-broker" || true
-	sleep 5
-	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb -n openshift-ansible-service-broker" || true
-	runuser -l $SUDOUSER -c "oc rollout cancel dc/asb-etcd -n openshift-ansible-service-broker" || true
-	sleep 5
-	ASBPID=$$
-	cat > /tmp/$ASBPID.asb-etcd-storage.yaml <<EOF
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: etcd
-  namespace: openshift-ansible-service-broker
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1G
-EOF
-	runuser -l $SUDOUSER -c "oc create -f /tmp/$ASBPID.asb-etcd-storage.yaml"
-	echo $(date) " - Created new PVC for ASB (Sleeping for 60 seconds)"
-	sleep 60
-	runuser -l $SUDOUSER -c "oc volume dc/asb-etcd --add --type pvc --claim-name etcd --mount-path /data --name etcd -n openshift-ansible-service-broker" || true
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker" || true
-	echo $(date) " - Assigned new PVC for ASB and starting (Sleeping for 120 seconds)"
-	sleep 120
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker" || true
+	# Installing Service Catalog, Ansible Service Broker and Template Service Broker
+	
+	echo $(date) "- Installing Service Catalog, Ansible Service Broker and Template Service Broker"
+	runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-service-catalog/config.yml"
+	echo $(date) "- Service Catalog, Ansible Service Broker and Template Service Broker installed successfully"
 
-# End of Azure specific section
+	# End of Azure specific section
 fi 
 
 # Configure Metrics

@@ -1,5 +1,12 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES for Master (Release 3.9) - May 5, 2018
+
+1.  Include playbook to test for DNS name resolution - accomodate for Azure network latency during deployment
+2.  Move Service Catalog install to post cluster standup
+3.  Clean up deployment script
+
+
 # UPDATES for Master (Release 3.9) - March 28, 2018
 
 1.  Create Release 3.9 Branch

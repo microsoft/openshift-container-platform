@@ -1911,6 +1911,10 @@
 			"type": "string",
 			"value": "[reference(variables('bastionPublicIp')).dnsSettings.fqdn]"
 		},
+		"Bastion SSH": {
+			"type": "string",
+			"value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('bastionPublicIp')).dnsSettings.fqdn)]"
+		},
 		"Openshift Master SSH": {
 			"type": "string",
 			"value": "[concat('ssh -p 2200 ', parameters('adminUsername'), '@', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn)]"

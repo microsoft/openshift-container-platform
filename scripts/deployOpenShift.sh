@@ -61,9 +61,15 @@ else
   export CLOUDNAME="AzurePublicCloud"
 fi
 
+# Setting the default openshift_cloudprovider_kind if Azure enabled
+if [[ $AZURE == "true" ]]
+then
+	export CLOUDKIND="openshift_cloudprovider_kind=azure"
+fi
+
 # Cloning Ansible playbook repository
-(cd /home/$SUDOUSER && git clone https://github.com/vincepower/openshift-container-platform-playbooks.git)
-#(cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git)
+#(cd /home/$SUDOUSER && git clone https://github.com/vincepower/openshift-container-platform-playbooks.git)
+(cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git)
 if [ -d /home/${SUDOUSER}/openshift-container-platform-playbooks ]
 then
   echo " - Retrieved playbooks successfully"
@@ -72,12 +78,23 @@ else
   exit 99
 fi
 
-# Setting the default openshift_cloudprovider_kind if Azure enabled
-# Disabling the Service Catalog if it isn't
-if [[ $AZURE == "true" ]]
-then
-	export CLOUDKIND="openshift_cloudprovider_kind=azure"
-fi
+# Setting DOMAIN variable
+export DOMAIN=`domainname -d`
+
+# Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
+echo $(date) " - Running DNS Hostname resolution check"
+runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
+
+# Setup NetworkManager to manage eth0
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-node/network_manager.yml"
+
+# Configure DNS so it always has the domain name
+echo $(date) " - Adding $DOMAIN to search for resolv.conf"
+runuser $SUDOUSER -c "ansible all -o -f 10 -b -m lineinfile -a 'dest=/etc/sysconfig/network-scripts/ifcfg-eth0 line=\"DOMAIN=$DOMAIN\"'"
+
+# Configure resolv.conf on all hosts through NetworkManager
+echo $(date) " - Restarting NetworkManager"
+runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -m service -a \"name=NetworkManager state=restarted\""
 
 # Create Master nodes grouping
 echo $(date) " - Creating Master nodes grouping"
@@ -115,7 +132,6 @@ $CNS-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift
 	done
 fi
 
-<<<<<<< HEAD
 # Create glusterfs configuration if CNS is enabled
 if [ $ENABLECNS == "true" ]
 then
@@ -132,39 +148,23 @@ then
 		cnsglusterinfo="$cnsglusterinfo
 $CNS-$c glusterfs_devices='[ \"${drive1}\", \"${drive2}\", \"${drive3}\" ]'"
 	done
-=======
-# Create Master nodes grouping
-echo $(date) " - Creating Master nodes grouping"
+fi
 
-for (( c=0; c<$MASTERCOUNT; c++ ))
-do
-  mastergroup="$mastergroup
-$MASTER-$c openshift_node_labels=\"{'region': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c"
-done
-
-# Create Infra nodes grouping 
-echo $(date) " - Creating Infra nodes grouping"
-
-for (( c=0; c<$INFRACOUNT; c++ ))
-do
-  infragroup="$infragroup
-$INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c"
-done
-
-# Create Nodes grouping
-echo $(date) " - Creating Nodes grouping"
-
-for (( c=0; c<$NODECOUNT; c++ ))
-do
-  nodegroup="$nodegroup
-$NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c"
-done
-
-# Setting the default openshift_cloudprovider_kind if Azure enabled
 if [[ $AZURE == "true" ]]
 then
+
+# Setting the default openshift_cloudprovider_kind if Azure enabled
 	export CLOUDKIND="openshift_cloudprovider_kind=azure"
->>>>>>> a8635723be8944c880ed05d9c1bd4b7e2c044150
+
+# Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
+	if [ $? -eq 0 ]
+	then
+		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes successfully"
+	else
+		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes failed to complete"
+		exit 13
+	fi
 fi
 
 # Create Ansible Hosts File
@@ -207,9 +207,6 @@ $registrygluster
 # Deploy Service Catalog
 openshift_enable_service_catalog=false
 
-# template_service_broker_install=false
-# template_service_broker_selector={"region":"infra"}
-
 # Type of clustering being used by OCP
 openshift_master_cluster_method=native
 
@@ -227,10 +224,6 @@ openshift_metrics_start_cluster=true
 openshift_metrics_hawkular_nodeselector={"region":"infra"}
 openshift_metrics_cassandra_nodeselector={"region":"infra"}
 openshift_metrics_heapster_nodeselector={"region":"infra"}
-<<<<<<< HEAD
-=======
-# openshift_metrics_hawkular_hostname=https://hawkular-metrics.$ROUTING
->>>>>>> a8635723be8944c880ed05d9c1bd4b7e2c044150
 
 # Setup logging
 openshift_logging_install_logging=false
@@ -260,57 +253,11 @@ $cnsglusterinfo
 $mastergroup
 $infragroup
 $nodegroup
-<<<<<<< HEAD
 $cnsgroup
 
 # host group for adding new nodes
 [new_nodes]
 EOF
-
-# Setting DOMAIN variable
-export DOMAIN=`domainname -d`
-
-# Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
-echo $(date) " - Running DNS Hostname resolution check"
-runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
-
-# Setup NetworkManager to manage eth0
-runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-node/network_manager.yml"
-
-# Configure DNS so it always has the domain name
-echo $(date) " - Adding $DOMAIN to search for resolv.conf"
-runuser $SUDOUSER -c "ansible all -o -f 10 -b -m lineinfile -a 'dest=/etc/sysconfig/network-scripts/ifcfg-eth0 line=\"DOMAIN=$DOMAIN\"'"
-
-# Configure resolv.conf on all hosts through NetworkManager
-echo $(date) " - Restarting NetworkManager"
-runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -m service -a \"name=NetworkManager state=restarted\""
-=======
-
-# host group for new nodes
-[new_nodes]
-EOF
-
-# Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
-echo $(date) " - Running DNS Hostname resolution check"
-runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
-echo $(date) " - DNS Hostname resolution check complete"
-
-#echo $(date) " - Running network_manager.yml playbook"
-DOMAIN=`domainname -d`
->>>>>>> a8635723be8944c880ed05d9c1bd4b7e2c044150
-
-# Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
-if [[ $AZURE == "true" ]]
-then
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
-	if [ $? -eq 0 ]
-	then
-		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes successfully"
-	else
-		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes failed to complete"
-		exit 13
-	fi
-fi
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Running Prerequisites via Ansible Playbook"
@@ -432,7 +379,6 @@ echo $(date) " - Adding api and logging labels"
 runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
 runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
 
-<<<<<<< HEAD
 # Restarting things so everything is clean before installing anything else
 echo $(date) " - Rebooting cluster to complete installation"
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master.yaml"
@@ -444,26 +390,6 @@ if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
 then
 	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-service-catalog/config.yml -e openshift_enable_service_catalog=true"
 fi
-=======
-	echo $(date) " - Sleep for 120"
-	sleep 120
-
-	echo $(date) " - Rebooting cluster to complete installation"
-	runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
-	runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
-	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master.yaml"
-	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
-	sleep 10
-
-	# Installing Service Catalog, Ansible Service Broker and Template Service Broker
-	
-	echo $(date) "- Installing Service Catalog, Ansible Service Broker and Template Service Broker"
-	runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-service-catalog/config.yml"
-	echo $(date) "- Service Catalog, Ansible Service Broker and Template Service Broker installed successfully"
-	
-	# End of Azure specific section
-fi 
->>>>>>> a8635723be8944c880ed05d9c1bd4b7e2c044150
 
 # Configure Metrics
 if [ $METRICS == "true" ]
@@ -511,7 +437,6 @@ echo $(date) " - Deleting unecessary files"
 rm -rf /home/${SUDOUSER}/openshift-container-platform-playbooks
 
 echo $(date) " - Sleep for 30"
-
 sleep 30
 
 echo $(date) " - Script complete"

@@ -85,17 +85,6 @@ export DOMAIN=`domainname -d`
 echo $(date) " - Running DNS Hostname resolution check"
 runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
 
-# Setup NetworkManager to manage eth0
-runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-node/network_manager.yml"
-
-# Configure DNS so it always has the domain name
-echo $(date) " - Adding $DOMAIN to search for resolv.conf"
-runuser $SUDOUSER -c "ansible all -o -f 10 -b -m lineinfile -a 'dest=/etc/sysconfig/network-scripts/ifcfg-eth0 line=\"DOMAIN=$DOMAIN\"'"
-
-# Configure resolv.conf on all hosts through NetworkManager
-echo $(date) " - Restarting NetworkManager"
-runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -m service -a \"name=NetworkManager state=restarted\""
-
 # Create Master nodes grouping
 echo $(date) " - Creating Master nodes grouping"
 for (( c=0; c<$MASTERCOUNT; c++ ))
@@ -258,6 +247,18 @@ $cnsgroup
 # host group for adding new nodes
 [new_nodes]
 EOF
+
+# Setup NetworkManager to manage eth0
+echo $(date) " - Running NetworkManager playbook"
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-node/network_manager.yml"
+
+# Configure DNS so it always has the domain name
+echo $(date) " - Adding $DOMAIN to search for resolv.conf"
+runuser $SUDOUSER -c "ansible all -o -f 10 -b -m lineinfile -a 'dest=/etc/sysconfig/network-scripts/ifcfg-eth0 line=\"DOMAIN=$DOMAIN\"'"
+
+# Configure resolv.conf on all hosts through NetworkManager
+echo $(date) " - Restarting NetworkManager"
+runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -m service -a \"name=NetworkManager state=restarted\""
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Running Prerequisites via Ansible Playbook"

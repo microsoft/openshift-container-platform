@@ -81,10 +81,6 @@ fi
 # Setting DOMAIN variable
 export DOMAIN=`domainname -d`
 
-# Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
-echo $(date) " - Running DNS Hostname resolution check"
-runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
-
 # Create Master nodes grouping
 echo $(date) " - Creating Master nodes grouping"
 for (( c=0; c<$MASTERCOUNT; c++ ))
@@ -231,13 +227,17 @@ $cnsgroup
 [new_nodes]
 EOF
 
+# Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
+echo $(date) " - Running DNS Hostname resolution check"
+runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
+
 if [[ $AZURE == "true" ]]
 then
 
-# Setting the default openshift_cloudprovider_kind if Azure enabled
+	# Setting the default openshift_cloudprovider_kind if Azure enabled
 	export CLOUDKIND="openshift_cloudprovider_kind=azure"
 
-# Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
+	# Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
 	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
 	if [ $? -eq 0 ]
 	then

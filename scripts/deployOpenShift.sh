@@ -54,17 +54,17 @@ echo $(date) " - Create Ansible Playbooks for Post Installation tasks"
 # Create docker registry config based on Commercial Azure or Azure Government
 if [[ $CLOUD == "US" ]]
 then
-  DOCKERREGISTRYYAML=dockerregistrygov.yaml
-  export CLOUDNAME="AzureUSGovernmentCloud"
+    DOCKERREGISTRYYAML=dockerregistrygov.yaml
+    export CLOUDNAME="AzureUSGovernmentCloud"
 else
-  DOCKERREGISTRYYAML=dockerregistrypublic.yaml
-  export CLOUDNAME="AzurePublicCloud"
+    DOCKERREGISTRYYAML=dockerregistrypublic.yaml
+    export CLOUDNAME="AzurePublicCloud"
 fi
 
 # Setting the default openshift_cloudprovider_kind if Azure enabled
 if [[ $AZURE == "true" ]]
 then
-	export CLOUDKIND="openshift_cloudprovider_kind=azure"
+    export CLOUDKIND="openshift_cloudprovider_kind=azure"
 fi
 
 # Cloning Ansible playbook repository
@@ -72,10 +72,10 @@ fi
 #(cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git)
 if [ -d /home/${SUDOUSER}/openshift-container-platform-playbooks ]
 then
-  echo " - Retrieved playbooks successfully"
+    echo " - Retrieved playbooks successfully"
 else
-  echo " - Retrieval of playbooks failed"
-  exit 99
+    echo " - Retrieval of playbooks failed"
+    exit 99
 fi
 
 # Setting DOMAIN variable
@@ -85,7 +85,7 @@ export DOMAIN=`domainname -d`
 echo $(date) " - Creating Master nodes grouping"
 for (( c=0; c<$MASTERCOUNT; c++ ))
 do
-	mastergroup="$mastergroup
+    mastergroup="$mastergroup
 $MASTER-$c openshift_node_labels=\"{'region': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c"
 done
 
@@ -93,7 +93,7 @@ done
 echo $(date) " - Creating Infra nodes grouping"
 for (( c=0; c<$INFRACOUNT; c++ ))
 do
-	infragroup="$infragroup
+    infragroup="$infragroup
 $INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c"
 done
 
@@ -101,38 +101,53 @@ done
 echo $(date) " - Creating Nodes grouping"
 for (( c=0; c<$NODECOUNT; c++ ))
 do
-	nodegroup="$nodegroup
+    nodegroup="$nodegroup
 $NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c"
 done
 
 # Create CNS nodes grouping if CNS is enabled
 if [ $ENABLECNS == "true" ]
 then
-	echo $(date) " - Creating CNS nodes grouping"
+    echo $(date) " - Creating CNS nodes grouping"
 
-	for (( c=0; c<$CNSCOUNT; c++ ))
-	do
-		cnsgroup="$cnsgroup
+    for (( c=0; c<$CNSCOUNT; c++ ))
+    do
+        cnsgroup="$cnsgroup
 $CNS-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$CNS-$c"
-	done
+    done
 fi
+
+# Create Temp Ansible Hosts File
+echo $(date) " - Create Ansible Hosts file"
+
+cat > /etc/ansible/hosts <<EOF
+[tempnodes]
+$mastergroup
+$infragroup
+$nodegroup
+$cnsgroup
+EOF
+
+# Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
+echo $(date) " - Running DNS Hostname resolution check"
+runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
 
 # Create glusterfs configuration if CNS is enabled
 if [ $ENABLECNS == "true" ]
 then
-	echo $(date) " - Creating glusterfs configuration"
-	registrygluster="openshift_hosted_registry_storage_kind=glusterfs"
+    echo $(date) " - Creating glusterfs configuration"
+    registrygluster="openshift_hosted_registry_storage_kind=glusterfs"
 
-	for (( c=0; c<$CNSCOUNT; c++ ))
-	do
-		runuser $SUDOUSER -c "ssh-keyscan -H $CNS-$c >> ~/.ssh/known_hosts"
-		drive=$(runuser $SUDOUSER -c "ssh $CNS-$c 'sudo /usr/sbin/fdisk -l'" | awk '$1 == "Disk" && $2 ~ /^\// && ! /mapper/ {if (drive) print drive; drive = $2; sub(":", "", drive);} drive && /^\// {drive = ""} END {if (drive) print drive;}')
-		drive1=$(echo $drive | cut -d ' ' -f 1)
-		drive2=$(echo $drive | cut -d ' ' -f 2)
-		drive3=$(echo $drive | cut -d ' ' -f 3)
-		cnsglusterinfo="$cnsglusterinfo
+    for (( c=0; c<$CNSCOUNT; c++ ))
+    do
+        runuser $SUDOUSER -c "ssh-keyscan -H $CNS-$c >> ~/.ssh/known_hosts"
+        drive=$(runuser $SUDOUSER -c "ssh $CNS-$c 'sudo /usr/sbin/fdisk -l'" | awk '$1 == "Disk" && $2 ~ /^\// && ! /mapper/ {if (drive) print drive; drive = $2; sub(":", "", drive);} drive && /^\// {drive = ""} END {if (drive) print drive;}')
+        drive1=$(echo $drive | cut -d ' ' -f 1)
+        drive2=$(echo $drive | cut -d ' ' -f 2)
+        drive3=$(echo $drive | cut -d ' ' -f 3)
+        cnsglusterinfo="$cnsglusterinfo
 $CNS-$c glusterfs_devices='[ \"${drive1}\", \"${drive2}\", \"${drive3}\" ]'"
-	done
+    done
 fi
 
 # Create Ansible Hosts File
@@ -227,25 +242,20 @@ $cnsgroup
 [new_nodes]
 EOF
 
-# Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
-echo $(date) " - Running DNS Hostname resolution check"
-runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
-
 if [[ $AZURE == "true" ]]
 then
+    # Setting the default openshift_cloudprovider_kind if Azure enabled
+    export CLOUDKIND="openshift_cloudprovider_kind=azure"
 
-	# Setting the default openshift_cloudprovider_kind if Azure enabled
-	export CLOUDKIND="openshift_cloudprovider_kind=azure"
-
-	# Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
-	if [ $? -eq 0 ]
-	then
-		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes successfully"
-	else
-		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes failed to complete"
-		exit 13
-	fi
+    # Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
+    runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
+    if [ $? -eq 0 ]
+    then
+        echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes successfully"
+    else
+        echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes failed to complete"
+        exit 13
+    fi
 fi
 
 # Setup NetworkManager to manage eth0
@@ -269,10 +279,10 @@ echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml"
 if [ $? -eq 0 ]
 then
-	echo $(date) " - OpenShift Cluster installed successfully"
+    echo $(date) " - OpenShift Cluster installed successfully"
 else
-	echo $(date) " - OpenShift Cluster failed to install"
-	exit 6
+    echo $(date) " - OpenShift Cluster failed to install"
+    exit 6
 fi
 
 echo $(date) " - Modifying sudoers"
@@ -320,36 +330,36 @@ CNS_DEFAULT_STORAGE=true
 # Handing Azure specific storage requirements if it is enabled
 if [[ $AZURE == "true" ]]
 then
-	# Azure wants to be primary, so let us let it be
-	CNS_DEFAULT_STORAGE=false
+    # Azure wants to be primary, so let us let it be
+    CNS_DEFAULT_STORAGE=false
 
-	# Create Storage Classes
-	echo $(date) " - Creating Storage Classes"
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
+    # Create Storage Classes
+    echo $(date) " - Creating Storage Classes"
+    runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
 
-	echo $(date) " - Sleep for 60"
-	sleep 60
+    echo $(date) " - Sleep for 60"
+    sleep 60
 
-	# Execute setup-azure-master playbooks to configure Azure Cloud Provider
-	echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configure-master-for-azure.yaml"
-	if [ $? -eq 0 ]
-	then
-	    echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
-	else
-	    echo $(date) " - Cloud Provider setup of master config on Master Nodes failed to completed"
-	    exit 7
-	fi
-	echo $(date) " - Sleep for 60"
-	sleep 60
+    # Execute setup-azure-master playbooks to configure Azure Cloud Provider
+    echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
+    runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configure-master-for-azure.yaml"
+    if [ $? -eq 0 ]
+    then
+        echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
+    else
+        echo $(date) " - Cloud Provider setup of master config on Master Nodes failed to completed"
+        exit 7
+    fi
+    echo $(date) " - Sleep for 60"
+    sleep 60
 # End of Azure specific section
 fi 
 
 # Reconfigure glusterfs storage class
 if [ $CNS_DEFAULT_STORAGE == "true" ]
 then
-	echo $(date) "- Create default glusterfs storage class"
-	cat > /home/$SUDOUSER/default-glusterfs-storage.yaml <<EOF
+    echo $(date) "- Create default glusterfs storage class"
+    cat > /home/$SUDOUSER/default-glusterfs-storage.yaml <<EOF
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -364,18 +374,18 @@ parameters:
 provisioner: kubernetes.io/glusterfs
 reclaimPolicy: Delete
 EOF
-	runuser -l $SUDOUSER -c "oc create -f /home/$SUDOUSER/default-glusterfs-storage.yaml"
+    runuser -l $SUDOUSER -c "oc create -f /home/$SUDOUSER/default-glusterfs-storage.yaml"
 
-	echo $(date) " - Sleep for 60"
-	sleep 60
+    echo $(date) " - Sleep for 60"
+    sleep 60
 fi
 
 # Ensuring selinux is configured properly
 if [ $ENABLECNS == "true" ]
 then
-	# Setting selinux to allow gluster-fusefs access
-	echo $(date) " - Setting selinux to allow gluster-fuse access"
-	runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -a 'sudo setsebool -P virt_sandbox_use_fusefs on'" || true
+    # Setting selinux to allow gluster-fusefs access
+    echo $(date) " - Setting selinux to allow gluster-fuse access"
+    runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -a 'sudo setsebool -P virt_sandbox_use_fusefs on'" || true
 # End of CNS specific section
 fi
 
@@ -393,48 +403,48 @@ sleep 20
 # Installing Service Catalog, Ansible Service Broker and Template Service Broker
 if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
 then
-	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-service-catalog/config.yml -e openshift_enable_service_catalog=true"
+    runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-service-catalog/config.yml -e openshift_enable_service_catalog=true"
 fi
 
 # Configure Metrics
 if [ $METRICS == "true" ]
 then
-	sleep 30
-	echo $(date) "- Deploying Metrics"
-	if [ $AZURE == "true" ]
-	then
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
-	else
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True"
-	fi
-	if [ $? -eq 0 ]
-	then
-	    echo $(date) " - Metrics configuration completed successfully"
-	else
-	    echo $(date) " - Metrics configuration failed"
-	    exit 11
-	fi
+    sleep 30
+    echo $(date) "- Deploying Metrics"
+    if [ $AZURE == "true" ]
+    then
+        runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
+    else
+        runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True"
+    fi
+    if [ $? -eq 0 ]
+    then
+        echo $(date) " - Metrics configuration completed successfully"
+    else
+        echo $(date) " - Metrics configuration failed"
+        exit 11
+    fi
 fi
 
 # Configure Logging
 
 if [ $LOGGING == "true" ]
 then
-	sleep 60
-	echo $(date) "- Deploying Logging"
-	if [ $AZURE == "true" ]
-	then
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true"
-	else
-		runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True"
-	fi
-	if [ $? -eq 0 ]
-	then
-	    echo $(date) " - Logging configuration completed successfully"
-	else
-	    echo $(date) " - Logging configuration failed"
-	    exit 12
-	fi
+    sleep 60
+    echo $(date) "- Deploying Logging"
+    if [ $AZURE == "true" ]
+    then
+        runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true"
+    else
+        runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True"
+    fi
+    if [ $? -eq 0 ]
+    then
+        echo $(date) " - Logging configuration completed successfully"
+    else
+        echo $(date) " - Logging configuration failed"
+        exit 12
+    fi
 fi
 
 # Delete yaml files

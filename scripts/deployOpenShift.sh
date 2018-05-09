@@ -139,23 +139,6 @@ $CNS-$c glusterfs_devices='[ \"${drive1}\", \"${drive2}\", \"${drive3}\" ]'"
 	done
 fi
 
-if [[ $AZURE == "true" ]]
-then
-
-# Setting the default openshift_cloudprovider_kind if Azure enabled
-	export CLOUDKIND="openshift_cloudprovider_kind=azure"
-
-# Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
-	if [ $? -eq 0 ]
-	then
-		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes successfully"
-	else
-		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes failed to complete"
-		exit 13
-	fi
-fi
-
 # Create Ansible Hosts File
 echo $(date) " - Create Ansible Hosts file"
 
@@ -247,6 +230,23 @@ $cnsgroup
 # host group for adding new nodes
 [new_nodes]
 EOF
+
+if [[ $AZURE == "true" ]]
+then
+
+# Setting the default openshift_cloudprovider_kind if Azure enabled
+	export CLOUDKIND="openshift_cloudprovider_kind=azure"
+
+# Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
+	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
+	if [ $? -eq 0 ]
+	then
+		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes successfully"
+	else
+		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes failed to complete"
+		exit 13
+	fi
+fi
 
 # Setup NetworkManager to manage eth0
 echo $(date) " - Running NetworkManager playbook"
@@ -346,7 +346,7 @@ then
 fi 
 
 # Reconfigure glusterfs storage class
-if [ $ENABLECNS == "true" ]
+if [ $CNS_DEFAULT_STORAGE == "true" ]
 then
 	echo $(date) "- Create default glusterfs storage class"
 	cat > /home/$SUDOUSER/default-glusterfs-storage.yaml <<EOF
@@ -368,7 +368,11 @@ EOF
 
 	echo $(date) " - Sleep for 60"
 	sleep 60
+fi
 
+# Ensuring selinux is configured properly
+if [ $ENABLECNS == "true" ]
+then
 	# Setting selinux to allow gluster-fusefs access
 	echo $(date) " - Setting selinux to allow gluster-fuse access"
 	runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -a 'sudo setsebool -P virt_sandbox_use_fusefs on'" || true

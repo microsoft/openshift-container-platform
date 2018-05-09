@@ -73,7 +73,6 @@
 		"singlequote": "'",
 		"tenantId": "[subscription().tenantId]",
 		"subscriptionId": "[subscription().subscriptionId]",
-		"location": "[parameters('location')]",
 		"resourceGroupName": "[resourceGroup().name]"
 	},
 	"resources": [{
@@ -84,7 +83,9 @@
 		"tags": {
 			"displayName": "PrepBastion",
 				"provider": "[parameters('redHatTags').provider]",
-				"app": "[parameters('redHatTags').app]"
+				"app": "[parameters('redHatTags').app]",
+				"version": "[parameters('redHatTags').version]",
+				"platform": "[parameters('redHatTags').platform]"
 		},
 		"properties": {
 			"publisher": "Microsoft.Azure.Extensions",

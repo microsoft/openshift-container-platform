@@ -15,10 +15,10 @@
 			"value": "Standard_DS2_v2"
 		},
 		"storageKind": {
-			"value": "managed"
+			"value": "changeme"
 		},
 		"openshiftClusterPrefix": {
-			"value": "ocpcluster"
+			"value": "changeme"
 		},
 		"masterInstanceCount": {
 			"value": 3
@@ -33,10 +33,10 @@
 			"value": 128
 		},
 		"adminUsername": {
-			"value": "clusteradmin"
+			"value": "changeme"
 		},
 		"openshiftPassword": {
-			"value": "GEN-PASSWORD"
+			"value": "changeme"
 		},
 		"enableMetrics": {
 			"value": "false"
@@ -44,41 +44,54 @@
 		"enableLogging": {
 			"value": "false"
 		},
+		"enableCNS": {
+			"value": "false"
+		},
 		"rhsmUsernameOrOrgId": {
-			"value": "rhsmuser"
+			"value": "changeme"
 		},
 		"rhsmPasswordOrActivationKey": {
-			"value": "GEN-PASSWORD"
+			"value": "changeme"
 		},
 		"rhsmPoolId": {
-			"value": "8a81234151631b3201a5e6f4322e42a9"
+			"value": "changeme"
 		},
 		"sshPublicKey": {
 			"value": "GEN-SSH-PUB-KEY"
 		},
 		"keyVaultResourceGroup": {
-			"value": "kvrg"
+			"value": "changeme"
 		},
 		"keyVaultName": {
-			"value": "keyvaultname"
+			"value": "changeme"
 		},
 		"keyVaultSecret": {
-			"value": "mysecret"
+			"value": "changeme"
 		},
 		"enableAzure": {
-			"value": "true"
+			"value": "false"
 		},
 		"aadClientId": {
-			"value": "12345678-abcd-47bf-9b6f-12345678abcd"
+			"value": "changeme"
 		},
 		"aadClientSecret": {
-			"value": "GEN-PASSWORD"
+			"value": "changeme"
 		},
 		"defaultSubDomainType": {
 			"value": "nipio"
 		},
 		"defaultSubDomain": {
-			"value": "domain.com"
+			"value": "changeme"
+		},
+		"addressPrefix": {
+			"value": "10.128.0.0/9"
+		},
+		"masterSubnetPrefix": {
+			"value": "10.129.0.0/16"
+		},
+		"nodeSubnetPrefix": {
+			"value": "10.130.0.0/16"
 		}
+
 	}
 }

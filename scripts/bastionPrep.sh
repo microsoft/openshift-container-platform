@@ -25,28 +25,28 @@ subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_A
 
 if [ $? -eq 0 ]
 then
-   echo "Subscribed successfully"
+    echo "Subscribed successfully"
 elif [ $? -eq 64 ]
-   then
-       echo "This system is already registered."
+then
+    echo "This system is already registered."
 else
-   echo "Incorrect Username / Password or Organization ID / Activation Key specified"
-   exit 3
+    echo "Incorrect Username / Password or Organization ID / Activation Key specified"
+    exit 3
 fi
 
 subscription-manager attach --pool=$POOL_ID > attach.log
 if [ $? -eq 0 ]
 then
-   echo "Pool attached successfully"
+    echo "Pool attached successfully"
 else
-   evaluate=$( cut -f 2-5 -d ' ' attach.log )
-   if [[ $evaluate == "unit has already had" ]]
-      then
-         echo "Pool $POOL_ID was already attached and was not attached again."
-	  else
-         echo "Incorrect Pool ID or no entitlements available"
-         exit 4
-   fi
+    evaluate=$( cut -f 2-5 -d ' ' attach.log )
+    if [[ $evaluate == "unit has already had" ]]
+    then
+        echo "Pool $POOL_ID was already attached and was not attached again."
+    else
+        echo "Incorrect Pool ID or no entitlements available"
+        exit 4
+    fi
 fi
 
 # Disable all repositories and enable only the required ones
@@ -97,3 +97,4 @@ wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 5 https
 ansible-playbook -f 10 ./updateansiblecfg.yaml
 
 echo $(date) " - Script Complete"
+

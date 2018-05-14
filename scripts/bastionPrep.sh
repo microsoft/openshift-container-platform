@@ -22,11 +22,12 @@ sleep 10
 echo $(date) " - Register host with Cloud Access Subscription"
 
 subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
+RETCODE=$?
 
-if [ $? -eq 0 ]
+if [ $RETCODE -eq 0 ]
 then
    echo "Subscribed successfully"
-elif [ $? -eq 64 ]
+elif [ $RETCODE -eq 64 ]
    then
        echo "This system is already registered."
 else

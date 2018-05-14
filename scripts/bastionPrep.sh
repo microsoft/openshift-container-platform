@@ -28,8 +28,8 @@ if [ $RETCODE -eq 0 ]
 then
    echo "Subscribed successfully"
 elif [ $RETCODE -eq 64 ]
-   then
-       echo "This system is already registered."
+then
+           echo "This system is already registered."
 else
    echo "Incorrect Username / Password or Organization ID / Activation Key specified"
    exit 3
@@ -40,11 +40,11 @@ if [ $? -eq 0 ]
 then
    echo "Pool attached successfully"
 else
-   evaluate=$( cut -f 2-5 -d ' ' attach.log )
-   if [[ $evaluate == "unit has already had" ]]
+   grep attached attach.log
+   if [ $? -eq 0 ]
       then
          echo "Pool $POOL_ID was already attached and was not attached again."
-	  else
+      else
          echo "Incorrect Pool ID or no entitlements available"
          exit 4
    fi

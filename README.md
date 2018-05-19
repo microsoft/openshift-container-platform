@@ -21,7 +21,7 @@ This template deploys OpenShift Container Platform with basic username / passwor
 
 |Resource           	|Properties                                                                                                                          |
 |-----------------------|------------------------------------------------------------------------------------------------------------------------------------|
-|Virtual Network   		|**Address prefix:** 10.0.0.0/8<br />**Master subnet:** 10.1.0.0/16<br />**Node subnet:** 10.2.0.0/16                      |
+|Virtual Network   		|**Address prefix:** 10.0.0.0/14<br />**Master subnet:** 10.1.0.0/16<br />**Node subnet:** 10.2.0.0/16                      |
 |Master Load Balancer	|1 probe and 1 rule for TCP 443<br/> NAT rules for SSH on Ports 2200-220X                                           |
 |Infra Load Balancer	|2 probes and 2 rules for TCP 80 and TCP 443									                                           |
 |Public IP Addresses	|Bastion Public IP for Bastion Node<br />OpenShift Master public IP attached to Master Load Balancer<br />OpenShift Router public IP attached to Infra Load Balancer            |
@@ -123,20 +123,26 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 9.  dataDiskSize: Size of data disk to attach to nodes for Docker volume - valid sizes are 32 GB, 64 GB, 128 GB, 256 GB, 512 GB, 1024 GB, and 2048 GB
 10. adminUsername: Admin username for both OS (VM) login and initial OpenShift user
 11. openshiftPassword: Password for OpenShift user and root user
-11. enableMetrics: Enable Metrics - value is either "true" or "false"
-11. enableLogging: Enable Logging - value is either "true" or "false"
-12. rhsmUsernameOrOrgId: Red Hat Subscription Manager Username or Organization ID. To find your Organization ID, run on registered server: `subscription-manager identity`.
-13. rhsmPasswordOrActivationKey: Red Hat Subscription Manager Password or Activation Key for your Cloud Access subscription. You can get this from [here](https://access.redhat.com/management/activation_keys).
-14. rhsmPoolId: The Red Hat Subscription Manager Pool ID that contains your OpenShift entitlements
-15. sshPublicKey: Copy your SSH Public Key here
-16. keyVaultResourceGroup: The name of the Resource Group that contains the Key Vault
-17. keyVaultName: The name of the Key Vault you created
-18. keyVaultSecret: The Secret Name you used when creating the Secret (that contains the Private Key)
-18. enableAzure: Enable Azure Cloud Provider - value is either "true" or "false"
-18. aadClientId: Azure Active Directory Client ID also known as Application ID for Service Principal
-18. aadClientSecret: Azure Active Directory Client Secret for Service Principal
-19. defaultSubDomainType: This will either be nipio (if you don't have your own domain) or custom if you have your own domain that you would like to use for routing
-20. defaultSubDomain: The wildcard DNS name you would like to use for routing if you selected custom above.  If you selected nipio above, you must still enter something here but it will not be used
+12. enableMetrics: Enable Metrics - value is either "true" or "false"
+13. enableLogging: Enable Logging - value is either "true" or "false"
+14. enableCNS: Enable Container Native Storage (CNS) - value is either "true" or "false"
+15. rhsmUsernameOrOrgId: Red Hat Subscription Manager Username or Organization ID. To find your Organization ID, run on registered server: `subscription-manager identity`.
+16. rhsmPasswordOrActivationKey: Red Hat Subscription Manager Password or Activation Key for your Cloud Access subscription. You can get this from [here](https://access.redhat.com/management/activation_keys).
+17. rhsmPoolId: The Red Hat Subscription Manager Pool ID that contains your OpenShift entitlements
+18. sshPublicKey: Copy your SSH Public Key here
+19. keyVaultResourceGroup: The name of the Resource Group that contains the Key Vault
+20. keyVaultName: The name of the Key Vault you created
+21. keyVaultSecret: The Secret Name you used when creating the Secret (that contains the Private Key)
+22. enableAzure: Enable Azure Cloud Provider - value is either "true" or "false"
+23. aadClientId: Azure Active Directory Client ID also known as Application ID for Service Principal
+24. aadClientSecret: Azure Active Directory Client Secret for Service Principal
+25. defaultSubDomainType: This will either be nipio (if you don't have your own domain) or custom if you have your own domain that you would like to use for routing
+26. defaultSubDomain: The wildcard DNS name you would like to use for routing if you selected custom above.  If you selected nipio above, you must still enter something here but it will not be used
+** NOTE ** For the next three IP ranges they need to be in CIDR format and be in RFC 1918 (10.0.0.0/8, 192.168.0.0/16, or 172.16.0.0/12).
+** NOTE ** The range just can't put servers in the 10.128.0.0/16 range but it can be a larger subnet that includes them like 10.0.0.0/8.
+27. addressPrefix: IP range for the entire Virtual Network. Default is 10.0.0.0/14.
+28. masterSubnetPrefix: Subnet for master, CNS, and infra nodes to be hosted. Needs to have at least 16 IPs. Default is 10.1.0.0/16.
+29. nodeSubnetPrefix: Subnet for applicaton nodes. Should have at least 16 IPs. Default is 10.2.0.0/16.
 
 ## Deploy Template
 
@@ -190,6 +196,12 @@ For further troubleshooting, please SSH into your Bastion node on port 22.  You 
 You should see a folder named '0' and '1'.  In each of these folders, you will see two files, stderr and stdout.  You can look through these files to determine where the failure occurred.
 
 ## Post-Deployment Operations
+
+### Service Catalog
+
+**Service Catalog**
+
+If you enable Azure or CNS for storage these scripts will deploy the service catalog as a post deployment option.
 
 ### Metrics and logging
 

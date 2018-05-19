@@ -267,7 +267,7 @@
 		},
 		"addressPrefix": {
 			"type": "string",
-			"defaultValue": "10.0.0.0/8",
+			"defaultValue": "10.0.0.0/14",
 			"metadata": {
 				"description": "Base subnet used for the virtual network needs to be in CIDR format and be an IP range specified in the RFC1918 range and we recommend at least a /23 - default is 10.0.0.0/8"
 			}

@@ -1,5 +1,12 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES for Master (Release 3.9) - May 19, 2018
+
+1.  Updated scripts to support 3.9.27
+2.  Added Support for RHEL 7.5
+3.  Added Container Native Storage (CNS) support
+4.  Added support for custom IP range for the Virtual Network
+
 # UPDATES for Master (Release 3.9) - March 28, 2018
 
 1.  Create Release 3.9 Branch

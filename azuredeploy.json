@@ -351,8 +351,8 @@
 				"skuTier": "[variables('vmSizesMap')[parameters('nodeVmSize')].storageAccountTier]"
 			},
 			"cns": {
-				"skuName": "[variables('vmSizesMap')[parameters('nodeVmSize')].storageAccountType]",
-				"skuTier": "[variables('vmSizesMap')[parameters('nodeVmSize')].storageAccountTier]"
+				"skuName": "[variables('vmSizesMap')[parameters('cnsVmSize')].storageAccountType]",
+				"skuTier": "[variables('vmSizesMap')[parameters('cnsVmSize')].storageAccountTier]"
 			},
 			"diagnostics": {
 				"skuName": "Standard_LRS",

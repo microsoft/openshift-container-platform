@@ -244,9 +244,6 @@ EOF
 
 if [[ $AZURE == "true" ]]
 then
-    # Setting the default openshift_cloudprovider_kind if Azure enabled
-    export CLOUDKIND="openshift_cloudprovider_kind=azure"
-
     # Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
     runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
     if [ $? -eq 0 ]

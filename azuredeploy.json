@@ -96,7 +96,7 @@
 			"minLength": 4,
 			"maxLength": 20,
 			"metadata": {
-				"description": "OpenShift cluster prefix.  Used to generate master, infra and node hostnames.  Maximum of 20 characters."
+				"description": "OpenShift cluster prefix. Used to generate master, infra and node hostnames. Maximum of 20 characters."
 			}
 		},
 		"masterInstanceCount": {
@@ -112,7 +112,7 @@
 			"defaultValue": 3,
 			"allowedValues": [2, 3],
 			"metadata": {
-				"description": "Number of OpenShift infra nodes.  1 is non HA.  Choose 2 or 3 for HA"
+				"description": "Number of OpenShift infra nodes. 1 is non HA. Choose 2 or 3 for HA"
 			}
 		},
 		"nodeInstanceCount": {
@@ -1115,7 +1115,7 @@
 				"platformUpdateDomainCount": "5"
 			},
 			"tags": {
-				"displayName": "CsnAvailabilitySet",
+				"displayName": "CnsAvailabilitySet",
 				"provider": "[variables('redHatTags').provider]",
 				"app": "[variables('redHatTags').app]",
 				"version": "[variables('redHatTags').version]",
@@ -2160,19 +2160,19 @@
 		}
 	],
 	"outputs": {
-		"Openshift Console Url": {
+		"OpenshiftConsoleUrl": {
 			"type": "string",
 			"value": "[concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, '/console')]"
 		},
-		"Bastion DNS FQDN": {
+		"BastionDNSFQDN": {
 			"type": "string",
 			"value": "[reference(variables('bastionPublicIp')).dnsSettings.fqdn]"
 		},
-		"Openshift Master SSH": {
+		"OpenshiftMasterSSH": {
 			"type": "string",
 			"value": "[concat('ssh -p 2200', parameters('adminUsername'), '@', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn)]"
 		},
-		"Openshift Infra Load Balancer FQDN": {
+		"OpenshiftInfraLoadBalancerFQDN": {
 			"type": "string",
 			"value": "[reference(variables('infraLbPublicIpDnsLabel')).dnsSettings.fqdn]"
 		}

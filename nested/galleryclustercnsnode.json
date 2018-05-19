@@ -20,6 +20,18 @@
 				"description": "SSH Public Key"
 			}
 		},
+		"dataDiskSize": {
+			"type": "int",
+			"metadata": {
+				"description": "Size of Data Disk"
+			}
+		},
+		"glusterDiskSize": {
+			"type": "int",
+			"metadata": {
+				"description": "Size of Data Disks for Gluster"
+			}
+		},
 		"adminUsername": {
 			"type": "string",
 			"metadata": {
@@ -32,6 +44,12 @@
 				"description": "VM Size"
 			}
 		},
+		"availabilitySet": {
+			"type": "string",
+			"metadata": {
+				"description": "Name of Availibility Set"
+			}
+		},
 		"hostName": {
 			"type": "string",
 			"metadata": {
@@ -42,6 +60,12 @@
 			"type": "string",
 			"metadata": {
 				"description": "Unmanaged OS disk uri"
+			}
+		},
+		"unmanagedDataDiskUri": {
+			"type": "string",
+			"metadata": {
+				"description": "Unmanaged data disk uri"
 			}
 		},
 		"role": {
@@ -62,10 +86,16 @@
 				"description": "Managed or Unmanaged disk"
 			}
 		},
-		"newStorageAccount": {
+		"newStorageAccountOs": {
 			"type": "string",
 			"metadata": {
-				"description": "Storage Account"
+				"description": "Storage Account for OS disk"
+			}
+		},
+		"newStorageAccountData": {
+			"type": "string",
+			"metadata": {
+				"description": "Storage Account for data disk"
 			}
 		},
 		"diagStorageAccount": {
@@ -109,8 +139,42 @@
 				},
 				"caching": "ReadWrite",
 				"createOption": "FromImage",
+				"diskSizeGB": 64,
 				"osType": "Linux"
-			}
+			},
+			"dataDisks": [{
+				"name": "[concat(parameters('hostName'), '-docker-pool')]",
+				"diskSizeGB": "[parameters('dataDiskSize')]",
+				"lun": 0,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostName'), '-gluster-disk0')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 1,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostName'), '-gluster-disk1')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 2,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostName'), '-gluster-disk2')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 3,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			}]
 		},
 		"unmanagedStorageProfile": {
 			"imageReference": "[parameters('imageReference')]",
@@ -120,8 +184,42 @@
 					"uri": "[concat(parameters('unmanagedOsDiskUri'), 'vhds/', parameters('hostname'), '-osdisk.vhd')]"
 				},
 				"caching": "ReadWrite",
-				"createOption": "FromImage"
-			}
+				"createOption": "FromImage",
+				"diskSizeGB": 64
+			},
+			"dataDisks": [{
+				"name": "[concat(parameters('hostname'), '-docker-pool')]",
+				"diskSizeGB": "[parameters('dataDiskSize')]",
+				"lun": 0,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-docker-pool.vhd')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostname'), '-gluster-disk0')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 1,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-gluster-disk0.vhd')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostname'), '-gluster-disk1')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 2,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-gluster-disk1.vhd')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostname'), '-gluster-disk2')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 3,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-gluster-disk2.vhd')]"
+				},
+				"createOption": "Empty"
+			}]
 		},
 		"storageProfile": "[concat(parameters('storageKind'), 'StorageProfile')]"
 	},
@@ -138,6 +236,9 @@
 				"platform": "[parameters('redHatTags').platform]"
 		},
 		"properties": {
+			"availabilitySet": {
+				"id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySet'))]"
+			},
 			"hardwareProfile": {
 				"vmSize": "[parameters('vmSize')]"
 			},

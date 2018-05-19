@@ -44,6 +44,9 @@
 		"enableLogging": {
 			"value": "false"
 		},
+		"enableCNS": {
+			"value": "false"
+		},
 		"rhsmUsernameOrOrgId": {
 			"value": "changeme"
 		},
@@ -79,6 +82,16 @@
 		},
 		"defaultSubDomain": {
 			"value": "changeme"
+		},
+		"addressPrefix": {
+			"value": "10.0.0.0/14"
+		},
+		"masterSubnetPrefix": {
+			"value": "10.1.0.0/16"
+		},
+		"nodeSubnetPrefix": {
+			"value": "10.2.0.0/16"
 		}
+
 	}
 }

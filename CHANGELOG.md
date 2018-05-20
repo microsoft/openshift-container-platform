@@ -1,8 +1,15 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES for Release 3.7 - May 19, 2018
+
+1.  Re-introduce non-HA option with 1 master.
+2.  Move Service Catalog install to post cluster install.
+
+
 # UPDATES for Release 3.7 - February 14, 2018
 
 1.  Create Release 3.7 branch
+
 
 # UPDATES for Release 3.7 - January 12, 2018
 

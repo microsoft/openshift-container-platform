@@ -44,6 +44,7 @@ echo "Configuring SSH ControlPath to use shorter path name"
 sed -i -e "s/^# control_path = %(directory)s\/%%h-%%r/control_path = %(directory)s\/%%h-%%r/" /etc/ansible/ansible.cfg
 sed -i -e "s/^#host_key_checking = False/host_key_checking = False/" /etc/ansible/ansible.cfg
 sed -i -e "s/^#pty=False/pty=False/" /etc/ansible/ansible.cfg
+sed -i -e "s/^#stdout_callback = skippy/stdout_callback = skippy/" /etc/ansible/ansible.cfg
 
 # Create Ansible Playbooks for Post Installation tasks
 echo $(date) " - Create Ansible Playbooks for Post Installation tasks"
@@ -410,6 +411,39 @@ cat > /home/${SUDOUSER}/masternonscheduleable.yml <<EOF
     command: oadm manage-node {{inventory_hostname}} --schedulable=false
 EOF
 
+# Create Master nodes grouping
+echo $(date) " - Creating Master nodes grouping"
+
+for (( c=0; c<$MASTERCOUNT; c++ ))
+do
+  mastergroup="$mastergroup
+$MASTER-$c openshift_node_labels=\"{'region': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c"
+done
+
+# Create Infra nodes grouping 
+echo $(date) " - Creating Infra nodes grouping"
+
+for (( c=0; c<$INFRACOUNT; c++ ))
+do
+  infragroup="$infragroup
+$INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c"
+done
+
+# Create Nodes grouping
+echo $(date) " - Creating Nodes grouping"
+
+for (( c=0; c<$NODECOUNT; c++ ))
+do
+  nodegroup="$nodegroup
+$NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c"
+done
+
+# Set HA mode if 3 or 5 masters chosen
+if [[ $MASTERCOUNT != 1 ]]
+then
+	export HAMODE="openshift_master_cluster_method=native"
+fi
+
 # Create Ansible Hosts File
 echo $(date) " - Create Ansible Hosts file"
 
@@ -435,21 +469,20 @@ openshift_master_default_subdomain=$ROUTING
 openshift_override_hostname_check=true
 osm_use_cockpit=${COCKPIT}
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
-console_port=443
 openshift_cloudprovider_kind=azure
-osm_default_node_selector='type=app'
+osm_default_node_selector='region=app'
 openshift_disable_check=memory_availability,docker_image_availability
 
 # default selectors for router and registry services
-openshift_router_selector='type=infra'
-openshift_registry_selector='type=infra'
+openshift_router_selector='region=infra'
+openshift_registry_selector='region=infra'
 
 # Deploy Service Catalog
-# openshift_enable_service_catalog=false
+openshift_enable_service_catalog=false
 
 # template_service_broker_install=false
 
-openshift_master_cluster_method=native
+$HAMODE
 openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
 openshift_master_cluster_public_hostname=$MASTERPUBLICIPHOSTNAME
 openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
@@ -461,9 +494,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 openshift_metrics_install_metrics=false
 #openshift_metrics_cassandra_storage_type=dynamic
 openshift_metrics_start_cluster=true
-openshift_metrics_hawkular_nodeselector={"type":"infra"}
-openshift_metrics_cassandra_nodeselector={"type":"infra"}
-openshift_metrics_heapster_nodeselector={"type":"infra"}
+openshift_metrics_hawkular_nodeselector={"region":"infra"}
+openshift_metrics_cassandra_nodeselector={"region":"infra"}
+openshift_metrics_heapster_nodeselector={"region":"infra"}
 openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 #openshift_metrics_storage_labels={'storage': 'metrics'}
 
@@ -471,12 +504,11 @@ openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 openshift_logging_install_logging=false
 #openshift_hosted_logging_storage_kind=dynamic
 openshift_logging_fluentd_nodeselector={"logging":"true"}
-openshift_logging_es_nodeselector={"type":"infra"}
-openshift_logging_kibana_nodeselector={"type":"infra"}
-openshift_logging_curator_nodeselector={"type":"infra"}
+openshift_logging_es_nodeselector={"region":"infra"}
+openshift_logging_kibana_nodeselector={"region":"infra"}
+openshift_logging_curator_nodeselector={"region":"infra"}
 openshift_master_logging_public_url=https://kibana.$ROUTING
 openshift_logging_master_public_url=https://$MASTERPUBLICIPHOSTNAME:8443
-#openshift_logging_storage_labels={'storage': 'logging'}
 
 # host group for masters
 [masters]
@@ -491,41 +523,16 @@ $MASTER-0
 
 # host group for nodes
 [nodes]
-EOF
-
-# Loop to add Masters
-
-for (( c=0; c<$MASTERCOUNT; c++ ))
-do
-  echo "$MASTER-$c openshift_node_labels=\"{'type': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c" >> /etc/ansible/hosts
-done
-
-# Loop to add Infra Nodes
-
-for (( c=0; c<$INFRACOUNT; c++ ))
-do
-  echo "$INFRA-$c openshift_node_labels=\"{'type': 'infra', 'zone': 'default', 'region': 'infra'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
-done
-
-# Loop to add Nodes
-
-for (( c=0; c<$NODECOUNT; c++ ))
-do
-  echo "$NODE-$c openshift_node_labels=\"{'type': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
-done
-
-# Create new_nodes group
-
-cat >> /etc/ansible/hosts <<EOF
+$mastergroup
+$infragroup
+$nodegroup
 
 # host group for adding new nodes
 [new_nodes]
 EOF
 
-#echo $(date) " - Running network_manager.yml playbook" 
-DOMAIN=`domainname -d` 
-
 # Setup NetworkManager to manage eth0 
+echo $(date) " - Running network_manager.yml playbook" 
 runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-node/network_manager.yml" 
 
 # Configure resolv.conf on all hosts through NetworkManager 
@@ -667,8 +674,10 @@ then
 	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-master.yml"
 	runuser -l $SUDOUSER -c "ansible-playbook ~/reboot-nodes.yml"
 	sleep 10
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker"
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker"
+	
+	echo $(date) "- Installing Service Catalog, Ansible Service Broker and Template Service Broker"
+	runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/service-catalog.yml"
+	echo $(date) "- Service Catalog, Ansible Service Broker and Template Service Broker installed successfully"
 
 fi
 

@@ -537,7 +537,7 @@ runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/p
 
 # Configure resolv.conf on all hosts through NetworkManager 
 echo $(date) " - Setting up NetworkManager on eth0" 
-runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\"" 
+runuser -l $SUDOUSER -c "ansible all -b -o -m service -a \"name=NetworkManager state=restarted\"" 
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"

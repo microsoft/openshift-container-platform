@@ -30,6 +30,9 @@ export STORAGEKIND=${23}
 export ENABLECNS=${24}
 export CNS=${25}
 export CNSCOUNT=${26}
+export VNETNAME=${27}
+export NODENSG=${28}
+export NODEAVAILIBILITYSET=${29}
 
 export BASTION=$(hostname)
 
@@ -64,7 +67,10 @@ fi
 # Setting the default openshift_cloudprovider_kind if Azure enabled
 if [[ $AZURE == "true" ]]
 then
-    export CLOUDKIND="openshift_cloudprovider_kind=azure"
+    CLOUDKIND="openshift_cloudprovider_kind=azure
+osm_controller_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc/origin/cloudprovider/azure.conf']}
+osm_api_server_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc/origin/cloudprovider/azure.conf']}
+openshift_node_kubelet_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc/origin/cloudprovider/azure.conf'], 'enable-controller-attach-detach': ['true']}"
 fi
 
 # Cloning Ansible playbook repository
@@ -313,10 +319,6 @@ runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-play
 echo $(date) " - Assigning cluster admin rights to user"
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
 
-# Setting password for root if Cockpit is enabled
-echo $(date) " - Assigning password for root, which is used to login to Cockpit"
-runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignrootpassword.yaml"
-
 # Configure Docker Registry to use Azure Storage Account
 echo $(date) " - Configuring Docker Registry to use Azure Storage Account"
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
@@ -324,7 +326,7 @@ runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-play
 # Setting CNS as default storage, only AZURE being true will override it
 CNS_DEFAULT_STORAGE=true
 
-# Handing Azure specific storage requirements if it is enabled
+# Handling Azure specific storage requirements if it is enabled
 if [[ $AZURE == "true" ]]
 then
     # Azure wants to be primary, so let us let it be
@@ -338,17 +340,17 @@ then
     sleep 60
 
     # Execute setup-azure-master playbooks to configure Azure Cloud Provider
-    echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
-    runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configure-master-for-azure.yaml"
-    if [ $? -eq 0 ]
-    then
-        echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
-    else
-        echo $(date) " - Cloud Provider setup of master config on Master Nodes failed to completed"
-        exit 7
-    fi
-    echo $(date) " - Sleep for 60"
-    sleep 60
+    # echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
+    # runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configure-master-for-azure.yaml"
+    # if [ $? -eq 0 ]
+    # then
+        # echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
+    # else
+        # echo $(date) " - Cloud Provider setup of master config on Master Nodes failed to completed"
+        # exit 7
+    # fi
+    # echo $(date) " - Sleep for 60"
+    # sleep 60
 # End of Azure specific section
 fi 
 
@@ -387,9 +389,9 @@ then
 fi
 
 # Adding some labels back because they go missing
-echo $(date) " - Adding api and logging labels"
-runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
-runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
+# echo $(date) " - Adding api and logging labels"
+# runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
+# runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
 
 # Restarting things so everything is clean before installing anything else
 echo $(date) " - Rebooting cluster to complete installation"

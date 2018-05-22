@@ -60,7 +60,7 @@
 		},
 		"nodeVmSize": {
 			"type": "string",
-			"defaultValue": "Standard_D2s_v3",
+			"defaultValue": "Standard_D4s_v3",
 			"allowedValues": [
 				"Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_A8", "Standard_A9", "Standard_A10", "Standard_A11",
 				"Standard_D2", "Standard_D3", "Standard_D4",
@@ -205,28 +205,25 @@
 		},
 		"keyVaultResourceGroup": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Resource Group that contains the Key Vault"
 			}
 		},
 		"keyVaultName": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Name of the Key Vault"
 			}
 		},
 		"keyVaultSecret": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Key Vault Secret Name that contains the Private Key"
 			}
 		},
 		"enableAzure": {
 			"type": "string",
-			"defaultValue": "false",
+			"defaultValue": "true",
 			"allowedValues": [
 				"true", "false"
 			],
@@ -2154,6 +2151,15 @@
 					},
 					"redHatTags": {
 						"value": "[variables('redHatTags')]"
+					},
+					"virtualNetworkName": {
+						"value": "[variables('virtualNetworkName')]"
+					},
+					"nodeNetworkSecurityGroup": {
+						"value": "[concat(variables('openshiftNodeHostname'), '-nsg')]"
+					},
+					"nodeAvailabilitySet": {
+						"value": "nodeavailabilityset"
 					}
 				}
 			}

@@ -49,9 +49,7 @@ echo "Configuring SSH ControlPath to use shorter path name"
 sed -i -e "s/^# control_path = %(directory)s\/%%h-%%r/control_path = %(directory)s\/%%h-%%r/" /etc/ansible/ansible.cfg
 sed -i -e "s/^#host_key_checking = False/host_key_checking = False/" /etc/ansible/ansible.cfg
 sed -i -e "s/^#pty=False/pty=False/" /etc/ansible/ansible.cfg
-
-# Create Ansible Playbooks for Post Installation tasks
-echo $(date) " - Create Ansible Playbooks for Post Installation tasks"
+sed -i -e "s/^#stdout_callback = skippy/stdout_callback = skippy/" /etc/ansible/ansible.cfg
 
 # Run on MASTER-0 node - configure registry to use Azure Storage
 # Create docker registry config based on Commercial Azure or Azure Government
@@ -123,6 +121,12 @@ $CNS-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift
     done
 fi
 
+# Setting the default openshift_cloudprovider_kind if Azure enabled
+if [[ $AZURE == "true" ]]
+then
+    export HAMODE="openshift_master_cluster_method=native"
+fi
+
 # Create Temp Ansible Hosts File
 echo $(date) " - Create Ansible Hosts file"
 
@@ -142,7 +146,6 @@ runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playboo
 if [ $ENABLECNS == "true" ]
 then
     echo $(date) " - Creating glusterfs configuration"
-    registrygluster="openshift_hosted_registry_storage_kind=glusterfs"
 
     for (( c=0; c<$CNSCOUNT; c++ ))
     do
@@ -197,7 +200,7 @@ $registrygluster
 openshift_enable_service_catalog=false
 
 # Type of clustering being used by OCP
-openshift_master_cluster_method=native
+$HAMODE
 
 # Addresses for connecting to the OpenShift master nodes
 openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
@@ -272,10 +275,12 @@ runuser $SUDOUSER -c "ansible all -o -f 10 -b -m lineinfile -a 'dest=/etc/syscon
 # Configure resolv.conf on all hosts through NetworkManager
 echo $(date) " - Restarting NetworkManager"
 runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -m service -a \"name=NetworkManager state=restarted\""
+echo $(date) " - NetworkManager configuration complete"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Running Prerequisites via Ansible Playbook"
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml"
+echo $(date) " - Prerequisites check complete"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
@@ -335,23 +340,6 @@ then
     # Create Storage Classes
     echo $(date) " - Creating Storage Classes"
     runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
-
-    echo $(date) " - Sleep for 60"
-    sleep 60
-
-    # Execute setup-azure-master playbooks to configure Azure Cloud Provider
-    # echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
-    # runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configure-master-for-azure.yaml"
-    # if [ $? -eq 0 ]
-    # then
-        # echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
-    # else
-        # echo $(date) " - Cloud Provider setup of master config on Master Nodes failed to completed"
-        # exit 7
-    # fi
-    # echo $(date) " - Sleep for 60"
-    # sleep 60
-# End of Azure specific section
 fi 
 
 # Reconfigure glusterfs storage class
@@ -389,9 +377,9 @@ then
 fi
 
 # Adding some labels back because they go missing
-# echo $(date) " - Adding api and logging labels"
-# runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
-# runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
+echo $(date) " - Adding api and logging labels"
+runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
+runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
 
 # Restarting things so everything is clean before installing anything else
 echo $(date) " - Rebooting cluster to complete installation"

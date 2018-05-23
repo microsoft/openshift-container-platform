@@ -6,13 +6,16 @@
 			"value": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/master"
 		},
 		"masterVmSize": {
-			"value": "Standard_DS2_v2"
+			"value": "Standard_E2s_v3"
 		},
 		"infraVmSize": {
-			"value": "Standard_DS2_v2"
+			"value": "Standard_D4s_v3"
 		},
 		"nodeVmSize": {
-			"value": "Standard_DS2_v2"
+			"value": "Standard_D4s_v3"
+		},
+		"cnsVmSize": {
+			"value": "Standard_E4s_v3"
 		},
 		"storageKind": {
 			"value": "changeme"
@@ -24,10 +27,10 @@
 			"value": 3
 		},
 		"infraInstanceCount": {
-			"value": 2
+			"value": 3
 		},
 		"nodeInstanceCount": {
-			"value": 1
+			"value": 3
 		},
 		"dataDiskSize": {
 			"value": 128
@@ -69,7 +72,7 @@
 			"value": "changeme"
 		},
 		"enableAzure": {
-			"value": "false"
+			"value": "true"
 		},
 		"aadClientId": {
 			"value": "changeme"
@@ -92,6 +95,5 @@
 		"nodeSubnetPrefix": {
 			"value": "10.2.0.0/16"
 		}
-
 	}
 }

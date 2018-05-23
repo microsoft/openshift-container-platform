@@ -30,6 +30,9 @@ export STORAGEKIND=${23}
 export ENABLECNS=${24}
 export CNS=${25}
 export CNSCOUNT=${26}
+export VNETNAME=${27}
+export NODENSG=${28}
+export NODEAVAILIBILITYSET=${29}
 
 export BASTION=$(hostname)
 
@@ -46,9 +49,7 @@ echo "Configuring SSH ControlPath to use shorter path name"
 sed -i -e "s/^# control_path = %(directory)s\/%%h-%%r/control_path = %(directory)s\/%%h-%%r/" /etc/ansible/ansible.cfg
 sed -i -e "s/^#host_key_checking = False/host_key_checking = False/" /etc/ansible/ansible.cfg
 sed -i -e "s/^#pty=False/pty=False/" /etc/ansible/ansible.cfg
-
-# Create Ansible Playbooks for Post Installation tasks
-echo $(date) " - Create Ansible Playbooks for Post Installation tasks"
+sed -i -e "s/^#stdout_callback = skippy/stdout_callback = skippy/" /etc/ansible/ansible.cfg
 
 # Run on MASTER-0 node - configure registry to use Azure Storage
 # Create docker registry config based on Commercial Azure or Azure Government
@@ -64,7 +65,10 @@ fi
 # Setting the default openshift_cloudprovider_kind if Azure enabled
 if [[ $AZURE == "true" ]]
 then
-    export CLOUDKIND="openshift_cloudprovider_kind=azure"
+    CLOUDKIND="openshift_cloudprovider_kind=azure
+osm_controller_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc/origin/cloudprovider/azure.conf']}
+osm_api_server_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc/origin/cloudprovider/azure.conf']}
+openshift_node_kubelet_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc/origin/cloudprovider/azure.conf'], 'enable-controller-attach-detach': ['true']}"
 fi
 
 # Cloning Ansible playbook repository
@@ -117,6 +121,12 @@ $CNS-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift
     done
 fi
 
+# Setting the default openshift_cloudprovider_kind if Azure enabled
+if [[ $AZURE == "true" ]]
+then
+    export HAMODE="openshift_master_cluster_method=native"
+fi
+
 # Create Temp Ansible Hosts File
 echo $(date) " - Create Ansible Hosts file"
 
@@ -136,7 +146,6 @@ runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playboo
 if [ $ENABLECNS == "true" ]
 then
     echo $(date) " - Creating glusterfs configuration"
-    registrygluster="openshift_hosted_registry_storage_kind=glusterfs"
 
     for (( c=0; c<$CNSCOUNT; c++ ))
     do
@@ -191,7 +200,7 @@ $registrygluster
 openshift_enable_service_catalog=false
 
 # Type of clustering being used by OCP
-openshift_master_cluster_method=native
+$HAMODE
 
 # Addresses for connecting to the OpenShift master nodes
 openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
@@ -266,10 +275,12 @@ runuser $SUDOUSER -c "ansible all -o -f 10 -b -m lineinfile -a 'dest=/etc/syscon
 # Configure resolv.conf on all hosts through NetworkManager
 echo $(date) " - Restarting NetworkManager"
 runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -m service -a \"name=NetworkManager state=restarted\""
+echo $(date) " - NetworkManager configuration complete"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Running Prerequisites via Ansible Playbook"
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml"
+echo $(date) " - Prerequisites check complete"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
@@ -313,10 +324,6 @@ runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-play
 echo $(date) " - Assigning cluster admin rights to user"
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
 
-# Setting password for root if Cockpit is enabled
-echo $(date) " - Assigning password for root, which is used to login to Cockpit"
-runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignrootpassword.yaml"
-
 # Configure Docker Registry to use Azure Storage Account
 echo $(date) " - Configuring Docker Registry to use Azure Storage Account"
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
@@ -324,7 +331,7 @@ runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-play
 # Setting CNS as default storage, only AZURE being true will override it
 CNS_DEFAULT_STORAGE=true
 
-# Handing Azure specific storage requirements if it is enabled
+# Handling Azure specific storage requirements if it is enabled
 if [[ $AZURE == "true" ]]
 then
     # Azure wants to be primary, so let us let it be
@@ -333,23 +340,6 @@ then
     # Create Storage Classes
     echo $(date) " - Creating Storage Classes"
     runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
-
-    echo $(date) " - Sleep for 60"
-    sleep 60
-
-    # Execute setup-azure-master playbooks to configure Azure Cloud Provider
-    echo $(date) " - Configuring OpenShift Cloud Provider to be Azure"
-    runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configure-master-for-azure.yaml"
-    if [ $? -eq 0 ]
-    then
-        echo $(date) " - Cloud Provider setup of master config on Master Nodes completed successfully"
-    else
-        echo $(date) " - Cloud Provider setup of master config on Master Nodes failed to completed"
-        exit 7
-    fi
-    echo $(date) " - Sleep for 60"
-    sleep 60
-# End of Azure specific section
 fi 
 
 # Reconfigure glusterfs storage class

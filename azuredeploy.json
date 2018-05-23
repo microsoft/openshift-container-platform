@@ -82,6 +82,17 @@
 				"description": "OpenShift Node VM(s) size"
 			}
 		},
+		"cnsVmSize": {
+			"type": "string",
+			"defaultValue": "Standard_E4s_v3",
+			"allowedValues": [
+				"Standard_D4s_v3", "Standard_D8s_v3", "Standard_D16s_v3", "Standard_D32s_v3", "Standard_D64s_v3",
+				"Standard_E4s_v3", "Standard_E8s_v3", "Standard_E16s_v3", "Standard_E32s_v3", "Standard_E64s_v3"
+			],
+			"metadata": {
+				"description": "OpenShift CNS Node VM(s) size"
+			}
+		},
 		"storageKind": {
 			"type": "string",
 			"defaultValue": "managed",
@@ -102,7 +113,7 @@
 		"masterInstanceCount": {
 			"type": "int",
 			"defaultValue": 3,
-			"allowedValues": [3, 5],
+			"allowedValues": [1, 3, 5],
 			"metadata": {
 				"description": "Number of OpenShift masters."
 			}
@@ -110,7 +121,7 @@
 		"infraInstanceCount": {
 			"type": "int",
 			"defaultValue": 3,
-			"allowedValues": [2, 3],
+			"allowedValues": [1, 2, 3],
 			"metadata": {
 				"description": "Number of OpenShift infra nodes. 1 is non HA. Choose 2 or 3 for HA"
 			}
@@ -418,11 +429,10 @@
 		"redHatTags": {
 			"app": "OpenShiftContainerPlatform",
 			"version": "3.9",
-			"platform": "Azure",
+			"platform": "AzurePublic",
 			"provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
 		},
 		"bastionVmSize": "Standard_D2s_v3",
-		"cnsVmSize": "Standard_E4s_v3",
 		"glusterDiskSize": 128,
 		"cnsInstanceCount": 3,
 		"singlequote": "'",
@@ -1811,7 +1821,7 @@
 						"value": "[parameters('adminUsername')]"
 					},
 					"vmSize": {
-						"value": "[variables('cnsVmSize')]"
+						"value": "[parameters('cnsVmSize')]"
 					},
 					"availabilitySet": {
 						"value": "cnsavailabilityset"
@@ -1829,7 +1839,7 @@
 						"value": "cnsnode"
 					},
 					"vmStorageType": {
-						"value": "[variables('vmSizesMap')[variables('cnsVmSize')].storageAccountType]"
+						"value": "[variables('vmSizesMap')[parameters('cnsVmSize')].storageAccountType]"
 					},
 					"storageKind": {
 						"value": "[parameters('storageKind')]"
@@ -2078,7 +2088,7 @@
 						"value": "[variables('newStorageAccountRegistry')]"
 					},
 					"newStorageAccountKey": {
-						"value": "[listKeys(variables('newStorageAccountRegistry'),'2015-06-15').key1]"
+						"value": "[listKeys(variables('newStorageAccountRegistry'), variables('apiVersionStorage')).keys[0].value]"
 					},
 					"openshiftBastionHostname": {
 						"value": "[variables('openshiftBastionHostname')]"
@@ -2176,7 +2186,7 @@
 		},
 		"OpenshiftMasterSSH": {
 			"type": "string",
-			"value": "[concat('ssh -p 2200', parameters('adminUsername'), '@', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn)]"
+			"value": "[concat('ssh -p 2200 ', parameters('adminUsername'), '@', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn)]"
 		},
 		"OpenshiftInfraLoadBalancerFQDN": {
 			"type": "string",

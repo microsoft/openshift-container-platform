@@ -17,6 +17,8 @@ Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
 ## OpenShift Container Platform 3.9 with Username / Password authentication for OpenShift
 
+Re-introduced a non-HA master config with a single master option.
+
 This template deploys OpenShift Container Platform with basic username / password for authentication to OpenShift. It includes the following resources:
 
 |Resource           	|Properties                                                                                                                          |
@@ -29,7 +31,7 @@ This template deploys OpenShift Container Platform with basic username / passwor
 |Storage Accounts <br />Managed Disks      |2 Storage Accounts for Diagnostics Logs <br />1 Storage Account for Private Docker Registry |
 |Network Security Groups|1 Network Security Group for Bastion VM<br />1 Network Security Group Master VMs<br />1 Network Security Group for Infra VMs<br />1 Network Security Group for Node VMs |
 |Availability Sets      |1 Availability Set for Master VMs<br />1 Availability Set for Infra VMs<br />1 Availability Set for Node VMs  |
-|Virtual Machines   	|1 Bastion Node - Used to Run Ansible Playbook for OpenShift deployment<br />3 or 5 Master Nodes<br />2 or 3 Infra Nodes<br />User-defined number of Nodes (1 to 30)<br />All VMs include a single attached data disk for Docker thin pool logical volume|
+|Virtual Machines   	|1 Bastion Node - Used to Run Ansible Playbook for OpenShift deployment<br />1, 3 or 5 Master Nodes<br />1, 2 or 3 Infra Nodes<br />User-defined number of Nodes (1 to 30)<br />All VMs include a single attached data disk for Docker thin pool logical volume|
 
 ![Cluster Diagram](images/openshiftdiagram.jpg)
 
@@ -42,7 +44,7 @@ This template deploys multiple VMs and requires some pre-work before you can suc
 This template uses the On-Demand Red Hat Enterprise Linux image from the Azure Gallery. 
 >When using the On-Demand image, there is an hourly charge for using this image.  At the same time, the instance will be registered to your Red Hat subscription, so you will also be using one of your entitlements. This will lead to "double billing".
 
-After successful deployment, the Bastion Node is no longer required unless you want to use it to add nodes or run other playbooks in the future.  You can turn it off and delete it or keep it around for running future playbooks.  You can also use this as the jump host for managing your OpenShift cluster.
+After successful deployment, the Bastion Node is no longer required unless you want to use it to add nodes or run other playbooks in the future.  The Bastion node is the only node by default that has the private key for SSH to all the cluster nodes. You can turn it off and delete it or keep it around for running future playbooks.  You can also use this as the jump host for managing your OpenShift cluster.
 
 ## Prerequisites
 
@@ -103,7 +105,7 @@ The appId is used for the aadClientId parameter.
 
 ### Red Hat Subscription Access
 
-For security reasons, the method for registering the RHEL system has been changed to allow the use of an Organization ID and Activation Key as well as a Username and Password. Please know that it is more secure to use the Organization ID and Activation Key.
+For security reasons, the method for registering the RHEL system allows the use of an Organization ID and Activation Key as well as a Username and Password. Please know that it is more secure to use the Organization ID and Activation Key.
 
 You can determine your Organization ID by running ```subscription-manager identity``` on a registered machine.  To create or find your Activation Key, please go here: https://access.redhat.com/management/activation_keys.
 
@@ -115,6 +117,7 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 2.  masterVmSize: Size of the Master VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
 3.  infraVmSize: Size of the Infra VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
 3.  nodeVmSize: Size of the App Node VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
+3.  cnsVmSize: Size of the CNS Node VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
 4.  storageKind: The type of storage to be used. Value is either "managed" or "unmanaged"
 4.  openshiftClusterPrefix: Cluster Prefix used to configure hostnames for all nodes - bastion, master, infra and app nodes. Between 1 and 20 characters
 7.  masterInstanceCount: Number of Masters nodes to deploy
@@ -170,6 +173,8 @@ The OpenShift Ansible playbook does take a while to run when using VMs backed by
 If the Azure Cloud Provider is not enabled, then the Service Catalog and Ansible Template Service Broker will not be installed as Service Catalog requires persistent storage.
 
 Be sure to follow the OpenShift instructions to create the necessary DNS entry for the OpenShift Router for access to applications. <br />
+
+A Standard Storage Account is provisioned to provide persistent storage for the integrated OpenShift Registry as Premium Storage does not support storage of anything but VHD files.
 
 
 ### TROUBLESHOOTING

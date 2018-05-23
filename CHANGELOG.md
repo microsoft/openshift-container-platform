@@ -1,5 +1,13 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+
+# UPDATES for Master (Release 3.9) - May 22, 2018
+
+1.  Added parameter for CNS VM Size
+2.  Added support for non-HA masters by allowing a single master
+3.  Cleaned up Azure Cloud Provider configuration
+
+
 # UPDATES for Master (Release 3.9) - May 19, 2018
 
 1.  Updated scripts to support 3.9.27

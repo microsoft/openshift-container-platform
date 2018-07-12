@@ -296,7 +296,7 @@
 		},
 		"addressPrefixes": {
 		  "type": "string",
-		  "defaultValue": "10.0.0.0/14"
+		  "defaultValue": "10.0.0.0/14",
 		  "metadata": {
 			"description": "Address prefix of the virtual network"
 		  }
@@ -316,10 +316,10 @@
 			}
 		},
 		"nodeSubnetName": {
-			"type": "string",
-			"defaultValue": "nodesubnet",
-			"metadata": {
-				"description": "Name of the subnet"
+		  "type": "string",
+		  "defaultValue": "nodesubnet",
+		  "metadata": {
+			"description": "Name of the subnet"
 		  }
 		},
 		"nodeSubnetPrefix": {
@@ -332,6 +332,7 @@
 	},
 	"variables": {
 		"location": "[resourceGroup().location]",
+		"runScriptExtensions": "no",
 		"resourceGroupName": "[resourceGroup().id]",
 		"apiVersionCompute": "2017-03-30",
 		"apiVersionNetwork": "2017-09-01",
@@ -1014,9 +1015,7 @@
 			"apiVersion": "[variables('apiVersionNetwork')]",
 			"properties": {
 				"addressSpace": {
-					"addressPrefixes": [
-						"[parameters('addressPrefixes')]"
-					]
+					"addressPrefixes": "[parameters('addressPrefixes')]"
 				},
 				"subnets": [{
 					"name": "[parameters('masterSubnetName')]",
@@ -1904,6 +1903,7 @@
 				}
 			}
 		}, {
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "bastionPrep",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
@@ -1959,6 +1959,7 @@
 			}
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "[concat(variables('openshiftMasterHostname'), '-', copyIndex(), '/prepMasters')]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
@@ -1992,6 +1993,7 @@
 			}
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "[concat(variables('openshiftInfraHostname'), '-', copyIndex(), '/prepNodes')]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
@@ -2059,6 +2061,7 @@
 			}
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "[concat(variables('openshiftNodeHostname'), '-', copyIndex(), '/prepNodes')]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
@@ -2092,6 +2095,7 @@
 			}
 		}, {
 			"name": "OpenShiftDeployment",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [

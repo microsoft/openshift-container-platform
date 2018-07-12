@@ -86,11 +86,26 @@
 		"defaultSubDomain": {
 			"value": "domain.com"
 		},
-		"addressPrefix": {
+		"virtualNetworkNewOrExisting": {
+			"value": "existing"
+		},
+		"virtualNetworkResourceGroupName": {
+			"value": "haroldw-0000-vnetrg"
+		},
+		"virtualNetworkName": {
+			"value": "hwopenshiftvnet"
+		},
+		"addressPrefixes": {
 			"value": "10.0.0.0/14"
+		},
+		"masterSubnetName": {
+			"value": "mastersubnet"
 		},
 		"masterSubnetPrefix": {
 			"value": "10.1.0.0/16"
+		},
+		"nodeSubnetName": {
+			"value": "nodesubnet"
 		},
 		"nodeSubnetPrefix": {
 			"value": "10.2.0.0/16"

@@ -90,10 +90,10 @@
 			"value": "existing"
 		},
 		"virtualNetworkResourceGroupName": {
-			"value": "haroldw-0000-vnetrg"
+			"value": "existingvnetrg"
 		},
 		"virtualNetworkName": {
-			"value": "hwopenshiftvnet"
+			"value": "openshiftvnet"
 		},
 		"addressPrefixes": {
 			"value": "10.0.0.0/14"

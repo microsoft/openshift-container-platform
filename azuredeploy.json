@@ -569,12 +569,12 @@
 			"Standard_D1_v2": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D2_v2": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D3_v2": {
 				"storageAccountType": "Standard_LRS",
@@ -679,12 +679,12 @@
 			"Standard_DS1_v2": {
 				"storageAccountType": "Premium_LRS",
 				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_DS2_v2": {
 				"storageAccountType": "Premium_LRS",
 				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_DS3_v2": {
 				"storageAccountType": "Premium_LRS",
@@ -754,7 +754,7 @@
 			"Standard_D2_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D4_v3": {
 				"storageAccountType": "Standard_LRS",
@@ -784,7 +784,7 @@
 			"Standard_D2s_v3": {
 				"storageAccountType": "Premium_LRS",
 				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D4s_v3": {
 				"storageAccountType": "Premium_LRS",
@@ -814,7 +814,7 @@
 			"Standard_E2_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E4_v3": {
 				"storageAccountType": "Standard_LRS",
@@ -844,7 +844,7 @@
 			"Standard_E2s_v3": {
 				"storageAccountType": "Premium_LRS",
 				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E4s_v3": {
 				"storageAccountType": "Premium_LRS",

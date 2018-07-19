@@ -94,7 +94,7 @@ if [[ $CLUSTERTYPE == "private" ]]
 then
 	MASTERCLUSTERADDRESS="openshift_master_cluster_hostname=$MASTER-0
 openshift_master_cluster_public_hostname=$PRIVATEDNS
-openshift_master_cluster_public_vip=PRIVATEIP
+openshift_master_cluster_public_vip=$PRIVATEIP
 "
 else
 	MASTERCLUSTERADDRESS="openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME

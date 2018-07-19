@@ -100,6 +100,7 @@ else
 	MASTERCLUSTERADDRESS="openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
 openshift_master_cluster_public_hostname=$MASTERPUBLICIPHOSTNAME
 openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS"
+fi
 
 # Create Master nodes grouping
 echo $(date) " - Creating Master nodes grouping"

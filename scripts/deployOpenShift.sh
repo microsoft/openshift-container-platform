@@ -33,6 +33,9 @@ export CNSCOUNT=${26}
 export VNETNAME=${27}
 export NODENSG=${28}
 export NODEAVAILIBILITYSET=${29}
+export CLUSTERTYPE=${30}
+export PRIVATEIP=${31}
+export PRIVATEDNS=${32}
 
 export BASTION=$(hostname)
 
@@ -84,6 +87,19 @@ fi
 
 # Setting DOMAIN variable
 export DOMAIN=`domainname -d`
+
+# Configure Master cluster address information based on Cluster type (private or public)
+echo $(date) " - Create variable for master cluster address based on cluster type"
+if [[ $CLUSTERTYPE == "private" ]]
+then
+	MASTERCLUSTERADDRESS="openshift_master_cluster_hostname=$MASTER-0
+openshift_master_cluster_public_hostname=$PRIVATEDNS
+openshift_master_cluster_public_vip=PRIVATEIP
+"
+else
+	MASTERCLUSTERADDRESS="openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
+openshift_master_cluster_public_hostname=$MASTERPUBLICIPHOSTNAME
+openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS"
 
 # Create Master nodes grouping
 echo $(date) " - Creating Master nodes grouping"
@@ -208,9 +224,7 @@ openshift_enable_service_catalog=false
 $HAMODE
 
 # Addresses for connecting to the OpenShift master nodes
-openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
-openshift_master_cluster_public_hostname=$MASTERPUBLICIPHOSTNAME
-openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
+$MASTERCLUSTERADDRESS
 
 # Enable HTPasswdPasswordIdentityProvider
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]

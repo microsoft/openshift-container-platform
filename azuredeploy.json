@@ -328,6 +328,30 @@
 			"metadata": {
 				"description": "Base subnet used for the infra, node, and CNS servers, and needs to be a subset of the addressPrefix - default is 10.2.0.0/16"
 			}
+		},
+		"clusterType": {
+			"type": "string",
+			"defaultValue": "public",
+			"allowedValues": [
+				"private", "public"
+			],
+			"metadata": {
+				"description": "Specify whether the cluster is private or public. Private does not expose masters to public Internet"
+			}
+		},
+		"privateClusterIp": {
+			"type": "string",
+			"defaultValue": "10.1.0.200",
+			"metadata": {
+				"description": "Static Private IP address to use for master load balancer when creating a private cluster"
+			}
+		},
+		"privateClusterDns": {
+			"type": "string",
+			"defaultValue": "10.1.0.200",
+			"metadata": {
+				"description": "DNS name to use for master load balancer when creating a private cluster.  Needs to resolve to Private IP."
+			}
 		}
 	},
 	"variables": {
@@ -455,6 +479,20 @@
 		"infraLbBackendPoolId": "[concat(variables('infraLbId'),'/backendAddressPools/loadBalancerBackend')]",
 		"infraLbHttpProbeId": "[concat(variables('infraLbId'),'/probes/httpProbe')]",
 		"infraLbHttpsProbeId": "[concat(variables('infraLbId'),'/probes/httpsProbe')]",
+		
+		"privateMasterFrontEndIpConfigurationProperties": {
+			"privateIPAddress": "[parameters('privateClusterIp')]",
+			"privateIPAllocationMethod": "Static",
+			"subnet": {
+				"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName'))]"
+			}
+		},
+		"publicMasterFrontEndIpConfigurationProperties": {
+			"publicIPAddress": {
+				"id": "[variables('infraPublicIpAddressId')]"
+			}
+		},
+		"masterFrontEndIpConfigurationProperties": "[concat(parameters('clusterType'), 'MasterFrontEndIpConfigurationProperties')]",
 		"imageReference": {
 			"publisher": "RedHat",
 			"offer": "RHEL",
@@ -1259,11 +1297,7 @@
 			"properties": {
 				"frontendIPConfigurations": [{
 					"name": "LoadBalancerFrontEnd",
-					"properties": {
-						"publicIPAddress": {
-							"id": "[variables('masterPublicIpAddressId')]"
-						}
-					}
+					"properties": "[variables(variables('masterFrontEndIpConfigurationProperties'))]"
 				}],
 				"backendAddressPools": [{
 					"name": "loadBalancerBackEnd"
@@ -2288,6 +2322,15 @@
 					},
 					"nodeAvailabilitySet": {
 						"value": "nodeavailabilityset"
+					},
+					"clusterType": {
+						"value": "[parameters('clusterType')]"
+					},
+					"privateClusterIp": {
+						"value": "[parameters('privateClusterIp')]"
+					},
+					"privateClusterDns": {
+						"value": "[parameters('privateClusterDns')]"
 					}
 				}
 			}

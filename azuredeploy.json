@@ -1292,7 +1292,7 @@
 				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
-				"[concat('Microsoft.Network/publicIPAddresses/', variables('openshiftMasterPublicIpDnsLabel'))]"
+				"[if(equals(parameters('clusterType'), 'public'), 'concat('Microsoft.Network/publicIPAddresses/', variables('openshiftMasterPublicIpDnsLabel'))', '')]"
 			],
 			"properties": {
 				"frontendIPConfigurations": [{

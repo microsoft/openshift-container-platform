@@ -1133,6 +1133,9 @@
 						"[parameters('addressPrefixes')]"
 					]
 				},
+				"dhcpOptions": {
+					"dnsServers": []
+				},
 				"subnets": [{
 					"name": "[parameters('masterSubnetName')]",
 					"properties": {
@@ -1292,7 +1295,8 @@
 				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
-				"[if(equals(parameters('clusterType'), 'public'), 'concat('Microsoft.Network/publicIPAddresses/', variables('openshiftMasterPublicIpDnsLabel'))', '')]"
+				"[concat('Microsoft.Network/publicIPAddresses/', variables('openshiftMasterPublicIpDnsLabel'))]",
+				"[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
 			],
 			"properties": {
 				"frontendIPConfigurations": [{
@@ -1331,30 +1335,7 @@
 					}
 				}]
 			}
-		},
-		{
-			"apiVersion": "[variables('apiVersionNetwork')]",
-			"type": "Microsoft.Network/loadBalancers/inboundNatRules",
-			"name": "[concat(variables('masterLoadBalancerName'), '/', 'SSH-', variables('openshiftMasterHostname'), copyIndex())]",
-			"location": "[variables('location')]",
-			"copy": {
-				"name": "masterLbLoop",
-				"count": "[parameters('masterInstanceCount')]"
-			},
-			"dependsOn": [
-				"[variables('masterLbId')]"
-			],
-			"properties": {
-				"frontendIPConfiguration": {
-					"id": "[variables('masterLbFrontEndConfigId')]"
-				},
-				"protocol": "tcp",
-				"frontendPort": "[copyIndex(2200)]",
-				"backendPort": 22,
-				"enableFloatingIP": false
-			}
-		},
-		{
+		}, {
 			"type": "Microsoft.Network/loadBalancers",
 			"name": "[variables('infraLoadBalancerName')]",
 			"location": "[variables('location')]",
@@ -1481,7 +1462,6 @@
 			"dependsOn": [
 				"[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
 				"[concat('Microsoft.Network/loadBalancers/', variables('masterLoadBalancerName'))]",
-				"[concat(variables('masterLbId'), '/inboundNatRules/SSH-', variables('openshiftMasterHostname') ,copyIndex())]",
 				"[concat('Microsoft.Network/networkSecurityGroups/', variables('openshiftMasterHostname'), '-nsg')]"
 			],
 			"copy": {
@@ -1498,12 +1478,7 @@
 						},
 						"loadBalancerBackendAddressPools": [{
 							"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('masterLoadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]"
-						}],
-						"loadBalancerInboundNatRules": [
-							{
-								"id": "[concat(variables('masterLbId'),'/inboundNatRules/SSH-', variables('openshiftMasterHostname'), copyIndex())]"
-							}
-						]
+						}]
 					}
 				}],
 				"enableAcceleratedNetworking": "[if(equals(variables('vmSizesMap')[parameters('masterVmSize')].acceleratedNetworking, 'true'), 'true', 'false')]",

@@ -76,7 +76,7 @@ openshift_node_kubelet_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc
 fi
 
 # Cloning Ansible playbook repository
-echo " - Cloning Ansible playbook repository"
+echo $(date) " - Cloning Ansible playbook repository"
 ((cd /home/$SUDOUSER && git clone https://github.com/Microsoft/openshift-container-platform-playbooks.git) || (cd /home/$SUDOUSER/openshift-container-platform-playbooks && git pull))
 if [ -d /home/${SUDOUSER}/openshift-container-platform-playbooks ]
 then
@@ -85,6 +85,13 @@ else
     echo " - Retrieval of playbooks failed"
     exit 99
 fi
+
+# Creating variables file for future playbooks
+echo $(date) " - Creating variables file for future playbooks"
+cat > /home/$SUDOUSER/openshift-container-platform-playbooks/vars.yaml <<EOF
+admin_user: $SUDOUSER
+master_lb_private_dns: $PRIVATEDNS
+EOF
 
 # Setting DOMAIN variable
 export DOMAIN=`domainname -d`

@@ -36,6 +36,7 @@ export NODEAVAILIBILITYSET=${29}
 export CLUSTERTYPE=${30}
 export PRIVATEIP=${31}
 export PRIVATEDNS=${32}
+export MASTERPIPNAME=${33}
 
 export BASTION=$(hostname)
 
@@ -458,6 +459,8 @@ if [ $CLUSTERTYPE == "private" ]
 then
 	echo $(date) " - Configuring Private Cluster settings across all nodes"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/activate-private-lb.yaml"
+	az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
+	az network public-ip delete -g $RESOURCEGROUP -n $MASTERPIPNAME
 fi
 
 # Setting Masters to non-schedulable

@@ -94,8 +94,7 @@ if [[ $CLUSTERTYPE == "private" ]]
 then
 	MASTERCLUSTERADDRESS="openshift_master_cluster_hostname=$MASTER-0
 openshift_master_cluster_public_hostname=$PRIVATEDNS
-openshift_master_cluster_public_vip=$PRIVATEIP
-"
+openshift_master_cluster_public_vip=$PRIVATEIP"
 else
 	MASTERCLUSTERADDRESS="openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
 openshift_master_cluster_public_hostname=$MASTERPUBLICIPHOSTNAME
@@ -452,6 +451,13 @@ then
         echo $(date) " - Logging configuration failed"
         exit 12
     fi
+fi
+
+# Configure Private Cluster settings
+if [ $CLUSTERTYPE == "private" ]
+then
+	echo $(date) " - Configuring Private Cluster settings across all nodes"
+	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/activate-private-lb.yaml"
 fi
 
 # Setting Masters to non-schedulable

@@ -72,8 +72,10 @@ openshift_node_kubelet_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc
 fi
 
 # Cloning Ansible playbook repository
-(cd /home/$SUDOUSER && git clone https://github.com/vincepower/openshift-container-platform-playbooks.git || cd openshift-container-platform-playbooks && git pull)
-#(cd /home/$SUDOUSER && git clone https://github.com/microsoft/openshift-container-platform-playbooks.git || cd openshift-container-platform-playbooks && git pull)
+
+echo " - Cloning Ansible playbook repository"
+((cd /home/$SUDOUSER && git clone https://github.com/Microsoft/openshift-container-platform-playbooks.git) || (cd /home/$SUDOUSER/openshift-container-platform-playbooks && git pull))
+
 if [ -d /home/${SUDOUSER}/openshift-container-platform-playbooks ]
 then
     echo " - Retrieved playbooks successfully"
@@ -117,7 +119,7 @@ then
     for (( c=0; c<$CNSCOUNT; c++ ))
     do
         cnsgroup="$cnsgroup
-$CNS-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$CNS-$c"
+$CNS-$c openshift_node_labels=\"{'region': 'cns', 'zone': 'default'}\" openshift_hostname=$CNS-$c"
     done
 fi
 
@@ -438,6 +440,10 @@ then
         exit 12
     fi
 fi
+
+# Setting Masters to non-schedulable
+echo $(date) " - Setting Masters to non-schedulable"
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reset-masters-non-schedulable.yaml"
 
 # Delete yaml files
 echo $(date) " - Deleting unecessary files"

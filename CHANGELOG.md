@@ -1,6 +1,12 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
 
+# UPDATES for Master (Release 3.9) - July 14, 2018
+
+1.  Added support for Accelerated Networking
+2.  Added support for existing or new VNet
+
+
 # UPDATES for Master (Release 3.9) - May 22, 2018
 
 1.  Added parameter for CNS VM Size

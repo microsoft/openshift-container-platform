@@ -17,13 +17,14 @@ Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
 ## OpenShift Container Platform 3.9 with Username / Password authentication for OpenShift
 
-Re-introduced a non-HA master config with a single master option.
+Re-introduced a non-HA master config with a single master option.  VM types that support Accelerated Networking will automatically have this feature enabled.
 
 This template deploys OpenShift Container Platform with basic username / password for authentication to OpenShift. It includes the following resources:
 
 |Resource           	|Properties                                                                                                                          |
 |-----------------------|------------------------------------------------------------------------------------------------------------------------------------|
-|Virtual Network   		|**Address prefix:** 10.0.0.0/14<br />**Master subnet:** 10.1.0.0/16<br />**Node subnet:** 10.2.0.0/16                      |
+|Virtual Network <br />Default  		|**Address prefix:** 10.0.0.0/14<br />**Master subnet:** 10.1.0.0/16<br />**Node subnet:** 10.2.0.0/16                      |
+|Virtual Network <br />Custom   		|**Address prefix:** Your Choice<br />**Master subnet:** Your Choice<br />**Node subnet:** Your Choice                      |
 |Master Load Balancer	|1 probe and 1 rule for TCP 443<br/> NAT rules for SSH on Ports 2200-220X                                           |
 |Infra Load Balancer	|2 probes and 2 rules for TCP 80 and TCP 443									                                           |
 |Public IP Addresses	|Bastion Public IP for Bastion Node<br />OpenShift Master public IP attached to Master Load Balancer<br />OpenShift Router public IP attached to Infra Load Balancer            |
@@ -141,11 +142,16 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 24. aadClientSecret: Azure Active Directory Client Secret for Service Principal
 25. defaultSubDomainType: This will either be nipio (if you don't have your own domain) or custom if you have your own domain that you would like to use for routing
 26. defaultSubDomain: The wildcard DNS name you would like to use for routing if you selected custom above.  If you selected nipio above, you must still enter something here but it will not be used
+26. virtualNetworkNewOrExisting: Select whether to use an existing Virtual Network or create a new Virtual Network. Value is either "existing" or "new"
+26. virtualNetworkResourceGroupName: The name of the Resource Group where the VNet resides. If this parameter is omitted, it will default to RG in which new resources are created
+26. virtualNetworkName: The name of the Virtual Network. Must match the existing name for existing VNet or the name of the new VNet to create if creating a new VNet
+26: masterSubnetName: The name of the Master Subnet
+26: nodeSubnetName: The name of the Node Subnet
 ** NOTE ** For the next three IP ranges they need to be in CIDR format and be in RFC 1918 (10.0.0.0/8, 192.168.0.0/16, or 172.16.0.0/12).
 ** NOTE ** The range just can't put servers in the 10.128.0.0/16 range but it can be a larger subnet that includes them like 10.0.0.0/8.
-27. addressPrefix: IP range for the entire Virtual Network. Default is 10.0.0.0/14.
-28. masterSubnetPrefix: Subnet for master, CNS, and infra nodes to be hosted. Needs to have at least 16 IPs. Default is 10.1.0.0/16.
-29. nodeSubnetPrefix: Subnet for applicaton nodes. Should have at least 16 IPs. Default is 10.2.0.0/16.
+27. addressPrefixes: IP range for the entire Virtual Network. Default is 10.0.0.0/14.
+28. masterSubnetPrefix: Subnet for master, CNS, and infra nodes to be hosted. Needs to have enough IPs to support the number of nodes being deployed. Default is 10.1.0.0/16.
+29. nodeSubnetPrefix: Subnet for applicaton nodes. Needs to have enough IPs to support the number of nodes being deployed. Default is 10.2.0.0/16.
 
 ## Deploy Template
 

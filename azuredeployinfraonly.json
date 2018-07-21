@@ -316,10 +316,10 @@
 			}
 		},
 		"nodeSubnetName": {
-			"type": "string",
-			"defaultValue": "nodesubnet",
-			"metadata": {
-				"description": "Name of the subnet"
+		  "type": "string",
+		  "defaultValue": "nodesubnet",
+		  "metadata": {
+			"description": "Name of the subnet"
 		  }
 		},
 		"nodeSubnetPrefix": {
@@ -332,6 +332,7 @@
 	},
 	"variables": {
 		"location": "[resourceGroup().location]",
+		"runScriptExtensions": "no",
 		"resourceGroupName": "[resourceGroup().id]",
 		"apiVersionCompute": "2017-03-30",
 		"apiVersionNetwork": "2017-09-01",
@@ -488,388 +489,311 @@
 		"vmSizesMap": {
 			"Standard_A4": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A5": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A6": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A7": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A8": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A9": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A10": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A11": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D1": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D4": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D11": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D12": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D13": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D14": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D1_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D2_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D3_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D4_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D5_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D11_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D12_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D13_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D14_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_G1": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_G2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_G3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_G4": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_G5": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_DS1": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS4": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS11": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS12": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS13": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS14": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS1_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS2_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS3_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS4_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS5_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS11_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS12_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS13_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS14_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS15_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_GS1": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_GS2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_GS3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_GS4": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_GS5": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D2_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D4_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D8_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D16_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D32_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D64_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D2s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D4s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D8s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D16s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D32s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D64s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E2_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E4_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E8_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E16_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E32_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E64_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E2s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E4s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E8s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E16s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E32s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E64s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			}
 		}
 	},
@@ -1091,9 +1015,7 @@
 			"apiVersion": "[variables('apiVersionNetwork')]",
 			"properties": {
 				"addressSpace": {
-					"addressPrefixes": [
-						"[parameters('addressPrefixes')]"
-					]
+					"addressPrefixes": "[parameters('addressPrefixes')]"
 				},
 				"subnets": [{
 					"name": "[parameters('masterSubnetName')]",
@@ -1427,7 +1349,6 @@
 						}
 					}
 				}],
-				"enableAcceleratedNetworking": "[if(equals(variables('vmSizesMap')[variables('bastionVmSize')].acceleratedNetworking, 'true'), 'true', 'false')]",
 				"networkSecurityGroup": {
 					"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftBastionHostname'), '-nsg'))]"
 				}
@@ -1472,7 +1393,6 @@
 						]
 					}
 				}],
-				"enableAcceleratedNetworking": "[if(equals(variables('vmSizesMap')[parameters('masterVmSize')].acceleratedNetworking, 'true'), 'true', 'false')]",
 				"networkSecurityGroup": {
 					"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftMasterHostname'), '-nsg'))]"
 				}
@@ -1511,7 +1431,6 @@
 						}]
 					}
 				}],
-				"enableAcceleratedNetworking": "[if(equals(variables('vmSizesMap')[parameters('infraVmSize')].acceleratedNetworking, 'true'), 'true', 'false')]",
 				"networkSecurityGroup": {
 					"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftInfraHostname'), '-nsg'))]"
 				}
@@ -1547,7 +1466,6 @@
 						}
 					}
 				}],
-				"enableAcceleratedNetworking": "[if(equals(variables('vmSizesMap')[parameters('cnsVmSize')].acceleratedNetworking, 'true'), 'true', 'false')]",
 				"networkSecurityGroup": {
 					"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftCnsHostname'), '-nsg'))]"
 				}
@@ -1582,7 +1500,6 @@
 						}
 					}
 				}],
-				"enableAcceleratedNetworking": "[if(equals(variables('vmSizesMap')[parameters('nodeVmSize')].acceleratedNetworking, 'true'), 'true', 'false')]",
 				"networkSecurityGroup": {
 					"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftNodeHostname'), '-nsg'))]"
 				}
@@ -1986,6 +1903,7 @@
 				}
 			}
 		}, {
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "bastionPrep",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
@@ -2041,6 +1959,7 @@
 			}
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "[concat(variables('openshiftMasterHostname'), '-', copyIndex(), '/prepMasters')]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
@@ -2074,6 +1993,7 @@
 			}
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "[concat(variables('openshiftInfraHostname'), '-', copyIndex(), '/prepNodes')]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
@@ -2141,6 +2061,7 @@
 			}
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "[concat(variables('openshiftNodeHostname'), '-', copyIndex(), '/prepNodes')]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
@@ -2174,6 +2095,7 @@
 			}
 		}, {
 			"name": "OpenShiftDeployment",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [

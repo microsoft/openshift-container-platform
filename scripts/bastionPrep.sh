@@ -72,7 +72,7 @@ echo $(date) " - Install base packages"
 yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion httpd-tools kexec-tools sos psacct
 yum -y install ansible
 yum -y update glusterfs-fuse
-echo $(date) " - Base package insallation complete"
+echo $(date) " - Base package installation complete"
 
 # Excluders for OpenShift
 yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
@@ -82,7 +82,7 @@ atomic-openshift-excluder unexclude
 echo $(date) " - Installing OpenShift utilities"
 
 yum -y install atomic-openshift-utils
-echo $(date) " - OpenShift utilities insallation complete"
+echo $(date) " - OpenShift utilities installation complete"
 
 # Installing Azure CLI
 # From https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-yum
@@ -90,7 +90,7 @@ echo $(date) " - Installing Azure CLI"
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 sudo sh -c 'echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo'
 sudo yum install -y azure-cli
-echo $(date) " - Azure CLI insallation complete"
+echo $(date) " - Azure CLI installation complete"
 
 # Configure DNS so it always has the domain name
 echo $(date) " - Adding DOMAIN to search for resolv.conf"

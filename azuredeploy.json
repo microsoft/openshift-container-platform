@@ -1386,7 +1386,7 @@
 			"properties": {
 				"frontendIPConfigurations": [{
 					"name": "LoadBalancerFrontEnd",
-					"properties": "[variables(variables('masterFrontEndIpConfigurationProperties'))]"
+					"properties": "[variables(variables('infraFrontEndIpConfigurationProperties'))]"
 				}],
 				"backendAddressPools": [{
 					"name": "loadBalancerBackEnd"

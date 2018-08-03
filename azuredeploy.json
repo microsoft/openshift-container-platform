@@ -373,7 +373,7 @@
 	},
 	"variables": {
 		"location": "[resourceGroup().location]",
-		"resourceGroupName": "[resourceGroup().id]",
+		"resourceGroupName": "[resourceGroup().name]",
 		"tenantId": "[subscription().tenantId]",
 		"subscriptionId": "[subscription().subscriptionId]",
 		"apiVersionCompute": "2017-03-30",

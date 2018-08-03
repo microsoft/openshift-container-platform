@@ -329,28 +329,45 @@
 				"description": "Base subnet used for the infra, node, and CNS servers, and needs to be a subset of the addressPrefix - default is 10.2.0.0/16"
 			}
 		},
-		"clusterType": {
+		"masterClusterType": {
 			"type": "string",
 			"defaultValue": "public",
 			"allowedValues": [
 				"private", "public"
 			],
 			"metadata": {
-				"description": "Specify whether the cluster is private or public. Private does not expose masters to public Internet"
+				"description": "Specify whether the cluster uses private or public master nodes"
 			}
 		},
-		"privateClusterIp": {
+		"masterPrivateClusterIp": {
 			"type": "string",
 			"defaultValue": "10.1.0.200",
 			"metadata": {
-				"description": "Static Private IP address to use for master load balancer when creating a private cluster"
+				"description": "Static Private IP address to use for master load balancer when creating a cluster with private master nodes"
 			}
 		},
-		"privateClusterDns": {
+		"masterPrivateClusterDns": {
 			"type": "string",
-			"defaultValue": "10.1.0.200",
+			"defaultValue": "internalmaster.net",
 			"metadata": {
-				"description": "DNS name to use for master load balancer when creating a private cluster.  Needs to resolve to Private IP."
+				"description": "DNS name to use for master load balancer when creating a cluster with private master nodes.  Needs to resolve to Private IP."
+			}
+		},
+		"routerClusterType": {
+			"type": "string",
+			"defaultValue": "public",
+			"allowedValues": [
+				"private", "public"
+			],
+			"metadata": {
+				"description": "Specify whether the cluster uses private or public router. Private does not expose router pods to public Internet"
+			}
+		},
+		"routerPrivateClusterIp": {
+			"type": "string",
+			"defaultValue": "10.2.0.200",
+			"metadata": {
+				"description": "Static Private IP address to use for infra load balancer when creating a cluster with private infra nodes"
 			}
 		}
 	},
@@ -481,7 +498,7 @@
 		"infraLbHttpsProbeId": "[concat(variables('infraLbId'),'/probes/httpsProbe')]",
 		
 		"privateMasterFrontEndIpConfigurationProperties": {
-			"privateIPAddress": "[parameters('privateClusterIp')]",
+			"privateIPAddress": "[parameters('masterPrivateClusterIp')]",
 			"privateIPAllocationMethod": "Static",
 			"subnet": {
 				"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName'))]"
@@ -492,7 +509,20 @@
 				"id": "[variables('infraPublicIpAddressId')]"
 			}
 		},
-		"masterFrontEndIpConfigurationProperties": "[concat(parameters('clusterType'), 'MasterFrontEndIpConfigurationProperties')]",
+		"masterFrontEndIpConfigurationProperties": "[concat(parameters('masterClusterType'), 'MasterFrontEndIpConfigurationProperties')]",
+		"privateInfraFrontEndIpConfigurationProperties": {
+			"privateIPAddress": "[parameters('routerPrivateClusterIp')]",
+			"privateIPAllocationMethod": "Static",
+			"subnet": {
+				"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName'))]"
+			}
+		},
+		"publicInfraFrontEndIpConfigurationProperties": {
+			"publicIPAddress": {
+				"id": "[variables('infraPublicIpAddressId')]"
+			}
+		},
+		"infraFrontEndIpConfigurationProperties": "[concat(parameters('routerClusterType'), 'InfraFrontEndIpConfigurationProperties')]",
 		"imageReference": {
 			"publisher": "RedHat",
 			"offer": "RHEL",
@@ -1348,16 +1378,13 @@
 				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
-				"[concat('Microsoft.Network/publicIPAddresses/', variables('infraLbPublicIpDnsLabel'))]"
+				"[concat('Microsoft.Network/publicIPAddresses/', variables('infraLbPublicIpDnsLabel'))]",
+				"[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
 			],
 			"properties": {
 				"frontendIPConfigurations": [{
 					"name": "LoadBalancerFrontEnd",
-					"properties": {
-						"publicIPAddress": {
-							"id": "[variables('infraPublicIpAddressId')]"
-						}
-					}
+					"properties": "[variables(variables('masterFrontEndIpConfigurationProperties'))]"
 				}],
 				"backendAddressPools": [{
 					"name": "loadBalancerBackEnd"
@@ -2202,6 +2229,15 @@
 					"location": {
 						"value": "[variables('location')]"
 					},
+					"tenantId": {
+						"value": "[subscription().tenantId]"
+					},
+					"subscriptionId": {
+						"value": "[subscription().subscriptionId]"
+					},
+					"resourceGroupName": {
+						"value": "[resourceGroup().name]"
+					},
 					"apiVersionCompute": {
 						"value": "[variables('apiVersionCompute')]"
 					},
@@ -2298,14 +2334,14 @@
 					"nodeAvailabilitySet": {
 						"value": "nodeavailabilityset"
 					},
-					"clusterType": {
-						"value": "[parameters('clusterType')]"
+					"masterClusterType": {
+						"value": "[parameters('masterClusterType')]"
 					},
-					"privateClusterIp": {
-						"value": "[parameters('privateClusterIp')]"
+					"masterPrivateClusterIp": {
+						"value": "[parameters('masterPrivateClusterIp')]"
 					},
-					"privateClusterDns": {
-						"value": "[parameters('privateClusterDns')]"
+					"masterPrivateClusterDns": {
+						"value": "[parameters('masterPrivateClusterDns')]"
 					},
 					"masterPublicIpName": {
 						"value": "[variables('openshiftMasterPublicIpDnsLabel')]"
@@ -2315,21 +2351,21 @@
 		}
 	],
 	"outputs": {
-		"OpenshiftConsoleUrl": {
-			"type": "string",
-			"value": "[concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, '/console')]"
-		},
 		"BastionDNSFQDN": {
 			"type": "string",
 			"value": "[reference(variables('bastionPublicIp')).dnsSettings.fqdn]"
 		},
-		"OpenshiftMasterSSH": {
+		"OpenshiftConsoleUrl": {
 			"type": "string",
-			"value": "[concat('ssh -p 2200 ', parameters('adminUsername'), '@', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn)]"
+			"value": "[if(equals(parameters('masterClusterType'),'public'), concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, '/console'), concat('https://', parameters('masterPrivateClusterDns'), '/console'))]"
 		},
-		"OpenshiftInfraLoadBalancerFQDN": {
+		"OpenshiftConsolePublicUrl": {
 			"type": "string",
-			"value": "[reference(variables('infraLbPublicIpDnsLabel')).dnsSettings.fqdn]"
+			"value": "[concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, '/console')]"
+		},
+		"OpenshiftConsolePrivateUrl": {
+			"type": "string",
+			"value": "[concat('https://', parameters('masterPrivateClusterDns'), '/console')]"
 		}
 	}
 }

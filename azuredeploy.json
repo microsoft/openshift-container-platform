@@ -365,7 +365,7 @@
 		},
 		"routerPrivateClusterIp": {
 			"type": "string",
-			"defaultValue": "10.2.0.200",
+			"defaultValue": "10.1.0.201",
 			"metadata": {
 				"description": "Static Private IP address to use for infra load balancer when creating a cluster with private infra nodes"
 			}
@@ -374,6 +374,8 @@
 	"variables": {
 		"location": "[resourceGroup().location]",
 		"resourceGroupName": "[resourceGroup().id]",
+		"tenantId": "[subscription().tenantId]",
+		"subscriptionId": "[subscription().subscriptionId]",
 		"apiVersionCompute": "2017-03-30",
 		"apiVersionNetwork": "2017-09-01",
 		"apiVersionStorage": "2017-06-01",
@@ -2230,13 +2232,13 @@
 						"value": "[variables('location')]"
 					},
 					"tenantId": {
-						"value": "[subscription().tenantId]"
+						"value": "[variables('tenantId')]"
 					},
 					"subscriptionId": {
-						"value": "[subscription().subscriptionId]"
+						"value": "[variables('subscriptionId')]"
 					},
 					"resourceGroupName": {
-						"value": "[resourceGroup().name]"
+						"value": "[variables('resourceGroupName')]"
 					},
 					"apiVersionCompute": {
 						"value": "[variables('apiVersionCompute')]"

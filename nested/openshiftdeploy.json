@@ -218,19 +218,19 @@
 				"description": "Name of Node Availability Set"
 			}
 		},
-		"clusterType": {
+		"masterClusterType": {
 			"type": "string",
 			"metadata": {
 				"description": "Cluster Type"
 			}
 		},
-		"privateClusterIp": {
+		"masterPrivateClusterIp": {
 			"type": "string",
 			"metadata": {
 				"description": "Private IP Address"
 			}
 		},
-		"privateClusterDns": {
+		"masterPrivateClusterDns": {
 			"type": "string",
 			"metadata": {
 				"description": "Private Cluster DNS name"

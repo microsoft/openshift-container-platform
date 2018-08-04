@@ -508,7 +508,7 @@
 		},
 		"publicMasterFrontEndIpConfigurationProperties": {
 			"publicIPAddress": {
-				"id": "[variables('infraPublicIpAddressId')]"
+				"id": "[variables('masterPublicIpAddressId')]"
 			}
 		},
 		"masterFrontEndIpConfigurationProperties": "[concat(parameters('masterClusterType'), 'MasterFrontEndIpConfigurationProperties')]",

@@ -2360,14 +2360,6 @@
 		"OpenshiftConsoleUrl": {
 			"type": "string",
 			"value": "[if(equals(parameters('masterClusterType'),'public'), concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, '/console'), concat('https://', parameters('masterPrivateClusterDns'), '/console'))]"
-		},
-		"OpenshiftConsolePublicUrl": {
-			"type": "string",
-			"value": "[concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, '/console')]"
-		},
-		"OpenshiftConsolePrivateUrl": {
-			"type": "string",
-			"value": "[concat('https://', parameters('masterPrivateClusterDns'), '/console')]"
 		}
 	}
 }

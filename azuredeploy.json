@@ -1236,6 +1236,7 @@
 				}
 			}
 		}, {
+			"condition": "[equals(parameters('routerClusterType'), 'public')]",
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[variables('infraLbPublicIpDnsLabel')]",
 			"location": "[variables('location')]",
@@ -1254,6 +1255,7 @@
 				}
 			}
 		}, {
+			"condition": "[equals(parameters('masterClusterType'), 'public')]",
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[variables('openshiftMasterPublicIpDnsLabel')]",
 			"location": "[variables('location')]",
@@ -1326,10 +1328,7 @@
 				"version": "[variables('redHatTags').version]",
 				"platform": "[variables('redHatTags').platform]"
 			},
-			"dependsOn": [
-				"[concat('Microsoft.Network/publicIPAddresses/', variables('openshiftMasterPublicIpDnsLabel'))]",
-				"[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
-			],
+			"dependsOn": "[if(equals(parameters('masterClusterType'),'private'),concat('Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName')),concat('Microsoft.Network/publicIPAddresses/',variables('openshiftMasterPublicIpDnsLabel')))]",
 			"properties": {
 				"frontendIPConfigurations": [{
 					"name": "LoadBalancerFrontEnd",
@@ -1379,10 +1378,7 @@
 				"version": "[variables('redHatTags').version]",
 				"platform": "[variables('redHatTags').platform]"
 			},
-			"dependsOn": [
-				"[concat('Microsoft.Network/publicIPAddresses/', variables('infraLbPublicIpDnsLabel'))]",
-				"[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
-			],
+			"dependsOn": "[if(equals(parameters('routerClusterType'),'private'),concat('Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName')),concat('Microsoft.Network/publicIPAddresses/',variables('infraLbPublicIpDnsLabel')))]",
 			"properties": {
 				"frontendIPConfigurations": [{
 					"name": "LoadBalancerFrontEnd",

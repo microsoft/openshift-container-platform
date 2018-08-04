@@ -2347,6 +2347,12 @@
 					},
 					"masterPublicIpName": {
 						"value": "[variables('openshiftMasterPublicIpDnsLabel')]"
+					},
+					"routerClusterType": {
+						"value": "[parameters('routerClusterType')]"
+					},
+					"routerPublicIpName": {
+						"value": "[variables('infraLbPublicIpDnsLabel')]"
 					}
 				}
 			}

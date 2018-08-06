@@ -78,8 +78,11 @@ openshift_node_kubelet_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc
 fi
 
 # Cloning Ansible playbook repository
+
 echo $(date) " - Cloning Ansible playbook repository"
+
 ((cd /home/$SUDOUSER && git clone https://github.com/Microsoft/openshift-container-platform-playbooks.git) || (cd /home/$SUDOUSER/openshift-container-platform-playbooks && git pull))
+
 if [ -d /home/${SUDOUSER}/openshift-container-platform-playbooks ]
 then
     echo " - Retrieved playbooks successfully"

@@ -90,22 +90,22 @@
 			"value": "new"
 		},
 		"virtualNetworkResourceGroupName": {
-			"value": "vnetrg"
+			"value": "changeme"
 		},
 		"virtualNetworkName": {
-			"value": "openshiftvnet"
+			"value": "changeme"
 		},
 		"addressPrefixes": {
 			"value": "10.0.0.0/14"
 		},
 		"masterSubnetName": {
-			"value": "mastersubnet"
+			"value": "changeme"
 		},
 		"masterSubnetPrefix": {
 			"value": "10.1.0.0/16"
 		},
 		"nodeSubnetName": {
-			"value": "nodesubnet"
+			"value": "changeme"
 		},
 		"nodeSubnetPrefix": {
 			"value": "10.2.0.0/16"
@@ -117,7 +117,7 @@
 			"value": "10.1.0.200"
 		},
 		"masterPrivateClusterDns": {
-			"value": "internalmaster.net"
+			"value": "changeme"
 		},
 		"routerClusterType": {
 			"value": "public"

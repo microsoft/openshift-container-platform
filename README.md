@@ -5,7 +5,7 @@
 The master branch will now contain the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new things or try new things.
 
 We have branches for the stable releases:
-- Release-3.6
+- Release-3.6 (As is; no longer updated)
 - Release-3.7
 - Release-3.9
 - azurestack-release-3.7
@@ -17,7 +17,11 @@ Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
 ## OpenShift Container Platform 3.9 with Username / Password authentication for OpenShift
 
-Re-introduced a non-HA master config with a single master option.  VM types that support Accelerated Networking will automatically have this feature enabled.
+1.  Single master option available
+2.  VM types that support Accelerated Networking will automatically have this feature enabled
+3.  Custom and existing Vnet
+3.  Support cluster with private masters (no public IP on load balancer in front of master nodes)
+4.  Support cluster with private router (no public IP on load balancer in front of infra nodes)
 
 This template deploys OpenShift Container Platform with basic username / password for authentication to OpenShift. It includes the following resources:
 
@@ -27,7 +31,7 @@ This template deploys OpenShift Container Platform with basic username / passwor
 |Virtual Network <br />Custom   		|**Address prefix:** Your Choice<br />**Master subnet:** Your Choice<br />**Node subnet:** Your Choice                      |
 |Master Load Balancer	|1 probe and 1 rule for TCP 443                                       |
 |Infra Load Balancer	|2 probes and 2 rules for TCP 80 and TCP 443									                                           |
-|Public IP Addresses	|Bastion Public IP for Bastion Node<br />OpenShift Master public IP attached to Master Load Balancer<br />OpenShift Router public IP attached to Infra Load Balancer            |
+|Public IP Addresses	|Bastion Public IP for Bastion Node<br />OpenShift Master public IP attached to Master Load Balancer (if masters are public)<br />OpenShift Router public IP attached to Infra Load Balancer (if router is public)           |
 |Storage Accounts <br />Unmanaged Disks  	|1 Storage Account for Bastion VM <br />1 Storage Account for Master VMs <br />1 Storage Account for Infra VMs<br />2 Storage Accounts for Node VMs<br />2 Storage Accounts for Diagnostics Logs <br />1 Storage Account for Private Docker Registry<br />1 Storage Account for Persistent Volumes  |
 |Storage Accounts <br />Managed Disks      |2 Storage Accounts for Diagnostics Logs <br />1 Storage Account for Private Docker Registry |
 |Network Security Groups|1 Network Security Group for Bastion VM<br />1 Network Security Group Master VMs<br />1 Network Security Group for Infra VMs<br />1 Network Security Group for Node VMs |
@@ -45,9 +49,11 @@ This template deploys multiple VMs and requires some pre-work before you can suc
 This template uses the On-Demand Red Hat Enterprise Linux image from the Azure Gallery. 
 >When using the On-Demand image, there is an hourly charge for using this image.  At the same time, the instance will be registered to your Red Hat subscription, so you will also be using one of your entitlements. This will lead to "double billing".
 
-If a Private Cluster is selected, a static Private IP needs to be specified.  This must be within the CIDR for the master subnet and not already in use.  The Private Cluster DNS name must also be supplied and this needs to map to the static Private IP.
+If private masters is selected, a static Private IP needs to be specified which will be assigned to the front end of the master load balancer.  This must be within the CIDR for the master subnet and not already in use.  The master DNS name must also be supplied and this needs to map to the static Private IP and will be used to access the console on the master nodes.
 
-After successful deployment, the Bastion Node is no longer required unless you want to use it to add nodes or run other playbooks in the future.  The Bastion node is the only node by default that has the private key for SSH to all the cluster nodes. You can turn it off and delete it or keep it around for running future playbooks.  You can also use this as the jump host for managing your OpenShift cluster.
+If private router is selected, a static Private Ip needs to be specified which will be assigned to the front end of the infra load balancer.  This must be within the CIDR for the master subnet and not already in use.  You must then use a custom domain for routing purposes and this must map to the static router private IP.
+
+After successful deployment, the Bastion Node is the only node with a public IP that you can ssh into.  Even if the master nodes are configured for public access, they are not exposed for ssh access.
 
 ## Prerequisites
 
@@ -154,9 +160,11 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 27. addressPrefixes: IP range for the entire Virtual Network. Default is 10.0.0.0/14
 28. masterSubnetPrefix: Subnet for master, CNS, and infra nodes to be hosted. Needs to have enough IPs to support the number of nodes being deployed. Default is 10.1.0.0/16
 29. nodeSubnetPrefix: Subnet for applicaton nodes. Needs to have enough IPs to support the number of nodes being deployed. Default is 10.2.0.0/16
-30. clusterType: Specify whether a private or public cluster is to be deployed - value is either "public" or "private". If private is chosen, the master nodes will not be exposed to the Internet via a public IP. Instead, it will use the private IP specified in the next parameter. The default is public.
-31. privateClusterIp: If a private cluster is selected, then a private IP address must be specified for use by the internal load balancer for master nodes. This will be a static IP so it must reside within the CIDR block for the master subnet and not already in use. If a public cluster is selected, this value will not be used but must still be specified. The default value is 10.1.0.200
-32. privateClusterDns: If a private cluster is selected, then a DNS name (FQDN) or private IP address must be specified. This maps to the private IP address specified in the previous parameter
+30. masterClusterType: Specify whether the cluster uses private or public master nodes - value is either "public" or "private". If private is chosen, the master nodes will not be exposed to the Internet via a public IP. Instead, it will use the private IP specified in the next parameter. The default is public.
+31. masterPrivateClusterIp: If private master nodes is selected, then a private IP address must be specified for use by the internal load balancer for master nodes. This will be a static IP so it must reside within the CIDR block for the master subnet and not already in use. If public master nodes is selected, this value will not be used but must still be specified. The default value is 10.1.0.200
+32. masterPrivateClusterDns: If private master nodes is selected, then a DNS name (FQDN) must be specified. This maps to the private IP address specified in the previous parameter
+30. routerClusterType: Specify whether the cluster uses private or public infra nodes - value is either "public" or "private". If private is chosen, the infra nodes will not be exposed to the Internet via a public IP. Instead, it will use the private IP specified in the next parameter. The default is public.
+31. routerPrivateClusterIp: If private infra nodes is selected, then a private IP address must be specified for use by the internal load balancer for infra nodes. This will be a static IP so it must reside within the CIDR block for the master subnet and not already in use. If public infra nodes is selected, this value will not be used but must still be specified. The default value is 10.1.0.201
 
 ## Deploy Template
 

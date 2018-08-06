@@ -2,7 +2,7 @@
 
 ## NOTE: Structural change to Repo
 
-The master branch will now contain the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new things or try new things.
+The master branch contains the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new items or enable new configuration options.
 
 We have branches for the stable releases:
 - Release-3.6 (As is; no longer updated)
@@ -44,14 +44,14 @@ This template deploys OpenShift Container Platform with basic username / passwor
 
 Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started
 
-This template deploys multiple VMs and requires some pre-work before you can successfully deploy the OpenShift Cluster.  If you don't get the pre-work done correctly, you will most likely fail to deploy the cluster using this template.  Please read the instructions completely before you proceed. 
+This template deploys multiple VMs and requires some pre-work before you can successfully deploy the OpenShift Cluster.  If you don't complete the pre-work correctly, you will most likely fail to deploy the cluster using this template.  Please read the instructions completely before you proceed. 
 
 This template uses the On-Demand Red Hat Enterprise Linux image from the Azure Gallery. 
 >When using the On-Demand image, there is an hourly charge for using this image.  At the same time, the instance will be registered to your Red Hat subscription, so you will also be using one of your entitlements. This will lead to "double billing".
 
-If private masters is selected, a static Private IP needs to be specified which will be assigned to the front end of the master load balancer.  This must be within the CIDR for the master subnet and not already in use.  The master DNS name must also be supplied and this needs to map to the static Private IP and will be used to access the console on the master nodes.
+If private masters is selected, a static private IP needs to be specified which will be assigned to the front end of the master load balancer.  This must be within the CIDR for the master subnet and not already in use.  The master DNS name must also be supplied and this needs to map to the static Private IP and will be used to access the console on the master nodes.
 
-If private router is selected, a static Private Ip needs to be specified which will be assigned to the front end of the infra load balancer.  This must be within the CIDR for the master subnet and not already in use.  You must then use a custom domain for routing purposes and this must map to the static router private IP.
+If private router is selected, a static private Ip needs to be specified which will be assigned to the front end of the infra load balancer.  This must be within the CIDR for the infra subnet and not already in use.  **customSubDomainType** must be set to "custom" and the wildcard DNS name for routing must be provided for **defaultSubDomain**.
 
 After successful deployment, the Bastion Node is the only node with a public IP that you can ssh into.  Even if the master nodes are configured for public access, they are not exposed for ssh access.
 

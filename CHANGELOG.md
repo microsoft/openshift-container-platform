@@ -1,10 +1,11 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
 
-# UPDATES for Master (Release 3.9) - July 20, 2018
+# UPDATES for Master (Release 3.9) - August 6, 2018
 
-1.  Added support for Private Network
-2.  Removed inbound NAT rules for master LB to better secure master nodes
+1.  Added support for private master nodes
+2.  Addes support for private infra nodes
+3.  Removed inbound NAT rules for master LB to better secure master nodes
 
 
 # UPDATES for Master (Release 3.9) - July 14, 2018

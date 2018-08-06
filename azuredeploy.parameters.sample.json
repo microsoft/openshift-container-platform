@@ -87,10 +87,10 @@
 			"value": "domain.com"
 		},
 		"virtualNetworkNewOrExisting": {
-			"value": "existing"
+			"value": "new"
 		},
 		"virtualNetworkResourceGroupName": {
-			"value": "existingvnetrg"
+			"value": "vnetrg"
 		},
 		"virtualNetworkName": {
 			"value": "openshiftvnet"

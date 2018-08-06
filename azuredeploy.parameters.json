@@ -87,10 +87,10 @@
 			"value": "changeme"
 		},
 		"virtualNetworkNewOrExisting": {
-			"value": "existing"
+			"value": "new"
 		},
 		"virtualNetworkResourceGroupName": {
-			"value": "existingvnetrg"
+			"value": "vnetrg"
 		},
 		"virtualNetworkName": {
 			"value": "openshiftvnet"

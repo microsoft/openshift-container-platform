@@ -15,7 +15,7 @@ master_count: 3
 infra_count: 3
 node_count: 3
 # Min of 3 required and add odd nums only for CNS
-# cns_count:    [1,2,3]
+cns_count: 0 # [3,5,7]
 
 #######################
 # vm sizes and other vm configurations (adapt)
@@ -54,10 +54,10 @@ admin_privkey: '~/.ssh/id_rsa'
 # Service Principal 
 #######################
 # This is used to template the cloud config file on each node for azure
-aad_client_id: 'dfkdkfkdkf'
+aad_client_id: ""
 
 # Place this in vars file that can be encrypted in root of play and not checked into SCM
-aad_client_secret: 'password'
+aad_client_secret: ""
 subscription_id: ""
 tenant_id: ""
 
@@ -161,7 +161,7 @@ ocp_admin_passwd: 'redhat@123'
 #######################
 # deploy CNS
 #######################
-# deploy_cns: true
+deploy_cns: false
 # deploy_cns_on_infra: false
 
 #######################

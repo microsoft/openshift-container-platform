@@ -445,7 +445,7 @@
       azure_rm_publicipaddress_facts:
         resource_group: "{{ resource_group }}"
         name: "{{ master_lb_public_ip }}"
-      register: master_ip
+      register: master_lb_ip
 
     - set_fact:
         master_publicip: "{{ master_lb_ip.ansible_facts.azure_publicipaddresses[0].properties.ipAddress }}"
@@ -454,12 +454,14 @@
     - name: Get infra Public IP
       azure_rm_publicipaddress_facts:
         resource_group: "{{ resource_group }}"
-        name: "{{ infra_lb_public_ip }}"
-      register: infra_ip
+        name: "{{ router_lb_public_ip }}"
+      register: router_lb_ip
 
     - set_fact:
-        infra_publicip: "{{ infra_lb_ip.ansible_facts.azure_publicipaddresses[0].properties.ipAddress }}"
-        nip_io_domain: "{{ infra_publicip }}.nip.io"
+        router_publicip: "{{ router_lb_ip.ansible_facts.azure_publicipaddresses[0].properties.ipAddress }}"
+
+    - set_fact:
+        nip_io_domain: "{{ router_publicip }}.nip.io"
 
     -  set_fact:
         routing: "{{ nip_io_domain }}"
@@ -661,58 +663,69 @@
         path: export-all.sh
         mode: "a+x"
     
-    # Deploying openshift  with deployOpenShift.sh
+    # Deploying openshift CP with deployOpenShift.sh
     # 'bash ', parameters('openshiftDeploymentScriptFileName')
-    - name: Run deployOpenShift.sh
+    - name: Run deployOpenShift.sh Container Platform
       shell: |
-        args=(# export SUDOUSER=$1 - parameters('adminUsername')
+        args=(
+          # $1 SUDOUSER=$1 - parameters('adminUsername')
           "{{ admin_username }}" 
-          # export PASSWORD="$2" - parameters('openshiftPassword')
+          # $2 PASSWORD="$2" - parameters('openshiftPassword')
           "{{ ocp_admin_passwd }}" \
-          # export PRIVATEKEY=$3 - parameters('sshPrivateKey')
-          "{{ admin_privkey }}" \
-          # export MASTER=$4 - parameters('openshiftMasterHostname')
+          # $3 MASTER=$3 - parameters('openshiftMasterHostname')
           "{{ cluster_prefix }}-master" \
-          # export MASTERPUBLICIPHOSTNAME=$5 - parameters('openshiftMasterPublicIpFqdn')
+          # $4 MASTERPUBLICIPHOSTNAME=$4 - parameters('openshiftMasterPublicIpFqdn')
           "{{ master_publicip_fqdn }}" \
-          # export MASTERPUBLICIPADDRESS=$6 - parameters('openshiftMasterPublicIpAddress')
+          # $5 MASTERPUBLICIPADDRESS=$5 - parameters('openshiftMasterPublicIpAddress')
           "{{ master_publicip }}" \
-          # export INFRA=$7 - parameters('openshiftInfraHostname')
+          # $6 INFRA=$6 - parameters('openshiftInfraHostname')
           "{{ cluster_prefix }}-infra" \
-          # export NODE=$8 - parameters('openshiftNodeHostname')
+          # $7 NODE=$7 - parameters('openshiftNodeHostname')
           "{{ cluster_prefix }}-node" \
-          # export NODECOUNT=$9 - parameters('nodeInstanceCount')
+          # $8 NODECOUNT=$8 - parameters('nodeInstanceCount')
           "{{ node_count }}" \
-          # export INFRACOUNT=${10} - parameters('infraInstanceCount')
+          # $9 INFRACOUNT=${9} - parameters('infraInstanceCount')
           "{{ infra_count }}" \
-          # export MASTERCOUNT=${11} - parameters('MasterInstanceCount')
+          # $10 MASTERCOUNT=${10} - parameters('MasterInstanceCount')
           "{{ master_count }}" \
-          # export ROUTING=${12} - parameters(parameters('subDomainChosen'))
+          # $11 ROUTING=${11} - parameters(parameters('subDomainChosen'))
           "{{ routing }}" \
-          # export REGISTRYSA=${13} - parameters('newStorageAccountRegistry')
+          # $12 REGISTRYSA=${12} - parameters('newStorageAccountRegistry')
           "{{ registry_storage_account }}" \
-          # export ACCOUNTKEY="${14}" - parameters('newStorageAccountKey')
+          # $13 ACCOUNTKEY="${13}" - parameters('newStorageAccountKey')
           "{{ registry_storage_account_key }}" \
-          # export TENANTID=${15} - variables('tenantId')
+          # $14 METRICS=${14} - parameters('enableMetrics')
+          "{{ deploy_metrics }}"
+          # $15 LOGGING=${15}
+          "{{ deploy_logging }}"
+          # $16 TENANTID=${16} - variables('tenantId')
           "{{ tenant_id }}" \
-          # export SUBSCRIPTIONID=${16} - variables('subscriptionId')
+          # $17 SUBSCRIPTIONID=${17} - variables('subscriptionId')
           "{{ subscription_id }}" \
-          # export AADCLIENTID=${17} - parameters('aadClientId')
+          # $18 AADCLIENTID=${18} - parameters('aadClientId')
           "{{ aad_client_id }}" \
-          # export AADCLIENTSECRET="${18}" - parameters('aadClientSecret')
+          # $19 AADCLIENTSECRET="${19}" - parameters('aadClientSecret')
           "{{ aad_client_secret }}" \
-          # export RESOURCEGROUP=${19} - variables('resourceGroupName')
+          # $20 RESOURCEGROUP=${20} - variables('resourceGroupName')
           "{{ resource_group }}" \
-          # export LOCATION=${20} - variables('location')
+          # $21 LOCATION=${21} - variables('location')
           "{{ location }}" \
-          # export METRICS=${21} - parameters('enableMetrics')
-          "{{ deploy_metrics }}" \
-          # export LOGGING=${22} - parameters('enableLogging')
-          "{{ deploy_logging }}" \
-          # export AZURE=${23} - parameters('enableAzure')
+          # $22 AZURE=${22} - parameters('enableAzure')
           "{{ deploy_azure_cloud_provider }}" \
-          # export STORAGEKIND=${24}
+          # $23 STORAGEKIND=${23}
           "{{ disk_type }}"
+          # $24 ENABLECNS
+          "{{ deploy_cns }}"
+          # $25 CNS
+          "{{ cluster_prefix }}-cns"
+          # $26 CNSCOUNT
+          "{{ cns_count }}"
+          # $27 VNETNAME #TODO: remove var from script is not utilized
+          "{{ empty_var }}"
+          # $28 NODENSG #TODO: remove var from script is not utilized
+          "{{ empty_var }}"
+          # $29 NODEAVAILIBILITYSET #TODO: remove var from script is not utilized 
+          "{{ empty_var }}"
         )
         ./export-all.sh "${args[@]}"
         

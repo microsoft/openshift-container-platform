@@ -1,0 +1,96 @@
+# Migration of nodePrep script to ansible
+# Sauce: https://raw.githubusercontent.com/Microsoft/openshift-origin/master/scripts/nodePrep.sh
+ 
+---
+- hosts: localhost
+  become: yes
+ 
+  tasks:
+  - name: Install EPEL
+    yum:
+      name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+  - name: Enable EPEL
+    replace:
+      path: /etc/yum.repos.d/epel.repo
+      regexp: '^enabled=1'
+      replace: 'enabled=0'
+  
+  - name: Install dependencies
+    yum:
+      name: 
+        - wget
+        - git
+        - net-tools
+        - bind-utils
+        - iptables-services
+        - bridge-utils 
+        - bash-completion 
+        - kexec-tools 
+        - sos 
+        - psacct
+        - cloud-utils-growpart.noarch
+
+  - name: Update system to latest packages
+    yum:
+      name: '*'
+      state: latest
+      exclude: WALinuxAgent
+
+  - name: Restart dbus
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: dbus
+  - debug:
+      msg: "System updates done"
+  # Grow Root File System
+  - name: Grow Root FS
+    shell: |
+      rootdev=`findmnt --target / -o SOURCE -n`
+      rootdrivename=`lsblk -no pkname $rootdev`
+      rootdrive="/dev/"$rootdrivename
+      name=`lsblk  $rootdev -o NAME | tail -1`
+      part_number=${name#*${rootdrivename}}
+      growpart $rootdrive $part_number -u on
+      xfs_growfs $rootdev
+      if [ $? -eq 0 ]
+      then
+          echo $(date) " - Root File System successfully extended"
+      else
+          echo $(date) " - Root File System failed to be grown"
+        exit 20
+      fi
+
+  # Docker 1.13.x
+  - name: Install Docker 1.13.x
+    yum:
+      name: 
+        - docker
+  # Ansiblizing "sed -i -e "s#^OPTIONS='--selinux-enabled'#OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'#" /etc/sysconfig/docker"
+  - name: Enable SELinux 
+    replace:
+      path: /etc/sysconfig/docker
+      regexp: "^OPTIONS='--selinux-enabled'"
+      replace: "OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'"
+
+  # Create thin pool logical volume for Docker
+  - name: Creating thin pool logical volume for Docker and staring service
+    shell: |
+      echo "DEVS=${DOCKERVG}" >> /etc/sysconfig/docker-storage-setup
+      echo "VG=docker-vg" >> /etc/sysconfig/docker-storage-setup
+      docker-storage-setup
+      if [ $? -eq 0 ]
+      then
+          echo "Docker thin pool logical volume created successfully"
+      else
+          echo "Error creating logical volume for Docker"
+          exit 5
+      fi
+
+  # Enable and start Docker services
+  - name: Enable and start docker
+    systemd:
+      daemon_reload: yes
+      enabled: yes
+      state: started
+      name: docker

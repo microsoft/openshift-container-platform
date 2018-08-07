@@ -87,28 +87,43 @@
 			"value": "changeme"
 		},
 		"virtualNetworkNewOrExisting": {
-			"value": "existing"
+			"value": "new"
 		},
 		"virtualNetworkResourceGroupName": {
-			"value": "existingvnetrg"
+			"value": "changeme"
 		},
 		"virtualNetworkName": {
-			"value": "openshiftvnet"
+			"value": "changeme"
 		},
 		"addressPrefixes": {
 			"value": "10.0.0.0/14"
 		},
 		"masterSubnetName": {
-			"value": "mastersubnet"
+			"value": "changeme"
 		},
 		"masterSubnetPrefix": {
 			"value": "10.1.0.0/16"
 		},
 		"nodeSubnetName": {
-			"value": "nodesubnet"
+			"value": "changeme"
 		},
 		"nodeSubnetPrefix": {
 			"value": "10.2.0.0/16"
+		},
+		"masterClusterType": {
+			"value": "public"
+		},
+		"masterPrivateClusterIp": {
+			"value": "10.1.0.200"
+		},
+		"masterPrivateClusterDns": {
+			"value": "changeme"
+		},
+		"routerClusterType": {
+			"value": "public"
+		},
+		"routerPrivateClusterIp": {
+			"value": "10.1.0.201"
 		}
 	}
 }

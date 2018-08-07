@@ -87,10 +87,10 @@
 			"value": "domain.com"
 		},
 		"virtualNetworkNewOrExisting": {
-			"value": "existing"
+			"value": "new"
 		},
 		"virtualNetworkResourceGroupName": {
-			"value": "existingvnetrg"
+			"value": "vnetrg"
 		},
 		"virtualNetworkName": {
 			"value": "openshiftvnet"
@@ -109,6 +109,21 @@
 		},
 		"nodeSubnetPrefix": {
 			"value": "10.2.0.0/16"
+		},
+		"masterClusterType": {
+			"value": "public"
+		},
+		"masterPrivateClusterIp": {
+			"value": "10.1.0.200"
+		},
+		"masterPrivateClusterDns": {
+			"value": "internalmaster.net"
+		},
+		"routerClusterType": {
+			"value": "public"
+		},
+		"routerPrivateClusterIp": {
+			"value": "10.1.0.201"
 		}
 	}
 }

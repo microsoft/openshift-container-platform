@@ -33,6 +33,12 @@ export CNSCOUNT=${26}
 export VNETNAME=${27}
 export NODENSG=${28}
 export NODEAVAILIBILITYSET=${29}
+export MASTERCLUSTERTYPE=${30}
+export PRIVATEIP=${31}
+export PRIVATEDNS=${32}
+export MASTERPIPNAME=${33}
+export ROUTERCLUSTERTYPE=${34}
+export INFRAPIPNAME=${35}
 
 export BASTION=$(hostname)
 
@@ -73,7 +79,8 @@ fi
 
 # Cloning Ansible playbook repository
 
-echo " - Cloning Ansible playbook repository"
+echo $(date) " - Cloning Ansible playbook repository"
+
 ((cd /home/$SUDOUSER && git clone https://github.com/Microsoft/openshift-container-platform-playbooks.git) || (cd /home/$SUDOUSER/openshift-container-platform-playbooks && git pull))
 
 if [ -d /home/${SUDOUSER}/openshift-container-platform-playbooks ]
@@ -84,8 +91,28 @@ else
     exit 99
 fi
 
+# Creating variables file for future playbooks
+echo $(date) " - Creating variables file for future playbooks"
+cat > /home/$SUDOUSER/openshift-container-platform-playbooks/vars.yaml <<EOF
+admin_user: $SUDOUSER
+master_lb_private_dns: $PRIVATEDNS
+EOF
+
 # Setting DOMAIN variable
 export DOMAIN=`domainname -d`
+
+# Configure Master cluster address information based on Cluster type (private or public)
+echo $(date) " - Create variable for master cluster address based on cluster type"
+if [[ $MASTERCLUSTERTYPE == "private" ]]
+then
+	MASTERCLUSTERADDRESS="openshift_master_cluster_hostname=$MASTER-0
+openshift_master_cluster_public_hostname=$PRIVATEDNS
+openshift_master_cluster_public_vip=$PRIVATEIP"
+else
+	MASTERCLUSTERADDRESS="openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
+openshift_master_cluster_public_hostname=$MASTERPUBLICIPHOSTNAME
+openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS"
+fi
 
 # Create Master nodes grouping
 echo $(date) " - Creating Master nodes grouping"
@@ -210,9 +237,7 @@ openshift_enable_service_catalog=false
 $HAMODE
 
 # Addresses for connecting to the OpenShift master nodes
-openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
-openshift_master_cluster_public_hostname=$MASTERPUBLICIPHOSTNAME
-openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
+$MASTERCLUSTERADDRESS
 
 # Enable HTPasswdPasswordIdentityProvider
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
@@ -405,7 +430,7 @@ if [ $METRICS == "true" ]
 then
     sleep 30
     echo $(date) "- Deploying Metrics"
-    if [ $AZURE == "true" ]
+    if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
     then
         runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
     else
@@ -426,7 +451,7 @@ if [ $LOGGING == "true" ]
 then
     sleep 60
     echo $(date) "- Deploying Logging"
-    if [ $AZURE == "true" ]
+    if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
     then
         runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true"
     else
@@ -439,6 +464,27 @@ then
         echo $(date) " - Logging configuration failed"
         exit 12
     fi
+fi
+
+# Configure cluster for private masters
+if [ $MASTERCLUSTERTYPE == "private" ]
+then
+	echo $(date) " - Configure cluster for private masters"
+	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/activate-private-lb.yaml"
+
+	echo $(date) " - Delete Master Public IP if cluster is using private masters"
+	az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
+	az account set -s $SUBSCRIPTIONID
+	az network public-ip delete -g $RESOURCEGROUP -n $MASTERPIPNAME
+fi
+
+# Delete Router / Infra Public IP if cluster is using private router
+if [ $ROUTERCLUSTERTYPE == "private" ]
+then
+	echo $(date) " - Delete Router / Infra Public IP address"
+	az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
+	az account set -s $SUBSCRIPTIONID
+	az network public-ip delete -g $RESOURCEGROUP -n $INFRAPIPNAME
 fi
 
 # Setting Masters to non-schedulable

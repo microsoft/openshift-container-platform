@@ -1,6 +1,6 @@
-# Openshift work
+# WIP: Ansible playbooks to deploy OpenShift
 
-This is temporary repo to do experiments with openshift
+This directory contains a work in progress set of ansible playbooks and supporting files for deploying OpenShift in Azure.  In it’s current state, it is very raw and may have issues until we clean everything up.  We welcome any and all assistance on making this work just as good (or better) than what we have created with the original ARM templates.
 
 ## Requirements
 
@@ -11,8 +11,7 @@ Make sure you have ansible 2.6.1, and make sure you have azure cli 2.41. Also, m
 Install the requirements:
 
 ```bash
-sudo pip install ansible[azure]
-sudo pip install msrestazure
+subscription-manager repo —enable=rhel-7-server-ansible-2.6-rpms && yum install ansible
 ```
 Copy `vars.example.yml` to vars.yml and edit the file to update all the variables with your information.
 

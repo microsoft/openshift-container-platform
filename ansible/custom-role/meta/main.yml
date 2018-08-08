@@ -1,0 +1,31 @@
+--- 
+dependencies: []
+galaxy_info: 
+  author: zikalino
+  company: Microsoft
+  description: "latest Azure modules for provisioning Azure resources"
+  galaxy_tags: ["Azure", "cloud", "system", "development", "networking", "docker", "container", "kubernetes"]
+  license: MIT
+  min_ansible_version: "2.6.0"
+  platforms:
+    - name: GenericLinux
+      versions:
+        - any
+
+    - name: macOS
+      versions:
+        - Sierra
+
+    - name: MacOSX
+      versions: 
+        - 10.7
+        - 10.8
+        - 10.9
+        - "10.10"
+        - 10.11
+        - 10.12
+
+    - name: Windows
+      versions: 
+        - 2012R2
+

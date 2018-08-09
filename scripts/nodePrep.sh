@@ -14,11 +14,12 @@ sleep 10
 echo $(date) " - Register host with Cloud Access Subscription"
 
 subscription-manager register --force --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --force --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
+RETCODE=$?
 
-if [ $? -eq 0 ]
+if [ $RETCODE -eq 0 ]
 then
    echo "Subscribed successfully"
-elif [ $? -eq 64 ]
+elif [ $RETCODE -eq 64 ]
 then
    echo "This system is already registered."
 else
@@ -31,11 +32,11 @@ if [ $? -eq 0 ]
 then
    echo "Pool attached successfully"
 else
-   evaluate=$( cut -f 2-5 -d ' ' attach.log )
-   if [[ $evaluate == "unit has already had" ]]
+   grep attached attach.log
+   if [ $? -eq 0 ]
       then
          echo "Pool $POOL_ID was already attached and was not attached again."
-	  else
+   else
          echo "Incorrect Pool ID or no entitlements available"
          exit 4
    fi

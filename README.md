@@ -153,8 +153,8 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 26. virtualNetworkNewOrExisting: Select whether to use an existing Virtual Network or create a new Virtual Network. Value is either "existing" or "new"
 26. virtualNetworkResourceGroupName: The name of the Resource Group where the VNet resides. If this parameter is omitted, it will default to RG in which new resources are created
 26. virtualNetworkName: The name of the Virtual Network. Must match the existing name for existing VNet or the name of the new VNet to create if creating a new VNet
-26: masterSubnetName: The name of the Master Subnet
-26: nodeSubnetName: The name of the Node Subnet
+26. masterSubnetName: The name of the Master Subnet
+26. nodeSubnetName: The name of the Node Subnet
 ** NOTE ** For the next three IP ranges they need to be in CIDR format and be in RFC 1918 (10.0.0.0/8, 192.168.0.0/16, or 172.16.0.0/12)
 ** NOTE ** The range just can't put servers in the 10.128.0.0/16 range but it can be a larger subnet that includes them like 10.0.0.0/8
 27. addressPrefixes: IP range for the entire Virtual Network. Default is 10.0.0.0/14

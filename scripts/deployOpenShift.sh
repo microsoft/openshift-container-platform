@@ -151,7 +151,7 @@ $CNS-$c openshift_node_labels=\"{'region': 'cns', 'zone': 'default'}\" openshift
 fi
 
 # Setting the default openshift_cloudprovider_kind if Azure enabled
-if [[ $AZURE == "true" ]]
+if [[ $MASTERCOUNT != 1 ]]
 then
     export HAMODE="openshift_master_cluster_method=native"
 fi

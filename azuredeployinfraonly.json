@@ -316,10 +316,10 @@
 			}
 		},
 		"nodeSubnetName": {
-			"type": "string",
-			"defaultValue": "nodesubnet",
-			"metadata": {
-				"description": "Name of the subnet"
+		  "type": "string",
+		  "defaultValue": "nodesubnet",
+		  "metadata": {
+			"description": "Name of the subnet"
 		  }
 		},
 		"nodeSubnetPrefix": {
@@ -328,54 +328,12 @@
 			"metadata": {
 				"description": "Base subnet used for the infra, node, and CNS servers, and needs to be a subset of the addressPrefix - default is 10.2.0.0/16"
 			}
-		},
-		"masterClusterType": {
-			"type": "string",
-			"defaultValue": "public",
-			"allowedValues": [
-				"private", "public"
-			],
-			"metadata": {
-				"description": "Specify whether the cluster uses private or public master nodes"
-			}
-		},
-		"masterPrivateClusterIp": {
-			"type": "string",
-			"defaultValue": "10.1.0.200",
-			"metadata": {
-				"description": "Static Private IP address to use for master load balancer when creating a cluster with private master nodes"
-			}
-		},
-		"masterPrivateClusterDns": {
-			"type": "string",
-			"defaultValue": "internalmaster.net",
-			"metadata": {
-				"description": "DNS name to use for master load balancer when creating a cluster with private master nodes.  Needs to resolve to Private IP."
-			}
-		},
-		"routerClusterType": {
-			"type": "string",
-			"defaultValue": "public",
-			"allowedValues": [
-				"private", "public"
-			],
-			"metadata": {
-				"description": "Specify whether the cluster uses private or public router. Private does not expose router pods to public Internet"
-			}
-		},
-		"routerPrivateClusterIp": {
-			"type": "string",
-			"defaultValue": "10.1.0.201",
-			"metadata": {
-				"description": "Static Private IP address to use for infra load balancer when creating a cluster with private infra nodes"
-			}
 		}
 	},
 	"variables": {
 		"location": "[resourceGroup().location]",
-		"resourceGroupName": "[resourceGroup().name]",
-		"tenantId": "[subscription().tenantId]",
-		"subscriptionId": "[subscription().subscriptionId]",
+		"runScriptExtensions": "no",
+		"resourceGroupName": "[resourceGroup().id]",
 		"apiVersionCompute": "2017-03-30",
 		"apiVersionNetwork": "2017-09-01",
 		"apiVersionStorage": "2017-06-01",
@@ -498,33 +456,6 @@
 		"infraLbBackendPoolId": "[concat(variables('infraLbId'),'/backendAddressPools/loadBalancerBackend')]",
 		"infraLbHttpProbeId": "[concat(variables('infraLbId'),'/probes/httpProbe')]",
 		"infraLbHttpsProbeId": "[concat(variables('infraLbId'),'/probes/httpsProbe')]",
-		
-		"privateMasterFrontEndIpConfigurationProperties": {
-			"privateIPAddress": "[parameters('masterPrivateClusterIp')]",
-			"privateIPAllocationMethod": "Static",
-			"subnet": {
-				"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName'))]"
-			}
-		},
-		"publicMasterFrontEndIpConfigurationProperties": {
-			"publicIPAddress": {
-				"id": "[variables('masterPublicIpAddressId')]"
-			}
-		},
-		"masterFrontEndIpConfigurationProperties": "[concat(parameters('masterClusterType'), 'MasterFrontEndIpConfigurationProperties')]",
-		"privateInfraFrontEndIpConfigurationProperties": {
-			"privateIPAddress": "[parameters('routerPrivateClusterIp')]",
-			"privateIPAllocationMethod": "Static",
-			"subnet": {
-				"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName'))]"
-			}
-		},
-		"publicInfraFrontEndIpConfigurationProperties": {
-			"publicIPAddress": {
-				"id": "[variables('infraPublicIpAddressId')]"
-			}
-		},
-		"infraFrontEndIpConfigurationProperties": "[concat(parameters('routerClusterType'), 'InfraFrontEndIpConfigurationProperties')]",
 		"imageReference": {
 			"publisher": "RedHat",
 			"offer": "RHEL",
@@ -558,388 +489,311 @@
 		"vmSizesMap": {
 			"Standard_A4": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A5": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A6": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A7": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A8": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A9": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A10": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_A11": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D1": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D4": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D11": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D12": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D13": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D14": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D1_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D2_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D3_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D4_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D5_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D11_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D12_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D13_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D14_v2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_G1": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_G2": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_G3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_G4": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_G5": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_DS1": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS4": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS11": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS12": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS13": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS14": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS1_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS2_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS3_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS4_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS5_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS11_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS12_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS13_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS14_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_DS15_v2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_GS1": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_GS2": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_GS3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_GS4": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_GS5": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D2_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D4_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D8_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D16_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D32_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D64_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_D2s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D4s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D8s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D16s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D32s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_D64s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E2_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E4_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E8_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E16_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E32_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E64_v3": {
 				"storageAccountType": "Standard_LRS",
-				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Standard"
 			},
 			"Standard_E2s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "false"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E4s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E8s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E16s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E32s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			},
 			"Standard_E64s_v3": {
 				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountTier": "Premium"
 			}
 		}
 	},
@@ -1161,12 +1015,7 @@
 			"apiVersion": "[variables('apiVersionNetwork')]",
 			"properties": {
 				"addressSpace": {
-					"addressPrefixes": [
-						"[parameters('addressPrefixes')]"
-					]
-				},
-				"dhcpOptions": {
-					"dnsServers": []
+					"addressPrefixes": "[parameters('addressPrefixes')]"
 				},
 				"subnets": [{
 					"name": "[parameters('masterSubnetName')]",
@@ -1327,13 +1176,16 @@
 				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
-				"[concat('Microsoft.Network/publicIPAddresses/', variables('openshiftMasterPublicIpDnsLabel'))]",
-				"[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+				"[concat('Microsoft.Network/publicIPAddresses/', variables('openshiftMasterPublicIpDnsLabel'))]"
 			],
 			"properties": {
 				"frontendIPConfigurations": [{
 					"name": "LoadBalancerFrontEnd",
-					"properties": "[variables(variables('masterFrontEndIpConfigurationProperties'))]"
+					"properties": {
+						"publicIPAddress": {
+							"id": "[variables('masterPublicIpAddressId')]"
+						}
+					}
 				}],
 				"backendAddressPools": [{
 					"name": "loadBalancerBackEnd"
@@ -1367,7 +1219,30 @@
 					}
 				}]
 			}
-		}, {
+		},
+		{
+			"apiVersion": "[variables('apiVersionNetwork')]",
+			"type": "Microsoft.Network/loadBalancers/inboundNatRules",
+			"name": "[concat(variables('masterLoadBalancerName'), '/', 'SSH-', variables('openshiftMasterHostname'), copyIndex())]",
+			"location": "[variables('location')]",
+			"copy": {
+				"name": "masterLbLoop",
+				"count": "[parameters('masterInstanceCount')]"
+			},
+			"dependsOn": [
+				"[variables('masterLbId')]"
+			],
+			"properties": {
+				"frontendIPConfiguration": {
+					"id": "[variables('masterLbFrontEndConfigId')]"
+				},
+				"protocol": "tcp",
+				"frontendPort": "[copyIndex(2200)]",
+				"backendPort": 22,
+				"enableFloatingIP": false
+			}
+		},
+		{
 			"type": "Microsoft.Network/loadBalancers",
 			"name": "[variables('infraLoadBalancerName')]",
 			"location": "[variables('location')]",
@@ -1380,13 +1255,16 @@
 				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
-				"[concat('Microsoft.Network/publicIPAddresses/', variables('infraLbPublicIpDnsLabel'))]",
-				"[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+				"[concat('Microsoft.Network/publicIPAddresses/', variables('infraLbPublicIpDnsLabel'))]"
 			],
 			"properties": {
 				"frontendIPConfigurations": [{
 					"name": "LoadBalancerFrontEnd",
-					"properties": "[variables(variables('infraFrontEndIpConfigurationProperties'))]"
+					"properties": {
+						"publicIPAddress": {
+							"id": "[variables('infraPublicIpAddressId')]"
+						}
+					}
 				}],
 				"backendAddressPools": [{
 					"name": "loadBalancerBackEnd"
@@ -1471,7 +1349,6 @@
 						}
 					}
 				}],
-				"enableAcceleratedNetworking": "[if(equals(variables('vmSizesMap')[variables('bastionVmSize')].acceleratedNetworking, 'true'), 'true', 'false')]",
 				"networkSecurityGroup": {
 					"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftBastionHostname'), '-nsg'))]"
 				}
@@ -1491,6 +1368,7 @@
 			"dependsOn": [
 				"[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
 				"[concat('Microsoft.Network/loadBalancers/', variables('masterLoadBalancerName'))]",
+				"[concat(variables('masterLbId'), '/inboundNatRules/SSH-', variables('openshiftMasterHostname') ,copyIndex())]",
 				"[concat('Microsoft.Network/networkSecurityGroups/', variables('openshiftMasterHostname'), '-nsg')]"
 			],
 			"copy": {
@@ -1507,10 +1385,14 @@
 						},
 						"loadBalancerBackendAddressPools": [{
 							"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('masterLoadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]"
-						}]
+						}],
+						"loadBalancerInboundNatRules": [
+							{
+								"id": "[concat(variables('masterLbId'),'/inboundNatRules/SSH-', variables('openshiftMasterHostname'), copyIndex())]"
+							}
+						]
 					}
 				}],
-				"enableAcceleratedNetworking": "[if(equals(variables('vmSizesMap')[parameters('masterVmSize')].acceleratedNetworking, 'true'), 'true', 'false')]",
 				"networkSecurityGroup": {
 					"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftMasterHostname'), '-nsg'))]"
 				}
@@ -1549,7 +1431,6 @@
 						}]
 					}
 				}],
-				"enableAcceleratedNetworking": "[if(equals(variables('vmSizesMap')[parameters('infraVmSize')].acceleratedNetworking, 'true'), 'true', 'false')]",
 				"networkSecurityGroup": {
 					"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftInfraHostname'), '-nsg'))]"
 				}
@@ -1585,7 +1466,6 @@
 						}
 					}
 				}],
-				"enableAcceleratedNetworking": "[if(equals(variables('vmSizesMap')[parameters('cnsVmSize')].acceleratedNetworking, 'true'), 'true', 'false')]",
 				"networkSecurityGroup": {
 					"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftCnsHostname'), '-nsg'))]"
 				}
@@ -1620,7 +1500,6 @@
 						}
 					}
 				}],
-				"enableAcceleratedNetworking": "[if(equals(variables('vmSizesMap')[parameters('nodeVmSize')].acceleratedNetworking, 'true'), 'true', 'false')]",
 				"networkSecurityGroup": {
 					"id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftNodeHostname'), '-nsg'))]"
 				}
@@ -2024,6 +1903,7 @@
 				}
 			}
 		}, {
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "bastionPrep",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
@@ -2079,6 +1959,7 @@
 			}
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "[concat(variables('openshiftMasterHostname'), '-', copyIndex(), '/prepMasters')]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
@@ -2112,6 +1993,7 @@
 			}
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "[concat(variables('openshiftInfraHostname'), '-', copyIndex(), '/prepNodes')]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
@@ -2179,6 +2061,7 @@
 			}
 		}, {
 			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"name": "[concat(variables('openshiftNodeHostname'), '-', copyIndex(), '/prepNodes')]",
 			"location": "[variables('location')]",
 			"apiVersion": "[variables('apiVersionCompute')]",
@@ -2212,6 +2095,7 @@
 			}
 		}, {
 			"name": "OpenShiftDeployment",
+			"condition": "[equals(variables('runScriptExtensions'), 'yes')]",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [
@@ -2230,15 +2114,6 @@
 				"parameters": {
 					"location": {
 						"value": "[variables('location')]"
-					},
-					"tenantId": {
-						"value": "[variables('tenantId')]"
-					},
-					"subscriptionId": {
-						"value": "[variables('subscriptionId')]"
-					},
-					"resourceGroupName": {
-						"value": "[variables('resourceGroupName')]"
 					},
 					"apiVersionCompute": {
 						"value": "[variables('apiVersionCompute')]"
@@ -2335,37 +2210,27 @@
 					},
 					"nodeAvailabilitySet": {
 						"value": "nodeavailabilityset"
-					},
-					"masterClusterType": {
-						"value": "[parameters('masterClusterType')]"
-					},
-					"masterPrivateClusterIp": {
-						"value": "[parameters('masterPrivateClusterIp')]"
-					},
-					"masterPrivateClusterDns": {
-						"value": "[parameters('masterPrivateClusterDns')]"
-					},
-					"masterPublicIpName": {
-						"value": "[variables('openshiftMasterPublicIpDnsLabel')]"
-					},
-					"routerClusterType": {
-						"value": "[parameters('routerClusterType')]"
-					},
-					"routerPublicIpName": {
-						"value": "[variables('infraLbPublicIpDnsLabel')]"
 					}
 				}
 			}
 		}
 	],
 	"outputs": {
+		"OpenshiftConsoleUrl": {
+			"type": "string",
+			"value": "[concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, '/console')]"
+		},
 		"BastionDNSFQDN": {
 			"type": "string",
 			"value": "[reference(variables('bastionPublicIp')).dnsSettings.fqdn]"
 		},
-		"OpenshiftConsoleUrl": {
+		"OpenshiftMasterSSH": {
 			"type": "string",
-			"value": "[if(equals(parameters('masterClusterType'),'public'), concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, '/console'), concat('https://', parameters('masterPrivateClusterDns'), '/console'))]"
+			"value": "[concat('ssh -p 2200 ', parameters('adminUsername'), '@', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn)]"
+		},
+		"OpenshiftInfraLoadBalancerFQDN": {
+			"type": "string",
+			"value": "[reference(variables('infraLbPublicIpDnsLabel')).dnsSettings.fqdn]"
 		}
 	}
 }

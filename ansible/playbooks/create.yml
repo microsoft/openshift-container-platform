@@ -30,6 +30,7 @@
         name: bastion_publicip
       async: 150
       poll: 0
+      register: bastion_ip_output
 
     - name: Create public IP address for Master LB
       azure_rm_publicipaddress:
@@ -39,6 +40,7 @@
         name: "{{ master_lb_public_ip }}"
       async: 150
       poll: 0
+      register: master_ip_output
 
     - name: Create public IP address for Infra LB
       azure_rm_publicipaddress:
@@ -48,6 +50,7 @@
         name: "{{ router_lb_public_ip }}"
       async: 150
       poll: 0
+      register: infra_ip_output
 
     - name: Create public IP address for Bastion node
       azure_rm_publicipaddress:
@@ -57,6 +60,13 @@
         name: "{{ bastion_publicip }}"
       async: 150
       poll: 0
+      register: output
+
+    - set_fact:
+        jobs_ip:
+          - "{{ bastion_ip_output }}"
+          - "{{ master_ip_output }}"
+          - "{{ infra_ip_output }}"
 
     - name: Add master subnet
       azure_rm_subnet:
@@ -185,12 +195,14 @@
       poll: 0
 
     - name: Wait for three IP addresses to be present
-      azure_rm_publicipaddress_facts:
-        resource_group: "{{ resource_group }}"
-      register: output
-      until: output.ansible_facts.azure_publicipaddresses | length >= 3
-      delay: 20
-      retries: 10
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+        mode: status
+      register: item_result
+      with_items: "{{ jobs_ip }}"
+      until: item_result.finished
+      retries: 5
+      delay: 30
 
     # --- Load Balancers ---
     # These require the public IPs: master and infra respectively
@@ -260,6 +272,11 @@
             public_ip_address_name: bastion_publicip
       async: 400
       poll: 0
+      register: output
+
+    - set_fact:
+        jobs_nic:
+          - "{{ output }}"
 
     - name: Create storage account for Registry
       azure_rm_storageaccount:
@@ -297,6 +314,11 @@
       with_sequence: start=0 end={{ master_count - 1 }}
       async: 400
       poll: 0
+      register: output
+
+    - name: Store NIC jobs
+      set_fact:
+        jobs_nic: "{{ jobs_nic + output.results }}"
 
     - name: Create virtual network interface card for node
       azure_rm_networkinterface:
@@ -308,6 +330,11 @@
       with_sequence: start=0 end={{ node_count - 1 }}
       async: 400
       poll: 0
+      register: output
+
+    - name: Store NIC jobs
+      set_fact:
+        jobs_nic: "{{ jobs_nic + output.results }}"
 
     - name: Create virtual network interface card for infra
       azure_rm_networkinterface:
@@ -324,6 +351,24 @@
       with_sequence: start=0 end={{ infra_count - 1 }}
       async: 400
       poll: 0
+      register: output
+
+    - name: Store NIC jobs
+      set_fact:
+        jobs_nic: "{{ jobs_nic + output.results }}"
+
+    - debug:
+        var: jobs_nic
+
+    - name: Wait for NICs to be ready
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+        mode: status
+      register: async_poll_results
+      loop: "{{ jobs_nic }}"
+      until: item.finished
+      retries: 30
+      delay: 60
 
     # Create bastion
     - name: Create bastion VM
@@ -347,8 +392,14 @@
             - lun: 0
               disk_size_gb: "{{ data_disk_size }}"
               managed_disk_type: Standard_LRS
-      async: 150
+      async: 1000
       poll: 0
+      register: bastion_vm_output
+
+    - set_fact:
+        jobs_vm:
+          - "{{ bastion_vm_output }}"
+
 
     # Creating master
     - name: Create master VMs
@@ -375,8 +426,14 @@
         availability_set: masteravailabilityset
         os_disk_size_gb: 64
       with_sequence: start=0 end={{ master_count - 1 }}
-      async: 150
+      async: 1000
       poll: 0
+      register: output
+
+    - name: Store VM Jobs IDs
+      set_fact:
+        jobs_vm: "{{ jobs_vm }} + [ {{ item }} ]"
+      with_items: "{{ output.results }}"
 
     - name: Create node VMs
       azure_rm_virtualmachine:
@@ -402,8 +459,14 @@
         availability_set: nodeavailabilityset
         os_disk_size_gb: 64
       with_sequence: start=0 end={{ node_count - 1 }}
-      async: 150
+      async: 1000
       poll: 0
+      register: output
+
+    - name: Store VM Jobs IDs
+      set_fact:
+        jobs_vm: "{{ jobs_vm }} + [ {{ item }} ]"
+      with_items: "{{ output.results }}"
 
     - name: Create infra VMs
       azure_rm_virtualmachine:
@@ -429,8 +492,14 @@
         availability_set: infraavailabilityset
         os_disk_size_gb: 64
       with_sequence: start=0 end={{ infra_count - 1 }}
-      async: 150
+      async: 1000
       poll: 0
+      register: output
+
+    - name: Store VM Jobs IDs
+      set_fact:
+        jobs_vm: "{{ jobs_vm }} + [ {{ item }} ]"
+      with_items: "{{ output.results }}"
 
     - name: Get bastion Public IP
       azure_rm_publicipaddress_facts:
@@ -472,18 +541,15 @@
         hostname: "{{ bastion_public_ip }}"
         groupname: bastion_vm
 
-    - name: Wait for Virtual Machines
-      azure_rm_resource_facts:
-        # url: /subscriptions/{{ lookup('env','AZURE_SUBSCRIPTION_ID') }}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines
-        api_version: '2018-06-01'
-        resource_group: "{{ resource_group }}"
-        provider: compute
-        resource_type: virtualmachines
-      register: output
-      until: output.response[0].value | length >= (infra_count + node_count + master_count)
+    - name: Wait for VMs to be ready
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+        mode: status
+      register: async_poll_results
+      loop: "{{ jobs_vm }}"
+      until: async_poll_results.finished
+      retries: 30
       delay: 60
-      retries: 10
-
 
     # --- VM Extensions ---
     # These require: VMs

@@ -76,6 +76,7 @@
         virtual_network: "{{ virtual_network_name }}"
       async: 150
       poll: 0
+      register: master_subnet_output
   
     - name: Add node subnet
       azure_rm_subnet:
@@ -85,6 +86,7 @@
         virtual_network: "{{ virtual_network_name }}"
       async: 150
       poll: 0
+      register: node_subnet_output
   
     - name: Add infra subnet
       azure_rm_subnet:
@@ -94,7 +96,15 @@
         virtual_network: "{{ virtual_network_name }}"
       async: 150
       poll: 0
-        
+      register: infra_subnet_output
+
+    # store subnet job ids
+    - set_fact:
+        jobs_subnet:
+          - "{{ master_subnet_output }}"
+          - "{{ node_subnet_output }}"
+          - "{{ infra_subnet_output }}"
+
     - name: Create infrastructure NSG
       azure_rm_securitygroup:
         resource_group: "{{ resource_group }}"
@@ -200,6 +210,16 @@
         mode: status
       register: item_result
       with_items: "{{ jobs_ip }}"
+      until: item_result.finished
+      retries: 5
+      delay: 30
+
+    - name: Wait for subnets to be present
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+        mode: status
+      register: item_result
+      with_items: "{{ jobs_subnet }}"
       until: item_result.finished
       retries: 5
       delay: 30
@@ -327,6 +347,8 @@
         virtual_network: "{{ virtual_network_name }}"
         subnet: nodesubnet
         security_group: "{{ cluster_prefix }}-node-nsg"
+        ip_configurations:
+          - name: ipconfig1
       with_sequence: start=0 end={{ node_count - 1 }}
       async: 400
       poll: 0
@@ -366,7 +388,7 @@
         mode: status
       register: async_poll_results
       loop: "{{ jobs_nic }}"
-      until: item.finished
+      until: async_poll_results.finished
       retries: 30
       delay: 60
 

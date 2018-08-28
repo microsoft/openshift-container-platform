@@ -30,6 +30,7 @@
         name: bastion_publicip
       async: 150
       poll: 0
+      register: bastion_ip_output
 
     - name: Create public IP address for Master LB
       azure_rm_publicipaddress:
@@ -39,6 +40,7 @@
         name: "{{ master_lb_public_ip }}"
       async: 150
       poll: 0
+      register: master_ip_output
 
     - name: Create public IP address for Infra LB
       azure_rm_publicipaddress:
@@ -48,6 +50,7 @@
         name: "{{ router_lb_public_ip }}"
       async: 150
       poll: 0
+      register: infra_ip_output
 
     - name: Create public IP address for Bastion node
       azure_rm_publicipaddress:
@@ -57,6 +60,7 @@
         name: "{{ bastion_publicip }}"
       async: 150
       poll: 0
+      register: output
 
     - name: Add master subnet
       azure_rm_subnet:
@@ -66,6 +70,7 @@
         virtual_network: "{{ virtual_network_name }}"
       async: 150
       poll: 0
+      register: master_subnet_output
   
     - name: Add node subnet
       azure_rm_subnet:
@@ -75,6 +80,7 @@
         virtual_network: "{{ virtual_network_name }}"
       async: 150
       poll: 0
+      register: node_subnet_output
   
     - name: Add infra subnet
       azure_rm_subnet:
@@ -84,7 +90,8 @@
         virtual_network: "{{ virtual_network_name }}"
       async: 150
       poll: 0
-        
+      register: infra_subnet_output
+
     - name: Create infrastructure NSG
       azure_rm_securitygroup:
         resource_group: "{{ resource_group }}"
@@ -184,13 +191,21 @@
       async: 150
       poll: 0
 
-    - name: Wait for three IP addresses to be present
-      azure_rm_publicipaddress_facts:
-        resource_group: "{{ resource_group }}"
-      register: output
-      until: output.ansible_facts.azure_publicipaddresses | length >= 3
-      delay: 20
-      retries: 10
+    - name: Wait for IP addresses and subnets to be ready
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+        mode: status
+      register: item_result
+      with_items:
+          - "{{ bastion_ip_output }}"
+          - "{{ master_ip_output }}"
+          - "{{ infra_ip_output }}"
+          - "{{ master_subnet_output }}"
+          - "{{ node_subnet_output }}"
+          - "{{ infra_subnet_output }}"
+      until: item_result.finished
+      retries: 5
+      delay: 30
 
     # --- Load Balancers ---
     # These require the public IPs: master and infra respectively
@@ -260,6 +275,7 @@
             public_ip_address_name: bastion_publicip
       async: 400
       poll: 0
+      register: output_nic_bastion
 
     - name: Create storage account for Registry
       azure_rm_storageaccount:
@@ -297,6 +313,7 @@
       with_sequence: start=0 end={{ master_count - 1 }}
       async: 400
       poll: 0
+      register: output_nics_master
 
     - name: Create virtual network interface card for node
       azure_rm_networkinterface:
@@ -305,9 +322,12 @@
         virtual_network: "{{ virtual_network_name }}"
         subnet: nodesubnet
         security_group: "{{ cluster_prefix }}-node-nsg"
+        ip_configurations:
+          - name: ipconfig1
       with_sequence: start=0 end={{ node_count - 1 }}
       async: 400
       poll: 0
+      register: output_nics_node
 
     - name: Create virtual network interface card for infra
       azure_rm_networkinterface:
@@ -324,6 +344,17 @@
       with_sequence: start=0 end={{ infra_count - 1 }}
       async: 400
       poll: 0
+      register: output_nics_infra
+
+    - name: Wait for NICs to be ready
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+        mode: status
+      register: async_poll_results
+      loop: "{{ [ output_nic_bastion ] + output_nics_master.results + output_nics_node.results + output_nics_infra.results }}"
+      until: async_poll_results.finished
+      retries: 30
+      delay: 60
 
     # Create bastion
     - name: Create bastion VM
@@ -347,8 +378,9 @@
             - lun: 0
               disk_size_gb: "{{ data_disk_size }}"
               managed_disk_type: Standard_LRS
-      async: 150
+      async: 1000
       poll: 0
+      register: output_vm_bastion
 
     # Creating master
     - name: Create master VMs
@@ -375,8 +407,9 @@
         availability_set: masteravailabilityset
         os_disk_size_gb: 64
       with_sequence: start=0 end={{ master_count - 1 }}
-      async: 150
+      async: 1000
       poll: 0
+      register: output_vms_master
 
     - name: Create node VMs
       azure_rm_virtualmachine:
@@ -402,8 +435,9 @@
         availability_set: nodeavailabilityset
         os_disk_size_gb: 64
       with_sequence: start=0 end={{ node_count - 1 }}
-      async: 150
+      async: 1000
       poll: 0
+      register: output_vms_node
 
     - name: Create infra VMs
       azure_rm_virtualmachine:
@@ -429,8 +463,9 @@
         availability_set: infraavailabilityset
         os_disk_size_gb: 64
       with_sequence: start=0 end={{ infra_count - 1 }}
-      async: 150
+      async: 1000
       poll: 0
+      register: output_vms_infra
 
     - name: Get bastion Public IP
       azure_rm_publicipaddress_facts:
@@ -472,18 +507,16 @@
         hostname: "{{ bastion_public_ip }}"
         groupname: bastion_vm
 
-    - name: Wait for Virtual Machines
-      azure_rm_resource_facts:
-        # url: /subscriptions/{{ lookup('env','AZURE_SUBSCRIPTION_ID') }}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines
-        api_version: '2018-06-01'
-        resource_group: "{{ resource_group }}"
-        provider: compute
-        resource_type: virtualmachines
-      register: output
-      until: output.response[0].value | length >= (infra_count + node_count + master_count)
+    - name: Wait for VMs to be ready
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+        mode: status
+      register: async_poll_results
+      loop: "{{ jobs_vm }}"
+      loop: "{{ [ output_vm_bastion ] + output_vms_master.results + output_vms_node.results + output_vms_infra.results }}"
+      until: async_poll_results.finished
+      retries: 30
       delay: 60
-      retries: 10
-
 
     # --- VM Extensions ---
     # These require: VMs

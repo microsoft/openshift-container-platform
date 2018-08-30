@@ -1,6 +1,11 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
 
+# UPDATES for Master (Release 3.9) - August 28, 2018
+
+1.  Lock version to 3.9.33 - Azure Cloud Provider setup issues in 3.9.40
+
+
 # UPDATES for Master (Release 3.9) - August 6, 2018
 
 1.  Added support for private master nodes

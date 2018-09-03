@@ -18,10 +18,10 @@ RETCODE=$?
 
 if [ $RETCODE -eq 0 ]
 then
-   echo "Subscribed successfully"
+    echo "Subscribed successfully"
 elif [ $RETCODE -eq 64 ]
 then
-   echo "This system is already registered."
+    echo "This system is already registered."
 else
     echo "Incorrect Username / Password or Organization ID / Activation Key specified"
     exit 3
@@ -32,14 +32,14 @@ if [ $? -eq 0 ]
 then
     echo "Pool attached successfully"
 else
-   grep attached attach.log
-   if [ $? -eq 0 ]
-      then
-         echo "Pool $POOL_ID was already attached and was not attached again."
-   else
-         echo "Incorrect Pool ID or no entitlements available"
-         exit 4
-   fi
+    grep attached attach.log
+    if [ $? -eq 0 ]
+    then
+        echo "Pool $POOL_ID was already attached and was not attached again."
+    else
+        echo "Incorrect Pool ID or no entitlements available"
+        exit 4
+    fi
 fi
 
 # Disable all repositories and enable only the required ones

@@ -26,22 +26,22 @@ elif [ $RETCODE -eq 64 ]
 then
    echo "This system is already registered."
 else
-   echo "Incorrect Username / Password or Organization ID / Activation Key specified"
-   exit 3
+    echo "Incorrect Username / Password or Organization ID / Activation Key specified"
+    exit 3
 fi
 
 subscription-manager attach --pool=$POOL_ID > attach.log
 if [ $? -eq 0 ]
 then
-   echo "Pool attached successfully"
+    echo "Pool attached successfully"
 else
-   grep attached attach.log
-   if [ $? -eq 0 ]
-   then
-         echo "Pool $POOL_ID was already attached and was not attached again."
-   else
-         echo "Incorrect Pool ID or no entitlements available"
-         exit 4
+    grep attached attach.log
+    if [ $? -eq 0 ]
+    then
+        echo "Pool $POOL_ID was already attached and was not attached again."
+    else
+        echo "Incorrect Pool ID or no entitlements available"
+        exit 4
    fi
 fi
 
@@ -55,16 +55,20 @@ subscription-manager repos \
     --enable="rhel-7-server-extras-rpms" \
     --enable="rhel-7-server-ose-3.9-rpms" \
     --enable="rhel-7-server-ansible-2.4-rpms" \
-    --enable="rhel-7-fast-datapath-rpms" 
+    --enable="rhel-7-fast-datapath-rpms" \
+    --enable="rh-gluster-3-client-for-rhel-7-server-rpms"
 
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
 
 yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion httpd-tools kexec-tools sos psacct
 yum -y install cloud-utils-growpart.noarch
+yum -y install ansible
+yum -y update glusterfs-fuse
 yum -y update --exclude=WALinuxAgent
-yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
 
+# Excluders for OpenShift
+yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
 atomic-openshift-excluder unexclude
 
 # Grow Root File System
@@ -87,15 +91,24 @@ yum -y install atomic-openshift-utils
 echo $(date) " - Installing Docker"
 yum -y install docker 
 
-sed -i -e "s#^OPTIONS='--selinux-enabled'#OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'#" /etc/sysconfig/docker
+# Update docker storage
+echo "
+# Adding insecure-registry option required by OpenShift
+OPTIONS=\"\$OPTIONS --insecure-registry 172.30.0.0/16\"
+" >> /etc/sysconfig/docker
 
 # Create thin pool logical volume for Docker
 echo $(date) " - Creating thin pool logical volume for Docker and staring service"
 
 DOCKERVG=$( parted -m /dev/sda print all 2>/dev/null | grep unknown | grep /dev/sd | cut -d':' -f1 )
 
-echo "DEVS=${DOCKERVG}" >> /etc/sysconfig/docker-storage-setup
-echo "VG=docker-vg" >> /etc/sysconfig/docker-storage-setup
+echo "
+# Adding OpenShift data disk for docker
+DEVS=${DOCKERVG}
+VG=docker-vg
+" >> /etc/sysconfig/docker-storage-setup
+
+# Running setup for docker storage
 docker-storage-setup
 if [ $? -eq 0 ]
 then
@@ -118,7 +131,7 @@ cat <<EOF > /home/${SUDOUSER}/scunmanaged.yml
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: generic
+  name: azure
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: kubernetes.io/azure-disk
@@ -131,7 +144,7 @@ cat <<EOF > /home/${SUDOUSER}/scmanaged.yml
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: generic
+  name: azure
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: kubernetes.io/azure-disk
@@ -143,3 +156,4 @@ EOF
 fi
 
 echo $(date) " - Script Complete"
+

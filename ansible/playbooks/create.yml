@@ -4,8 +4,6 @@
 
 ---
 - hosts: localhost
-  roles:
-    - ../custom-role
   tasks:
     # --- PRE TASKS ---
     # All the other tasks require these tasks

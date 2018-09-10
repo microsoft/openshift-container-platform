@@ -1,0 +1,192 @@
+---
+# defaults file for create.yaml
+state: present
+location: eastus
+resource_group: "myclusterrg"
+cluster_prefix: mycluster
+
+runvmext: "true"
+unique_string: "{{ resource_group  | md5 | truncate(8, True, '') }}"
+
+#######################
+# Number of nodes
+#######################
+master_count: 3
+infra_count: 3
+node_count: 3
+# Min of 3 required and add odd nums only for CNS
+cns_count: 0 # [3,5,7]
+
+#######################
+# vm sizes and other vm configurations (adapt)
+# az vm list-sizes -l <region> -o table
+#######################
+
+vm_size_master: Standard_D2s_v3
+vm_size_infra:  Standard_D2s_v3
+vm_size_node:   Standard_D2s_v3
+vm_size_bastion: Standard_D2s_v3
+# vm_size_cns:    Standard_D8s_v3
+
+# Disk sizes for OS Disk and Data Disk in GB
+os_disk_size: 64
+data_disk_size: 64
+
+# Type of disk used
+# disk_type: managed
+managed_disk_type: Premium_LRS
+
+#######################
+# SSH user for all VMs created
+#######################
+admin_username: azureuser
+# This will be added to each instance's authorized_keys file
+admin_pubkey: 'ssh-rsa LDKJFDLKJDFLDKJDF'
+# Path for the private key which will be added to localhost ssh_config for proxying through the bastion
+admin_privkey: '~/.ssh/id_rsa'
+
+# If set, creates local users with password-less sudo on the bastion.
+# bastion_users:
+#  user1: 'ssh-rsa LDKJFDLKJDFLDKJDF'
+#  user2: 'ssh-rsa FDLKJDFLDKJDFLDKJ'
+
+#######################
+# Service Principal 
+#######################
+# This is used to template the cloud config file on each node for azure
+aad_client_id: ""
+
+# Place this in vars file that can be encrypted in root of play and not checked into SCM
+aad_client_secret: ""
+subscription_id: ""
+tenant_id: ""
+
+#######################
+# RHSM 
+# Username / Password or
+# Activation key / OrgId
+#######################
+rhsm_username_org: ''
+rhsm_password_key: ''
+# rhsm_key: ""
+# rhsm_org: ""
+# Can specify separate pools so only Application nodes use paid subs
+# or keep the same if only using one pool
+rhsm_pool: ""
+# rhsm_broker_pool: ""
+# rhsm_node_pool: ""
+# rhsm_repos: 
+#   - rhel-7-server-rpms
+#   - rhel-7-server-extras-rpms
+#   - rhel-7-server-ose-3.9-rpms
+#   - rhel-7-fast-datapath-rpms
+#   - rhel-7-server-ansible-2.4-rpms
+# bastion_pkgs:
+#   - ansible
+#   - atomic-openshift-utils
+#   - atomic-openshift-clients
+#   - git
+#   - tmux
+#   - screen
+
+#######################
+# Network
+#######################
+virtual_network_name: "openshiftvnet"
+virtual_network_cidr: "10.0.0.0/14"
+master_subnet_cidr: "10.1.0.0/16"
+infra_subnet_cidr: "10.2.0.0/16"
+node_subnet_cidr: "10.3.0.0/16"
+cns_subnet_cidr: "10.4.0.0/16"
+
+bastion_publicip: "bastion{{ unique_string }}"
+# api_port: 443
+
+# If this is set, the bastion host is configured with the given static
+# IP address. A public IP address is still assigned to the bastion
+# because it is required during installation, but can be removed in
+# Azure after the installation is done. This is useful in environments
+# where the VNet is accessible from a private network.
+# bastion_private_ip: 192.168.0.20
+
+# Override the defaults for the SDN cluster network and the services
+# network.
+# osm_cluster_network_cidr: 10.29.0.0/16
+# openshift_portal_net: 10.28.0.0/16
+
+#######################
+# LB
+#######################
+# Name of Master LB public IP address
+master_lb_public_ip: "masterdns{{ unique_string }}"
+routing: "apps.contoso.com"
+
+# If this is set, the master load balancer will be configured as an
+# internal Azure load balancer with the given IP address as its
+# frontend IP address. There will be no public IP address assigned to
+# the load balancer. This is useful in environments where the VNet is
+# accessible from a private network.
+#master_lb_private_ip: 192.168.0.21
+#master_lb_private_dns: ocp-console.example.com
+
+# Name of Router LB
+router_lb_public_ip: "routerdns{{ unique_string }}"
+
+# registry Storage Account Name
+registry_storage_account: "registry{{ unique_string }}"
+
+# Storage account for default Storage Class if using unmanaged disks
+unmanaged_storage_class_account: "scsa{{ unique_string }}"
+
+#######################
+# Custom Named Certs
+#######################
+# Router
+#router_cert: '{"cafile": "/path/to/ca_cert", "certfile": "/path/to/fullchain.cer", "keyfile": "/vagrant/keys/domain.key"}'
+## Master
+#master_cert: '[{"cafile": "/path/to/ca_cert", "certfile": "/path/to/fullchain.cer", "keyfile": "/path/to/key/domain.key", "names": ["openshift.console.domain.name"]}]'
+
+
+#######################
+# OCP Identity
+# Use 'htpasswd -n <user>' to generate password hash. (htpasswd from httpd-tools RPM)
+#######################
+# Example with admin:changeme
+# openshift_master_htpasswd_users: {'admin': '$apr1$zAhyA9Ko$rBxBOwAwwtRuuaw8OtCwH0'}
+# openshift_master_identity_providers: [{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+
+# 
+ocp_admin_passwd: 'redhat@123'
+
+#######################
+# deploy CNS
+#######################
+deploy_cns: false
+# deploy_cns_on_infra: false
+
+#######################
+# deploy additional components
+#######################
+
+deploy_metrics: true
+deploy_logging: true
+# deploy_prometheus: true
+deploy_azure_cloud_provider: true
+
+# volume sizing defaults
+# metrics_volume_size: '20Gi'
+# logging_volume_size: '100Gi'
+# prometheus_volume_size: '20Gi'
+
+#######################
+# UI customization
+#######################
+
+#project_request_message: To create a new project, contact your team administrator.
+
+#######################
+#######################
+# Don't change 
+#######################
+#######################
+# bastion: "{{ resource_group }}b.{{ location }}.cloudapp.azure.com"

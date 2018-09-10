@@ -1,0 +1,762 @@
+# Description
+# ===========
+# OpenShift sample for Azure
+
+---
+- hosts: localhost
+  tasks:
+    # --- PRE TASKS ---
+    # All the other tasks require these tasks
+    - name: Create a resource group
+      azure_rm_resourcegroup:
+        name: "{{ resource_group }}"
+        location: "{{ location }}"
+
+    - name: Create virtual network
+      azure_rm_virtualnetwork:
+        resource_group: "{{ resource_group }}"
+        name: "{{ virtual_network_name }}"
+        address_prefixes: "{{ virtual_network_cidr }}"
+
+    # --- PARALLELIZABLE TASKS ---
+    # All these tasks have no requirements other than RG and vNet
+    # They can be run in any order
+    - name: Create public IP address for Bastion node
+      azure_rm_publicipaddress:
+        resource_group: "{{ resource_group }}"
+        allocation_method: Static
+        name: bastion_publicip
+      async: 150
+      poll: 0
+      register: bastion_ip_output
+
+    - name: Create public IP address for Master LB
+      azure_rm_publicipaddress:
+        resource_group: "{{ resource_group }}"
+        allocation_method: Static
+        domain_name: "{{ master_lb_public_ip }}"
+        name: "{{ master_lb_public_ip }}"
+      async: 150
+      poll: 0
+      register: master_ip_output
+
+    - name: Create public IP address for Infra LB
+      azure_rm_publicipaddress:
+        resource_group: "{{ resource_group }}"
+        allocation_method: Static
+        domain_name: "{{ router_lb_public_ip }}"
+        name: "{{ router_lb_public_ip }}"
+      async: 150
+      poll: 0
+      register: infra_ip_output
+
+    - name: Create public IP address for Bastion node
+      azure_rm_publicipaddress:
+        resource_group: "{{ resource_group }}"
+        allocation_method: Static
+        domain_name: "{{ bastion_publicip }}"
+        name: "{{ bastion_publicip }}"
+      async: 150
+      poll: 0
+      register: output
+
+    - name: Add master subnet
+      azure_rm_subnet:
+        resource_group: "{{ resource_group }}"
+        name: mastersubnet
+        address_prefix: "{{ master_subnet_cidr }}"
+        virtual_network: "{{ virtual_network_name }}"
+      async: 150
+      poll: 0
+      register: master_subnet_output
+  
+    - name: Add node subnet
+      azure_rm_subnet:
+        resource_group: "{{ resource_group }}"
+        name: nodesubnet
+        address_prefix: "{{ node_subnet_cidr }}"
+        virtual_network: "{{ virtual_network_name }}"
+      async: 150
+      poll: 0
+      register: node_subnet_output
+  
+    - name: Add infra subnet
+      azure_rm_subnet:
+        resource_group: "{{ resource_group }}"
+        name: infrasubnet
+        address_prefix: "{{ infra_subnet_cidr }}"
+        virtual_network: "{{ virtual_network_name }}"
+      async: 150
+      poll: 0
+      register: infra_subnet_output
+
+    - name: Create infrastructure NSG
+      azure_rm_securitygroup:
+        resource_group: "{{ resource_group }}"
+        name: "{{ cluster_prefix }}-infra-nsg"
+        rules:
+          - name: allowSSHin_all
+            protocol: Tcp
+            destination_port_range: 22
+            access: Allow
+            priority: 100
+            direction: Inbound
+          - name: allowHTTPSIn_all
+            protocol: Tcp
+            destination_port_range: 443
+            access: Allow
+            priority: 200
+            direction: Inbound
+          - name: allowHTTPIn_all
+            protocol: Tcp
+            destination_port_range: 80
+            access: Allow
+            priority: 300
+            direction: Inbound
+      async: 150
+      poll: 0
+
+    - name: Create master NSG
+      azure_rm_securitygroup:
+        resource_group: "{{ resource_group }}"
+        name: "{{ cluster_prefix }}-master-nsg"
+        rules:
+          - name: allowSSHin_all
+            protocol: Tcp
+            destination_port_range: 22
+            access: Allow
+            priority: 100
+            direction: Inbound
+          - name: allowHTTPSIn_all
+            protocol: Tcp
+            destination_port_range: 443
+            access: Allow
+            priority: 200
+            direction: Inbound
+      async: 150
+      poll: 0
+
+    - name: Create node NSG
+      azure_rm_securitygroup:
+        resource_group: "{{ resource_group }}"
+        name: "{{ cluster_prefix }}-node-nsg"
+        rules:
+          - name: allowSSHin_all
+            protocol: Tcp
+            destination_port_range: 22
+            access: Allow
+            priority: 100
+            direction: Inbound
+          - name: allowHTTPSIn_all
+            protocol: Tcp
+            destination_port_range: 443
+            access: Allow
+            priority: 200
+            direction: Inbound
+          - name: allowHTTPIn_all
+            protocol: Tcp
+            destination_port_range: 80
+            access: Allow
+            priority: 300
+            direction: Inbound
+      async: 150
+      poll: 0
+
+    - name: Create master availability set
+      azure_rm_availabilityset:
+        name: masteravailabilityset
+        location: "{{ location }}"
+        resource_group: "{{ resource_group }}"
+        sku: Aligned
+      async: 150
+      poll: 0
+
+    - name: Create node availability set
+      azure_rm_availabilityset:
+        name: nodeavailabilityset
+        location: "{{ location }}"
+        resource_group: "{{ resource_group }}"
+        sku: Aligned
+      async: 150
+      poll: 0
+
+    - name: Create infra availability set
+      azure_rm_availabilityset:
+        name: infraavailabilityset
+        location: "{{ location }}"
+        resource_group: "{{ resource_group }}"
+        sku: Aligned
+      async: 150
+      poll: 0
+
+    - name: Wait for IP addresses and subnets to be ready
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+        mode: status
+      register: item_result
+      with_items:
+          - "{{ bastion_ip_output }}"
+          - "{{ master_ip_output }}"
+          - "{{ infra_ip_output }}"
+          - "{{ master_subnet_output }}"
+          - "{{ node_subnet_output }}"
+          - "{{ infra_subnet_output }}"
+      until: item_result.finished
+      retries: 5
+      delay: 30
+
+    # --- Load Balancers ---
+    # These require the public IPs: master and infra respectively
+    - name: Create master load balancer
+      azure_rm_loadbalancer:
+        name: "{{ cluster_prefix }}-masterlb"
+        location: "{{ location }}"
+        resource_group: "{{ resource_group }}"
+        frontend_ip_configurations:
+          - name: frontendip
+            public_ip_address: "{{ master_lb_public_ip }}"
+        load_balancing_rules:
+          - name: OpenShiftAdminConsole
+            frontend_ip_configuration: frontendip
+            load_distribution: SourceIP
+            idle_timeout: 15
+            probe: httpsprobe
+            backend_address_pool: backendaddrpool0
+            frontend_port: 443
+            backend_port: 443
+        backend_address_pools:
+          - name: backendaddrpool0
+        probes:
+          - name: httpsprobe
+            port: 443
+
+    - name: Create infra load balancer
+      azure_rm_loadbalancer:
+        name: "{{ cluster_prefix }}-infralb"
+        location: "{{ location }}"
+        resource_group: "{{ resource_group }}"
+        frontend_ip_configurations:
+          - name: frontendip
+            public_ip_address: "{{ router_lb_public_ip }}"
+        load_balancing_rules:
+          - name: OpenShiftRouterHTTP
+            frontend_ip_configuration: frontendip
+            probe: httpprobe
+            backend_address_pool: backendaddrpool0
+            frontend_port: 80
+            backend_port: 80
+          - name: OpenShiftRouterHTTPS
+            frontend_ip_configuration: frontendip
+            probe: httpsprobe
+            backend_address_pool: backendaddrpool0
+            frontend_port: 443
+            backend_port: 443
+        backend_address_pools:
+          - name: backendaddrpool0
+        probes:
+          - name: httpsprobe
+            port: 443
+          - name: httpprobe
+            port: 80
+
+    # --- NICs ---
+    # These require: Subnets and NSGs
+    - name: Create virtual network interface card for bastion
+      azure_rm_networkinterface:
+        resource_group: "{{ resource_group }}"
+        name: "{{ cluster_prefix }}-bastion-nic"
+        virtual_network: "{{ virtual_network_name }}"
+        subnet: infrasubnet
+        security_group: "{{ cluster_prefix }}-infra-nsg"
+        ip_configurations:
+          - name: ipconfig0
+            public_ip_address_name: bastion_publicip
+      async: 400
+      poll: 0
+      register: output_nic_bastion
+
+    - name: Create storage account for Registry
+      azure_rm_storageaccount:
+        resource_group: "{{ resource_group }}"
+        name: "{{ registry_storage_account }}"
+        type: Standard_LRS
+
+    - name: Get storage keys
+      azure_rm_resource:
+        resource_group: "{{ resource_group }}"
+        provider: storage
+        resource_type: storageAccounts
+        resource_name: "{{ registry_storage_account }}"
+        subresource:
+          - type: listkeys
+        api_version: '2018-03-01-preview'
+        method: POST
+      register: keys
+
+    - name: store key as fact
+      set_fact: registry_storage_account_key="{{ keys['response']['keys'][0]['value'] }}"
+
+    - name: Create virtual network interface card for master
+      azure_rm_networkinterface:
+        resource_group: "{{ resource_group }}"
+        name: "{{ cluster_prefix }}-master-{{ item }}-nic"
+        virtual_network: "{{ virtual_network_name }}"
+        subnet: mastersubnet
+        security_group: "{{ cluster_prefix }}-master-nsg"
+        ip_configurations:
+          - name: ipconfig1
+            load_balancer_backend_address_pools:
+              - name: backendaddrpool0
+                load_balancer: "{{ cluster_prefix }}-masterlb"
+      with_sequence: start=0 end={{ master_count - 1 }}
+      async: 400
+      poll: 0
+      register: output_nics_master
+
+    - name: Create virtual network interface card for node
+      azure_rm_networkinterface:
+        resource_group: "{{ resource_group }}"
+        name: "{{ cluster_prefix }}-node-{{ item }}-nic"
+        virtual_network: "{{ virtual_network_name }}"
+        subnet: nodesubnet
+        security_group: "{{ cluster_prefix }}-node-nsg"
+        ip_configurations:
+          - name: ipconfig1
+      with_sequence: start=0 end={{ node_count - 1 }}
+      async: 400
+      poll: 0
+      register: output_nics_node
+
+    - name: Create virtual network interface card for infra
+      azure_rm_networkinterface:
+        resource_group: "{{ resource_group }}"
+        name: "{{ cluster_prefix }}-infra-{{ item }}-nic"
+        virtual_network: "{{ virtual_network_name }}"
+        subnet: infrasubnet
+        security_group: "{{ cluster_prefix }}-infra-nsg"
+        ip_configurations:
+          - name: ipconfig1
+            load_balancer_backend_address_pools:
+              - name: backendaddrpool0
+                load_balancer: "{{ cluster_prefix }}-infralb"
+      with_sequence: start=0 end={{ infra_count - 1 }}
+      async: 400
+      poll: 0
+      register: output_nics_infra
+
+    - name: Wait for NICs to be ready
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+        mode: status
+      register: async_poll_results
+      loop: "{{ [ output_nic_bastion ] + output_nics_master.results + output_nics_node.results + output_nics_infra.results }}"
+      until: async_poll_results.finished
+      retries: 30
+      delay: 60
+
+    # Create bastion
+    - name: Create bastion VM
+      azure_rm_virtualmachine:
+        resource_group: "{{ resource_group }}"
+        name: "{{ cluster_prefix }}-bastion"
+        managed_disk_type: Standard_LRS
+        vm_size: "{{ vm_size_bastion }}"
+        admin_username: "{{ admin_username }}"
+        ssh_password_enabled: false
+        ssh_public_keys:
+          - path: /home/{{ admin_username }}/.ssh/authorized_keys
+            key_data: "{{ admin_pubkey }}"
+        network_interfaces: "{{ cluster_prefix }}-bastion-nic"
+        image:
+          offer: RHEL
+          publisher: RedHat
+          sku: 7-RAW
+          version: latest
+        data_disks:
+            - lun: 0
+              disk_size_gb: "{{ data_disk_size }}"
+              managed_disk_type: Standard_LRS
+      async: 1000
+      poll: 0
+      register: output_vm_bastion
+
+    # Creating master
+    - name: Create master VMs
+      azure_rm_virtualmachine:
+        resource_group: "{{ resource_group }}"
+        name: "{{ cluster_prefix }}-master-{{ item }}"
+        managed_disk_type: "{{ managed_disk_type }}"
+        vm_size: "{{ vm_size_master }}"
+        admin_username: "{{ admin_username }}"
+        ssh_password_enabled: false
+        ssh_public_keys:
+          - path: /home/{{ admin_username }}/.ssh/authorized_keys
+            key_data: "{{ admin_pubkey }}"
+        network_interfaces: "{{ cluster_prefix }}-master-{{ item }}-nic"
+        image:
+          offer: RHEL
+          publisher: RedHat
+          sku: 7-RAW
+          version: latest
+        data_disks:
+            - lun: 0
+              disk_size_gb: "{{ data_disk_size }}"
+              managed_disk_type: "{{ managed_disk_type }}"
+        availability_set: masteravailabilityset
+        os_disk_size_gb: 64
+      with_sequence: start=0 end={{ master_count - 1 }}
+      async: 1000
+      poll: 0
+      register: output_vms_master
+
+    - name: Create node VMs
+      azure_rm_virtualmachine:
+        resource_group: "{{ resource_group }}"
+        name: "{{ cluster_prefix }}-node-{{ item }}"
+        managed_disk_type: "{{ managed_disk_type }}"
+        vm_size: "{{ vm_size_node }}"
+        admin_username: "{{ admin_username }}"
+        ssh_password_enabled: false
+        ssh_public_keys:
+          - path: /home/{{ admin_username }}/.ssh/authorized_keys
+            key_data: "{{ admin_pubkey }}"
+        network_interfaces: "{{ cluster_prefix }}-node-{{ item }}-nic"
+        image:
+          offer: RHEL
+          publisher: RedHat
+          sku: 7-RAW
+          version: latest
+        data_disks:
+            - lun: 0
+              disk_size_gb: "{{ data_disk_size }}"
+              managed_disk_type: "{{ managed_disk_type }}"
+        availability_set: nodeavailabilityset
+        os_disk_size_gb: 64
+      with_sequence: start=0 end={{ node_count - 1 }}
+      async: 1000
+      poll: 0
+      register: output_vms_node
+
+    - name: Create infra VMs
+      azure_rm_virtualmachine:
+        resource_group: "{{ resource_group }}"
+        name: "{{ cluster_prefix }}-infra-{{ item }}"
+        managed_disk_type: "{{ managed_disk_type }}"
+        vm_size: "{{ vm_size_infra }}"
+        admin_username: "{{ admin_username }}"
+        ssh_password_enabled: false
+        ssh_public_keys:
+          - path: /home/{{ admin_username }}/.ssh/authorized_keys
+            key_data: "{{ admin_pubkey }}"
+        network_interfaces: "{{ cluster_prefix }}-infra-{{ item }}-nic"
+        image:
+          offer: RHEL
+          publisher: RedHat
+          sku: 7-RAW
+          version: latest
+        data_disks:
+            - lun: 0
+              disk_size_gb: "{{ data_disk_size }}"
+              managed_disk_type: "{{ managed_disk_type }}"
+        availability_set: infraavailabilityset
+        os_disk_size_gb: 64
+      with_sequence: start=0 end={{ infra_count - 1 }}
+      async: 1000
+      poll: 0
+      register: output_vms_infra
+
+    - name: Get bastion Public IP
+      azure_rm_publicipaddress_facts:
+        resource_group: "{{ resource_group }}"
+        name: "{{ bastion_publicip }}"
+      register: bastion_ip
+
+    - set_fact:
+       bastion_public_ip: "{{ bastion_ip.ansible_facts.azure_publicipaddresses[0].properties.ipAddress }}"
+
+    - name: Get master Public IP
+      azure_rm_publicipaddress_facts:
+        resource_group: "{{ resource_group }}"
+        name: "{{ master_lb_public_ip }}"
+      register: master_lb_ip
+
+    - set_fact:
+        master_publicip: "{{ master_lb_ip.ansible_facts.azure_publicipaddresses[0].properties.ipAddress }}"
+        master_publicip_fqdn: "{{ master_lb_ip.ansible_facts.azure_publicipaddresses[0].properties.dnsSettings.fqdn }}"
+
+    - name: Get infra Public IP
+      azure_rm_publicipaddress_facts:
+        resource_group: "{{ resource_group }}"
+        name: "{{ router_lb_public_ip }}"
+      register: router_lb_ip
+
+    - set_fact:
+        router_publicip: "{{ router_lb_ip.ansible_facts.azure_publicipaddresses[0].properties.ipAddress }}"
+
+    - set_fact:
+        nip_io_domain: "{{ router_publicip }}.nip.io"
+
+    -  set_fact:
+        routing: "{{ nip_io_domain }}"
+        when: routing is undefined or routing is none or routing == ""
+
+    - name: Add Bastion to host group
+      add_host:
+        hostname: "{{ bastion_public_ip }}"
+        groupname: bastion_vm
+
+    - name: Wait for VMs to be ready
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+        mode: status
+      register: async_poll_results
+      loop: "{{ jobs_vm }}"
+      loop: "{{ [ output_vm_bastion ] + output_vms_master.results + output_vms_node.results + output_vms_infra.results }}"
+      until: async_poll_results.finished
+      retries: 30
+      delay: 60
+
+    # --- VM Extensions ---
+    # These require: VMs
+    - name: Create master VM extension
+      azure_rm_virtualmachine_extension:
+        resource_group: "{{ resource_group }}"
+        name: deployOpenShift
+        virtual_machine_name: "{{ cluster_prefix }}-master-{{ item }}"
+        publisher: Microsoft.Azure.Extensions
+        virtual_machine_extension_type: CustomScript
+        type_handler_version: 2.0
+        settings:
+          fileUris:
+            - 'https://raw.githubusercontent.com/Microsoft/openshift-container-platform/master/scripts/masterPrep.sh'
+          commandToExecute: "bash masterPrep.sh {{ rhsm_username_org }} '{{ rhsm_password_key }}' {{ rhsm_pool }} {{ admin_username }} {{ location }} {{ unmanaged_storage_class_account }}"
+      with_sequence: start=0 end={{ master_count - 1 }}
+      when: runvmext == "true"
+      async: 150
+      poll: 0
+    
+
+    - name: Create infra VM extension
+      azure_rm_virtualmachine_extension:
+        resource_group: "{{ resource_group }}"
+        name: deployOpenShift
+        virtual_machine_name: "{{ cluster_prefix }}-infra-{{ item }}"
+        publisher: Microsoft.Azure.Extensions
+        virtual_machine_extension_type: CustomScript
+        type_handler_version: 2.0
+        settings:
+          fileUris:
+            - 'https://raw.githubusercontent.com/Microsoft/openshift-container-platform/master/scripts/nodePrep.sh'
+          commandToExecute: "bash nodePrep.sh {{ rhsm_username_org }} '{{ rhsm_password_key }}' {{ rhsm_pool }}"
+      with_sequence: start=0 end={{ infra_count - 1 }}
+      when: runvmext == "true"
+      async: 150
+      poll: 0
+
+    - name: Create node VM extension
+      azure_rm_virtualmachine_extension:
+        resource_group: "{{ resource_group }}"
+        name: deployOpenShift
+        virtual_machine_name: "{{ cluster_prefix }}-node-{{ item }}"
+        publisher: Microsoft.Azure.Extensions
+        virtual_machine_extension_type: CustomScript
+        type_handler_version: 2.0
+        settings:
+          fileUris:
+            - 'https://raw.githubusercontent.com/Microsoft/openshift-container-platform/master/scripts/nodePrep.sh'
+          commandToExecute: "bash nodePrep.sh {{ rhsm_username_org }} '{{ rhsm_password_key }}' {{ rhsm_pool }}"
+      with_sequence: start=0 end={{ node_count - 1 }}
+      when: runvmext == "true"
+      async: 150
+      poll: 0
+
+# Bastion playbook tasks to set it up
+- hosts: bastion_vm
+  user: "{{ admin_username }}"
+  become: yes
+  vars:
+      dest_key: "/home/{{ admin_username }}/.ssh/id_rsa"
+      empty_var: ""
+  tasks:
+    - name: Ensure .ssh directory exists in root home folder.
+      file: 
+        dest: "{{ dest_key | dirname }}"
+        mode: 0700 
+        owner: "{{ admin_username }}" 
+        state: directory
+
+    - name: Install SSH private key on Bastion
+      copy: 
+        src: "{{ admin_privkey }}" 
+        dest: "{{ dest_key }}"
+        mode: 0600
+        owner: "{{ admin_username }}"
+
+    - name: Remove RHUI
+      shell: |
+        rm -f /etc/yum.repos.d/rh-cloud.repo
+        sleep 10
+
+    - name: Register as user with password and auto-subscribe to available content.
+      redhat_subscription:
+        state: present
+        username: "{{ rhsm_username_org }}"
+        password: "{{ rhsm_password_key }}"
+        pool_ids: "{{ rhsm_pool }}"
+        auto_attach: yes
+
+    - name: Disable all RHSM repositories
+      rhsm_repository:
+        name: '*'
+        state: disabled
+
+    - name: Enable RHEL RHSCL and ansible repo
+      rhsm_repository:
+        name: 
+          - rhel-7-server-rpms
+          - rhel-7-server-extras-rpms
+          - rhel-7-server-ose-3.9-rpms
+          - rhel-7-server-ansible-2.4-rpms
+          - rhel-7-fast-datapath-rpms
+          - rh-gluster-3-client-for-rhel-7-server-rpms
+        state: enabled
+
+    - name: Update system to latest packages
+      yum:
+        name: '*'
+        state: latest
+        exclude: WALinuxAgent
+    
+    - name: Az CLI import rpm key   
+      rpm_key:
+        state: present
+        key: https://packages.microsoft.com/keys/microsoft.asc 
+
+    - name: Add Azure repository
+      yum_repository:
+        name: azure-cli
+        description: Azure CLI
+        baseurl: https://packages.microsoft.com/yumrepos/azure-cli
+        gpgcheck: yes
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+    
+    #TODO: Fix versions
+    - name: Install ALL packages
+      yum: 
+        name:
+          - wget
+          - net-tools
+          - bind-utils
+          - iptables-services
+          - bridge-utils
+          - bash-completion
+          - httpd-tools
+          - kexec-tools
+          - sos
+          - psacct
+          - ansible
+          - glusterfs-fuse
+          - gcc
+          - python-devel
+          - git
+          - azure-cli
+          - python27-python-pip
+          - atomic-openshift-excluder
+          - atomic-openshift-docker-excluder
+        state: present
+
+    - name: Excluders for OpenShift
+      shell: atomic-openshift-excluder unexclude
+
+    - name: Installing OpenShift utilities
+      yum: 
+        name:
+          - atomic-openshift-utils
+        state: present
+
+    - name: Adding DOMAIN to search for resolv.conf
+      shell: |
+        echo "DOMAIN=`domainname -d`" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+
+    - name: Get updateansiblecfg.yaml playbook
+      get_url:
+        url: https://raw.githubusercontent.com/microsoft/openshift-container-platform-playbooks/master/updateansiblecfg.yaml
+        dest: .
+    
+    - name: Run updateansiblecfg.yaml playbook
+      shell: ansible-playbook -f 25 updateansiblecfg.yaml
+      
+    - name: Get "deployOpenShift.sh"
+      get_url:
+        url: https://gist.githubusercontent.com/brusMX/b8ba89a4ce7063363315e6ce69b4a1d3/raw/652d8c73bc5f45e0383d0781c9e5293e56c4dc1f/export-all.sh
+        dest: .
+    - file:
+        path: export-all.sh
+        mode: "a+x"
+    
+    # Deploying openshift CP with deployOpenShift.sh
+    # 'bash ', parameters('openshiftDeploymentScriptFileName')
+    - name: Run deployOpenShift.sh Container Platform
+      shell: |
+        args=(
+          # $1 SUDOUSER=$1 - parameters('adminUsername')
+          "{{ admin_username }}" 
+          # $2 PASSWORD="$2" - parameters('openshiftPassword')
+          "{{ ocp_admin_passwd }}" \
+          # $3 MASTER=$3 - parameters('openshiftMasterHostname')
+          "{{ cluster_prefix }}-master" \
+          # $4 MASTERPUBLICIPHOSTNAME=$4 - parameters('openshiftMasterPublicIpFqdn')
+          "{{ master_publicip_fqdn }}" \
+          # $5 MASTERPUBLICIPADDRESS=$5 - parameters('openshiftMasterPublicIpAddress')
+          "{{ master_publicip }}" \
+          # $6 INFRA=$6 - parameters('openshiftInfraHostname')
+          "{{ cluster_prefix }}-infra" \
+          # $7 NODE=$7 - parameters('openshiftNodeHostname')
+          "{{ cluster_prefix }}-node" \
+          # $8 NODECOUNT=$8 - parameters('nodeInstanceCount')
+          "{{ node_count }}" \
+          # $9 INFRACOUNT=${9} - parameters('infraInstanceCount')
+          "{{ infra_count }}" \
+          # $10 MASTERCOUNT=${10} - parameters('MasterInstanceCount')
+          "{{ master_count }}" \
+          # $11 ROUTING=${11} - parameters(parameters('subDomainChosen'))
+          "{{ routing }}" \
+          # $12 REGISTRYSA=${12} - parameters('newStorageAccountRegistry')
+          "{{ registry_storage_account }}" \
+          # $13 ACCOUNTKEY="${13}" - parameters('newStorageAccountKey')
+          "{{ registry_storage_account_key }}" \
+          # $14 METRICS=${14} - parameters('enableMetrics')
+          "{{ deploy_metrics }}"
+          # $15 LOGGING=${15}
+          "{{ deploy_logging }}"
+          # $16 TENANTID=${16} - variables('tenantId')
+          "{{ tenant_id }}" \
+          # $17 SUBSCRIPTIONID=${17} - variables('subscriptionId')
+          "{{ subscription_id }}" \
+          # $18 AADCLIENTID=${18} - parameters('aadClientId')
+          "{{ aad_client_id }}" \
+          # $19 AADCLIENTSECRET="${19}" - parameters('aadClientSecret')
+          "{{ aad_client_secret }}" \
+          # $20 RESOURCEGROUP=${20} - variables('resourceGroupName')
+          "{{ resource_group }}" \
+          # $21 LOCATION=${21} - variables('location')
+          "{{ location }}" \
+          # $22 AZURE=${22} - parameters('enableAzure')
+          "{{ deploy_azure_cloud_provider }}" \
+          # $23 STORAGEKIND=${23}
+          "{{ disk_type }}"
+          # $24 ENABLECNS
+          "{{ deploy_cns }}"
+          # $25 CNS
+          "{{ cluster_prefix }}-cns"
+          # $26 CNSCOUNT
+          "{{ cns_count }}"
+          # $27 VNETNAME #TODO: remove var from script is not utilized
+          "{{ empty_var }}"
+          # $28 NODENSG #TODO: remove var from script is not utilized
+          "{{ empty_var }}"
+          # $29 NODEAVAILIBILITYSET #TODO: remove var from script is not utilized 
+          "{{ empty_var }}"
+        )
+        ./export-all.sh "${args[@]}"
+        

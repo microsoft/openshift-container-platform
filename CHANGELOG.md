@@ -1,5 +1,21 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES for Release 3.9 - May 5, 2018
+
+1.  Lock version to 3.9.33 - Azure Cloud Provider setup issues in 3.9.40
+2.  Added support for private master nodes
+3.  Addes support for private infra nodes
+4.  Removed inbound NAT rules for master LB to better secure master nodes
+5.  Added support for Accelerated Networking
+6.  Added support for existing or new VNet
+7.  Added parameter for CNS VM Size
+8.  Added support for non-HA masters by allowing a single master
+9.  Cleaned up Azure Cloud Provider configuration
+10. Added Support for RHEL 7.5
+11. Added Container Native Storage (CNS) support
+12. Added support for custom IP range for the Virtual Network
+
+
 # UPDATES for Master (Release 3.9) - May 5, 2018
 
 1.  Include playbook to test for DNS name resolution - accomodate for Azure network latency during deployment

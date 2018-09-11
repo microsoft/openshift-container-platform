@@ -93,6 +93,28 @@
 				"description": "OpenShift CNS Node VM(s) size"
 			}
 		},
+		"osImageType": {
+			"type": "string",
+			"defaultValue": "defaultgallery",
+			"allowedValues": [
+				"defaultgallery", "marketplace"
+			],
+			"metadata": {
+				"description": "OpenShift OS image type. 'defaultgallery' will use the on demand RHEL image. 'marketplace' allows you to define a third party marketplace image to use."
+			}
+		},
+		"marketplaceOsImage": {
+			"type": "object",
+			"defaultValue": {
+				"publisher": "redhat",
+				"offer": "rhel-byos",
+				"sku": "rhel-75",
+				"version": "latest"
+			},
+			"metadata": {
+				"description": "Enter the appropriate publisher, offer, sku and version values for the appropriate marketplace image you want to use."
+			}
+		},
 		"storageKind": {
 			"type": "string",
 			"defaultValue": "managed",
@@ -532,11 +554,22 @@
 			}
 		},
 		"infraFrontEndIpConfigurationProperties": "[concat(parameters('routerClusterType'), 'InfraFrontEndIpConfigurationProperties')]",
-		"imageReference": {
+		"defaultgalleryImageReference": {
 			"publisher": "RedHat",
 			"offer": "RHEL",
 			"sku": "7-RAW",
 			"version": "latest"
+		},
+		"marketplaceImageReference":{
+			"publisher": "[parameters('marketplaceOsImage').publisher]",
+			"offer": "[parameters('marketplaceOsImage').offer]",
+			"sku": "[parameters('marketplaceOsImage').sku]",
+			"version": "[parameters('marketplaceOsImage').version]"
+		},
+		"marketplacePlan":{
+			"publisher": "[parameters('marketplaceOsImage').publisher]",
+			"product": "[parameters('marketplaceOsImage').offer]",
+			"name": "[parameters('marketplaceOsImage').sku]"
 		},
 		"redHatTags": {
 			"app": "OpenShiftContainerPlatform",

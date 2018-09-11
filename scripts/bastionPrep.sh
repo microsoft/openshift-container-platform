@@ -58,8 +58,8 @@ subscription-manager repos --disable="*"
 subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
-    --enable="rhel-7-server-ose-3.9-rpms" \
-    --enable="rhel-7-server-ansible-2.4-rpms" \
+    --enable="rhel-7-server-ose-3.10-rpms" \
+    --enable="rhel-7-server-ansible-2.5-rpms" \
     --enable="rhel-7-fast-datapath-rpms" \
     --enable="rh-gluster-3-client-for-rhel-7-server-rpms"
 
@@ -74,10 +74,6 @@ yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash
 yum -y install ansible
 yum -y update glusterfs-fuse
 echo $(date) " - Base package installation complete"
-
-# Excluders for OpenShift
-yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
-atomic-openshift-excluder unexclude
 
 # Install OpenShift utilities
 echo $(date) " - Installing OpenShift utilities"

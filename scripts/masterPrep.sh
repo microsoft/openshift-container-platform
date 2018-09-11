@@ -53,8 +53,8 @@ subscription-manager repos --disable="*"
 subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
-    --enable="rhel-7-server-ose-3.9-rpms" \
-    --enable="rhel-7-server-ansible-2.4-rpms" \
+    --enable="rhel-7-server-ose-3.10-rpms" \
+    --enable="rhel-7-server-ansible-2.5-rpms" \
     --enable="rhel-7-fast-datapath-rpms" \
     --enable="rh-gluster-3-client-for-rhel-7-server-rpms"
 
@@ -66,10 +66,7 @@ yum -y install cloud-utils-growpart.noarch
 yum -y install ansible
 yum -y update glusterfs-fuse
 yum -y update --exclude=WALinuxAgent
-
-# Excluders for OpenShift
-yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
-atomic-openshift-excluder unexclude
+echo $(date) " - Base package insallation and updates complete"
 
 # Grow Root File System
 echo $(date) " - Grow Root FS"
@@ -123,37 +120,4 @@ fi
 systemctl enable docker
 systemctl start docker
 
-# Create Storage Class yml files on MASTER-0
-
-if hostname -f|grep -- "-0" >/dev/null
-then
-cat <<EOF > /home/${SUDOUSER}/scunmanaged.yml
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: azure
-  annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
-provisioner: kubernetes.io/azure-disk
-parameters:
-  location: ${LOCATION}
-  storageAccount: ${STORAGEACCOUNT}
-EOF
-
-cat <<EOF > /home/${SUDOUSER}/scmanaged.yml
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: azure
-  annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
-provisioner: kubernetes.io/azure-disk
-parameters:
-  kind: managed
-  location: ${LOCATION}
-  storageaccounttype: Premium_LRS
-EOF
-fi
-
 echo $(date) " - Script Complete"
-

@@ -554,17 +554,11 @@
 			}
 		},
 		"infraFrontEndIpConfigurationProperties": "[concat(parameters('routerClusterType'), 'InfraFrontEndIpConfigurationProperties')]",
-		"defaultgalleryImageReference": {
+		"imageReference": {
 			"publisher": "RedHat",
 			"offer": "RHEL",
 			"sku": "7-RAW",
 			"version": "latest"
-		},
-		"marketplaceImageReference":{
-			"publisher": "[parameters('marketplaceOsImage').publisher]",
-			"offer": "[parameters('marketplaceOsImage').offer]",
-			"sku": "[parameters('marketplaceOsImage').sku]",
-			"version": "[parameters('marketplaceOsImage').version]"
 		},
 		"marketplacePlan":{
 			"publisher": "[parameters('marketplaceOsImage').publisher]",
@@ -1695,6 +1689,15 @@
 					"vmSize": {
 						"value": "[variables('bastionVmSize')]"
 					},
+					"osImageType": {
+						"value": "[parameters('osImageType')]"
+					},
+					"marketplaceOsImage": {
+						"value": "[parameters('marketplaceOsImage')]"
+					},
+					"marketplacePlan": {
+						"value": "[variables('marketplacePlan')]"
+					},
 					"hostName": {
 						"value": "[variables('openshiftBastionHostname')]"
 					},
@@ -1767,6 +1770,15 @@
 					},
 					"vmSize": {
 						"value": "[parameters('masterVmSize')]"
+					},
+					"osImageType": {
+						"value": "[parameters('osImageType')]"
+					},
+					"marketplaceOsImage": {
+						"value": "[parameters('marketplaceOsImage')]"
+					},
+					"marketplacePlan": {
+						"value": "[variables('marketplacePlan')]"
 					},
 					"availabilitySet": {
 						"value": "masteravailabilityset"
@@ -1850,6 +1862,15 @@
 					"vmSize": {
 						"value": "[parameters('infraVmSize')]"
 					},
+					"osImageType": {
+						"value": "[parameters('osImageType')]"
+					},
+					"marketplaceOsImage": {
+						"value": "[parameters('marketplaceOsImage')]"
+					},
+					"marketplacePlan": {
+						"value": "[variables('marketplacePlan')]"
+					},
 					"availabilitySet": {
 						"value": "infraavailabilityset"
 					},
@@ -1931,6 +1952,15 @@
 					},
 					"vmSize": {
 						"value": "[parameters('nodeVmSize')]"
+					},
+					"osImageType": {
+						"value": "[parameters('osImageType')]"
+					},
+					"marketplaceOsImage": {
+						"value": "[parameters('marketplaceOsImage')]"
+					},
+					"marketplacePlan": {
+						"value": "[variables('marketplacePlan')]"
 					},
 					"availabilitySet": {
 						"value": "nodeavailabilityset"
@@ -2018,6 +2048,15 @@
 					},
 					"vmSize": {
 						"value": "[parameters('cnsVmSize')]"
+					},
+					"osImageType": {
+						"value": "[parameters('osImageType')]"
+					},
+					"marketplaceOsImage": {
+						"value": "[parameters('marketplaceOsImage')]"
+					},
+					"marketplacePlan": {
+						"value": "[variables('marketplacePlan')]"
 					},
 					"availabilitySet": {
 						"value": "cnsavailabilityset"

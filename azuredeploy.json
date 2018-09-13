@@ -305,6 +305,7 @@
 		"virtualNetworkNewOrExisting": {
 		  "type": "string",
 		  "defaultValue": "new",
+		  "allowedValues": ["new", "existing"],
 		  "metadata": {
 			"description": "Determines whether or not a new virtual network should be provisioned"
 		  }

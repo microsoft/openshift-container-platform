@@ -17,6 +17,17 @@
 		"cnsVmSize": {
 			"value": "Standard_E4s_v3"
 		},
+		"osImageType": {
+			"value": "defaultgallery"
+		},
+		"marketplaceOsImage": {
+			"value": {
+				"publisher": "RedHat",
+				"offer": "RHEL",
+				"sku": "7-RAW",
+				"version": "latest"
+			}
+		},
 		"storageKind": {
 			"value": "changeme"
 		},
@@ -57,6 +68,9 @@
 			"value": "changeme"
 		},
 		"rhsmPoolId": {
+			"value": "changeme"
+		},
+		"rhsmBrokerPoolId": {
 			"value": "changeme"
 		},
 		"sshPublicKey": {

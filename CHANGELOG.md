@@ -1,6 +1,13 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
 
+# UPDATES for Master (Release 3.10) - September 13, 2018
+
+1.  Update to deploy 3.10
+2.  Add support for 3rd party marketplace image
+3.  Add support for broker pool ID in addition to compute pool ID
+
+
 # UPDATES for Master (Release 3.9) - August 28, 2018
 
 1.  Lock version to 3.9.33 - Azure Cloud Provider setup issues in 3.9.40

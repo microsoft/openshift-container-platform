@@ -18,10 +18,10 @@ RETCODE=$?
 
 if [ $RETCODE -eq 0 ]
 then
-   echo "Subscribed successfully"
+    echo "Subscribed successfully"
 elif [ $RETCODE -eq 64 ]
 then
-   echo "This system is already registered."
+    echo "This system is already registered."
 else
     echo "Incorrect Username / Password or Organization ID / Activation Key specified"
     exit 3
@@ -32,14 +32,14 @@ if [ $? -eq 0 ]
 then
     echo "Pool attached successfully"
 else
-   grep attached attach.log
-   if [ $? -eq 0 ]
-      then
-         echo "Pool $POOL_ID was already attached and was not attached again."
-   else
-         echo "Incorrect Pool ID or no entitlements available"
-         exit 4
-   fi
+    grep attached attach.log
+    if [ $? -eq 0 ]
+    then
+        echo "Pool $POOL_ID was already attached and was not attached again."
+    else
+        echo "Incorrect Pool ID or no entitlements available"
+        exit 4
+    fi
 fi
 
 # Disable all repositories and enable only the required ones
@@ -50,8 +50,8 @@ subscription-manager repos --disable="*"
 subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
-    --enable="rhel-7-server-ose-3.9-rpms" \
-    --enable="rhel-7-server-ansible-2.4-rpms" \
+    --enable="rhel-7-server-ose-3.10-rpms" \
+    --enable="rhel-7-server-ansible-2.5-rpms" \
     --enable="rhel-7-fast-datapath-rpms" \
     --enable="rh-gluster-3-client-for-rhel-7-server-rpms"
 
@@ -63,10 +63,7 @@ yum -y install cloud-utils-growpart.noarch
 yum -y install ansible
 yum -y update glusterfs-fuse
 yum -y update --exclude=WALinuxAgent
-
-# Excluders for OpenShift
-yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
-atomic-openshift-excluder unexclude
+echo $(date) " - Base package insallation and updates complete"
 
 # Grow Root File System
 echo $(date) " - Grow Root FS"

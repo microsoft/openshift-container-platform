@@ -82,7 +82,7 @@ xfs_growfs $rootdev
 
 # Install OpenShift utilities
 echo $(date) " - Installing OpenShift utilities"
-yum -y install atomic-openshift-utils
+yum -y install openshift-ansible
 
 # Install Docker
 echo $(date) " - Installing Docker"

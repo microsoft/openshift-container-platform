@@ -78,7 +78,7 @@ echo $(date) " - Base package installation complete"
 # Install OpenShift utilities
 echo $(date) " - Installing OpenShift utilities"
 
-yum -y install atomic-openshift-utils
+yum -y install openshift-ansible
 echo $(date) " - OpenShift utilities installation complete"
 
 # Installing Azure CLI

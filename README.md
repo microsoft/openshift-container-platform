@@ -1,16 +1,18 @@
-# OpenShift Container Platform Deployment Template - Release 3.9
+# OpenShift Container Platform Deployment Template - Release 3.10
 
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
 **For OpenShift Origin refer to https://github.com/Microsoft/openshift-origin**
 
-## OpenShift Container Platform 3.9 with Username / Password authentication for OpenShift
+## OpenShift Container Platform 3.10 with Username / Password authentication for OpenShift
 
 1.  Single master option available
 2.  VM types that support Accelerated Networking will automatically have this feature enabled
 3.  Custom and existing Vnet
-3.  Support cluster with private masters (no public IP on load balancer in front of master nodes)
-4.  Support cluster with private router (no public IP on load balancer in front of infra nodes)
+4.  Support cluster with private masters (no public IP on load balancer in front of master nodes)
+5.  Support cluster with private router (no public IP on load balancer in front of infra nodes)
+6.  Support broker pool ID along with compute pool ID
+7.  Support for default gallery RHEL On Demand image and 3rd party Marketplace offer
 
 This template deploys OpenShift Container Platform with basic username / password for authentication to OpenShift. It includes the following resources:
 
@@ -38,6 +40,10 @@ This template deploys multiple VMs and requires some pre-work before you can suc
 
 This template uses the On-Demand Red Hat Enterprise Linux image from the Azure Gallery. 
 >When using the On-Demand image, there is an hourly charge for using this image.  At the same time, the instance will be registered to your Red Hat subscription, so you will also be using one of your entitlements. This will lead to "double billing".
+
+If you are only using one pool ID for all nodes, then enter the same pool ID for both 'rhsmPoolId' and 'rhsmBrokerPoolId'.
+
+If 3rd marketplace offer is selected, then you need to provide the following informatin for the offer - publisher, offer, sku, version.  You also need to enable the offer for programatic deployment.
 
 If private masters is selected, a static private IP needs to be specified which will be assigned to the front end of the master load balancer.  This must be within the CIDR for the master subnet and not already in use.  The master DNS name must also be supplied and this needs to map to the static Private IP and will be used to access the console on the master nodes.
 
@@ -117,6 +123,8 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 3.  infraVmSize: Size of the Infra VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
 3.  nodeVmSize: Size of the App Node VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
 3.  cnsVmSize: Size of the CNS Node VM. Select from one of the allowed VM sizes listed in the azuredeploy.json file
+4.  osImageType: The RHEL image to use. Value is either "defaultgallery" (On-Demand RHEL) or "marketplace" (3rd party Marketplace image)
+4.  marketplaceOsImage: If osImageType is marketplace, then enter the appropriate values for 'publisher', 'offer', 'sku', 'version' of the marketplace offer. This is an object type
 4.  storageKind: The type of storage to be used. Value is either "managed" or "unmanaged"
 4.  openshiftClusterPrefix: Cluster Prefix used to configure hostnames for all nodes - bastion, master, infra and app nodes. Between 1 and 20 characters
 7.  masterInstanceCount: Number of Masters nodes to deploy
@@ -130,7 +138,8 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 14. enableCNS: Enable Container Native Storage (CNS) - value is either "true" or "false"
 15. rhsmUsernameOrOrgId: Red Hat Subscription Manager Username or Organization ID. To find your Organization ID, run on registered server: `subscription-manager identity`.
 16. rhsmPasswordOrActivationKey: Red Hat Subscription Manager Password or Activation Key for your Cloud Access subscription. You can get this from [here](https://access.redhat.com/management/activation_keys).
-17. rhsmPoolId: The Red Hat Subscription Manager Pool ID that contains your OpenShift entitlements
+17. rhsmPoolId: The Red Hat Subscription Manager Pool ID that contains your OpenShift entitlements for compute nodes
+17. rhsmBrokerPoolId: The Red Hat Subscription Manager Pool ID that contains your OpenShift entitlements for masters and infra nodes. If you don't have different pool IDs, then enter the same pool ID as 'rhsmPoolId'
 18. sshPublicKey: Copy your SSH Public Key here
 19. keyVaultResourceGroup: The name of the Resource Group that contains the Key Vault
 20. keyVaultName: The name of the Key Vault you created
@@ -159,9 +168,9 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 ## Deploy Template
 
 Deploy to Azure using Azure Portal: 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Frelease-3.9%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
-<a href="https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Frelease-3.9%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/AzureGov.png"/></a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Frelease-3.9%2Fazuredeploy.json" target="_blank"><img src="http://armviz.io/visualizebutton.png"/></a>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
+<a href="https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/AzureGov.png"/></a>
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://armviz.io/visualizebutton.png"/></a>
 <br/>
 
 Once you have collected all of the prerequisites for the template, you can deploy the template by clicking Deploy to Azure or populating the **azuredeploy.parameters.json** file and executing Resource Manager deployment commands with PowerShell or the Azure CLI.
@@ -231,4 +240,4 @@ To create additional (non-admin) users in your environment, login to your master
 
 ### Additional OpenShift Configuration Options
  
-You can configure additional settings per the official (<a href="https://docs.openshift.com/container-platform/3.9/welcome/index.html" target="_blank">OpenShift Enterprise Documentation</a>).
+You can configure additional settings per the official (<a href="https://docs.openshift.com/container-platform/3.10/welcome/index.html" target="_blank">OpenShift Enterprise Documentation</a>).

@@ -1,10 +1,17 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES for Master (Release 3.10) - September 13, 2018
+
+1.  Update to deploy 3.10
+2.  Add support for 3rd party marketplace image
+3.  Add support for broker pool ID in addition to compute pool ID
+
+
 # UPDATES for Release 3.9 - May 5, 2018
 
 1.  Lock version to 3.9.33 - Azure Cloud Provider setup issues in 3.9.40
 2.  Added support for private master nodes
-3.  Addes support for private infra nodes
+3.  Added support for private infra nodes
 4.  Removed inbound NAT rules for master LB to better secure master nodes
 5.  Added support for Accelerated Networking
 6.  Added support for existing or new VNet

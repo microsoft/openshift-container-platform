@@ -17,6 +17,17 @@
 		"cnsVmSize": {
 			"value": "Standard_E4s_v3"
 		},
+		"osImageType": {
+			"value": "defaultgallery"
+		},
+		"marketplaceOsImage": {
+			"value": {
+				"publisher": "RedHat",
+				"offer": "RHEL",
+				"sku": "7-RAW",
+				"version": "latest"
+			}
+		},
 		"storageKind": {
 			"value": "managed"
 		},
@@ -57,6 +68,9 @@
 			"value": "GEN-PASSWORD"
 		},
 		"rhsmPoolId": {
+			"value": "8a81234151631b3201a5e6f4322e42a9"
+		},
+		"rhsmBrokerPoolId": {
 			"value": "8a81234151631b3201a5e6f4322e42a9"
 		},
 		"sshPublicKey": {

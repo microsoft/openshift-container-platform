@@ -93,6 +93,28 @@
 				"description": "OpenShift CNS Node VM(s) size"
 			}
 		},
+		"osImageType": {
+			"type": "string",
+			"defaultValue": "defaultgallery",
+			"allowedValues": [
+				"defaultgallery", "marketplace"
+			],
+			"metadata": {
+				"description": "OpenShift OS image type. 'defaultgallery' will use the on demand RHEL image. 'marketplace' allows you to define a third party marketplace image to use."
+			}
+		},
+		"marketplaceOsImage": {
+			"type": "object",
+			"defaultValue": {
+				"publisher": "redhat",
+				"offer": "rhel-byos",
+				"sku": "rhel-75",
+				"version": "latest"
+			},
+			"metadata": {
+				"description": "Enter the appropriate publisher, offer, sku and version values for the appropriate marketplace image you want to use."
+			}
+		},
 		"storageKind": {
 			"type": "string",
 			"defaultValue": "managed",
@@ -205,7 +227,14 @@
 			"type": "string",
 			"minLength": 1,
 			"metadata": {
-				"description": "Red Hat Subscription Manager Pool ID with OpenShift entitlements. To find it, run on registered server: subscription-manager list"
+				"description": "Red Hat Subscription Manager Pool ID with OpenShift entitlements for Application Nodes. To find it, run on registered server: subscription-manager list"
+			}
+		},
+		"rhsmBrokerPoolId": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Red Hat Subscription Manager Pool ID with OpenShift entitlements for Broker / Master Nodes. If not using this, enter the Pool ID for Application Nodes. To find it, run on registered server: subscription-manager list"
 			}
 		},
 		"sshPublicKey": {
@@ -276,6 +305,7 @@
 		"virtualNetworkNewOrExisting": {
 		  "type": "string",
 		  "defaultValue": "new",
+		  "allowedValues": ["new", "existing"],
 		  "metadata": {
 			"description": "Determines whether or not a new virtual network should be provisioned"
 		  }
@@ -530,6 +560,11 @@
 			"offer": "RHEL",
 			"sku": "7-RAW",
 			"version": "latest"
+		},
+		"marketplacePlan":{
+			"publisher": "[parameters('marketplaceOsImage').publisher]",
+			"product": "[parameters('marketplaceOsImage').offer]",
+			"name": "[parameters('marketplaceOsImage').sku]"
 		},
 		"redHatTags": {
 			"app": "OpenShiftContainerPlatform",
@@ -1655,6 +1690,15 @@
 					"vmSize": {
 						"value": "[variables('bastionVmSize')]"
 					},
+					"osImageType": {
+						"value": "[parameters('osImageType')]"
+					},
+					"marketplaceOsImage": {
+						"value": "[parameters('marketplaceOsImage')]"
+					},
+					"marketplacePlan": {
+						"value": "[variables('marketplacePlan')]"
+					},
 					"hostName": {
 						"value": "[variables('openshiftBastionHostname')]"
 					},
@@ -1727,6 +1771,15 @@
 					},
 					"vmSize": {
 						"value": "[parameters('masterVmSize')]"
+					},
+					"osImageType": {
+						"value": "[parameters('osImageType')]"
+					},
+					"marketplaceOsImage": {
+						"value": "[parameters('marketplaceOsImage')]"
+					},
+					"marketplacePlan": {
+						"value": "[variables('marketplacePlan')]"
 					},
 					"availabilitySet": {
 						"value": "masteravailabilityset"
@@ -1810,6 +1863,15 @@
 					"vmSize": {
 						"value": "[parameters('infraVmSize')]"
 					},
+					"osImageType": {
+						"value": "[parameters('osImageType')]"
+					},
+					"marketplaceOsImage": {
+						"value": "[parameters('marketplaceOsImage')]"
+					},
+					"marketplacePlan": {
+						"value": "[variables('marketplacePlan')]"
+					},
 					"availabilitySet": {
 						"value": "infraavailabilityset"
 					},
@@ -1891,6 +1953,15 @@
 					},
 					"vmSize": {
 						"value": "[parameters('nodeVmSize')]"
+					},
+					"osImageType": {
+						"value": "[parameters('osImageType')]"
+					},
+					"marketplaceOsImage": {
+						"value": "[parameters('marketplaceOsImage')]"
+					},
+					"marketplacePlan": {
+						"value": "[variables('marketplacePlan')]"
 					},
 					"availabilitySet": {
 						"value": "nodeavailabilityset"
@@ -1979,6 +2050,15 @@
 					"vmSize": {
 						"value": "[parameters('cnsVmSize')]"
 					},
+					"osImageType": {
+						"value": "[parameters('osImageType')]"
+					},
+					"marketplaceOsImage": {
+						"value": "[parameters('marketplaceOsImage')]"
+					},
+					"marketplacePlan": {
+						"value": "[variables('marketplacePlan')]"
+					},
 					"availabilitySet": {
 						"value": "cnsavailabilityset"
 					},
@@ -2062,7 +2142,7 @@
 						"value": "[parameters('rhsmPasswordOrActivationKey')]"
 					},
 					"rhsmPoolId": {
-						"value": "[parameters('rhsmPoolId')]"
+						"value": "[parameters('rhsmBrokerPoolId')]"
 					},
 					"sshPrivateKey": {
 						"reference": {
@@ -2107,7 +2187,7 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('bash ', variables('masterPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', parameters('adminUsername'), ' ', variables('location'), ' ', variables('newStorageAccountPersistentVolume1'))]"
+					"commandToExecute": "[concat('bash ', variables('masterPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmBrokerPoolId'), ' ', parameters('adminUsername'), ' ', variables('location'), ' ', variables('newStorageAccountPersistentVolume1'))]"
 				}
 			}
 		}, {
@@ -2140,7 +2220,7 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('bash ', variables('nodePrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'))]"
+					"commandToExecute": "[concat('bash ', variables('nodePrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmBrokerPoolId'))]"	
 				}
 			}
 		}, {

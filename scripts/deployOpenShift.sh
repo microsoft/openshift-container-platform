@@ -58,14 +58,6 @@ export MASTERLOOP=$((MASTERCOUNT - 1))
 export INFRALOOP=$((INFRACOUNT - 1))
 export NODELOOP=$((NODECOUNT - 1))
 
-# Logging into Azure CLI
-echo $(date) " - Logging into Azure CLI"
-az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
-az account set -s $SUBSCRIPTIONID
-
-# Adding Storage Extension
-az extension add --name storage-preview
-
 echo $(date) " - Configuring SSH ControlPath to use shorter path name"
 
 sed -i -e "s/^# control_path = %(directory)s\/%%h-%%r/control_path = %(directory)s\/%%h-%%r/" /etc/ansible/ansible.cfg
@@ -92,6 +84,14 @@ fi
 # Setting the default openshift_cloudprovider_kind if Azure enabled
 if [ $AZURE == "true" ]
 then
+    # Logging into Azure CLI
+    echo $(date) " - Logging into Azure CLI"
+    az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
+    az account set -s $SUBSCRIPTIONID
+
+    # Adding Storage Extension
+    az extension add --name storage-preview
+
     CLOUDKIND="openshift_cloudprovider_kind=azure
 openshift_cloudprovider_azure_client_id=\"{{ aadClientId }}\"
 openshift_cloudprovider_azure_client_secret=\"{{ aadClientSecret }}\"
@@ -197,9 +197,20 @@ EOF
 echo $(date) " - Running DNS Hostname resolution check"
 runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
 
-# Working with custom header logo
-# Getting the image type - it is ok if these fail
+# Working with custom header logo can only happen is Azure is enabled
 IMAGECT=nope
+if [ $AZURE == "true" ]
+then
+    # Enabling static web site on the web storage account
+    az storage blob service-properties update --account-name $WEBSTORAGE
+
+    # Retrieving URL
+    WEBSTORAGEURL=$(az storage account show -n $WEBSTORAGE --query primaryEndpoints.web -o tsv)
+else
+    IMAGEURL=""
+fi
+
+# Getting the image type - it is ok if these fail
 if [[ $IMAGEURL =~ ^http ]]
 then
     # If this curl fails then the script will just use the default image
@@ -217,12 +228,7 @@ then
     curl -o /tmp/customlogo.$IMAGETYPE $IMAGEURL || true
 fi
 
-# Enabling static web site on the web storage account
-az storage blob service-properties update --account-name $WEBSTORAGE
-
-# Retrieving URL
-WEBSTORAGEURL=$(az storage account show -n $WEBSTORAGE --query primaryEndpoints.web -o tsv)
-
+# Create base CSS file
 cat > /tmp/customlogo.css <<EOF
 #header-logo {
     background-image: url("${WEBSTORAGEURL}customlogo.${IMAGETYPE}");
@@ -230,13 +236,14 @@ cat > /tmp/customlogo.css <<EOF
 }
 EOF
 
-# Uploading the custom css and image
-az storage blob upload-batch -s /tmp --pattern customlogo.* -d \$web --account-name $WEBSTORAGE
-
 # If there is an image then activate it
-CUSTOMCSS=''
+CUSTOMCSS=""
 if ["${IMAGECT}" != "nope" ] 
 then
+    # Uploading the custom css and image
+    az storage blob upload-batch -s /tmp --pattern customlogo.* -d \$web --account-name $WEBSTORAGE
+
+    # To be added to /etc/ansible/hosts
     CUSTOMCSS="openshift_web_console_extension_stylesheet_urls=['${WEBSTORAGEURL}customlogo.${IMAGETYPE}']"
 fi
 
@@ -454,7 +461,7 @@ runuser -l $SUDOUSER -c "ansible-playbook -f 30 ~/openshift-container-platform-p
 sleep 20
 
 # Installing Service Catalog, Ansible Service Broker and Template Service Broker
-if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
+if [[ $AZURE == "true" || $ENABLECNS == "true" ]]
 then
     runuser -l $SUDOUSER -c "ansible-playbook -e openshift_cloudprovider_azure_client_id=$AADCLIENTID -e openshift_cloudprovider_azure_client_secret=\"$AADCLIENTSECRET\" -e openshift_cloudprovider_azure_tenant_id=$TENANTID -e openshift_cloudprovider_azure_subscription_id=$SUBSCRIPTIONID -e openshift_enable_service_catalog=true -f 30 /usr/share/ansible/openshift-ansible/playbooks/openshift-service-catalog/config.yml"
 fi
@@ -464,7 +471,7 @@ if [ $METRICS == "true" ]
 then
     sleep 30
     echo $(date) "- Deploying Metrics"
-    if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
+    if [[ $AZURE == "true" || $ENABLECNS == "true" ]]
     then
         runuser -l $SUDOUSER -c "ansible-playbook -e openshift_cloudprovider_azure_client_id=$AADCLIENTID -e openshift_cloudprovider_azure_client_secret=\"$AADCLIENTSECRET\" -e openshift_cloudprovider_azure_tenant_id=$TENANTID -e openshift_cloudprovider_azure_subscription_id=$SUBSCRIPTIONID -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic -f 30 /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml"
     else
@@ -485,7 +492,7 @@ if [ $LOGGING == "true" ]
 then
     sleep 60
     echo $(date) "- Deploying Logging"
-    if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
+    if [[ $AZURE == "true" || $ENABLECNS == "true" ]]
     then
         runuser -l $SUDOUSER -c "ansible-playbook -e openshift_cloudprovider_azure_client_id=$AADCLIENTID -e openshift_cloudprovider_azure_client_secret=\"$AADCLIENTSECRET\" -e openshift_cloudprovider_azure_tenant_id=$TENANTID -e openshift_cloudprovider_azure_subscription_id=$SUBSCRIPTIONID -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true -f 30 /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml"
     else
@@ -501,7 +508,7 @@ then
 fi
 
 # Configure cluster for private masters
-if [ $MASTERCLUSTERTYPE == "private" ]
+if [[ $MASTERCLUSTERTYPE == "private" && $AZURE == "true" ]]
 then
 	echo $(date) " - Configure cluster for private masters"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 30 ~/openshift-container-platform-playbooks/activate-private-lb.yaml"
@@ -511,7 +518,7 @@ then
 fi
 
 # Delete Router / Infra Public IP if cluster is using private router
-if [ $ROUTERCLUSTERTYPE == "private" ]
+if [ $ROUTERCLUSTERTYPE == "private" && $AZURE == "true" ]
 then
 	echo $(date) " - Delete Router / Infra Public IP address"
 	az network public-ip delete -g $RESOURCEGROUP -n $INFRAPIPNAME

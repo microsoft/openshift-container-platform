@@ -1261,7 +1261,7 @@
 				"platform": "[variables('redHatTags').platform]"
 			},
 			"sku": {
-				"name": "[variables('storageSkuObject').web.skuName]"
+				"name": "[variables('storageSkuObject').web.skuName]",
 				"tier": "[variables('storageSkuObject').web.skuTier]"
 			}
 		}, {

@@ -39,8 +39,8 @@ export PRIVATEDNS=${32}
 export MASTERPIPNAME=${33}
 export ROUTERCLUSTERTYPE=${34}
 export INFRAPIPNAME=${35}
-export WEBSTORAGE=${36}
-export IMAGEURL=${37}
+export IMAGEURL=${36}
+export WEBSTORAGE=${37}
 
 export BASTION=$(hostname)
 
@@ -464,6 +464,19 @@ sleep 20
 if [[ $AZURE == "true" || $ENABLECNS == "true" ]]
 then
     runuser -l $SUDOUSER -c "ansible-playbook -e openshift_cloudprovider_azure_client_id=$AADCLIENTID -e openshift_cloudprovider_azure_client_secret=\"$AADCLIENTSECRET\" -e openshift_cloudprovider_azure_tenant_id=$TENANTID -e openshift_cloudprovider_azure_subscription_id=$SUBSCRIPTIONID -e openshift_enable_service_catalog=true -f 30 /usr/share/ansible/openshift-ansible/playbooks/openshift-service-catalog/config.yml"
+fi
+
+# Adding Open Sevice Broker for Azaure (requires service catalog)
+if [[ $AZURE == "true" ]]
+then
+    oc new-project osba
+    oc process -f https://raw.githubusercontent.com/Azure/open-service-broker-azure/master/contrib/openshift/osba-os-template.yaml  \
+        -p ENVIRONMENT=AzurePublicCloud \
+        -p AZURE_SUBSCRIPTION_ID=$SUBSCRIPTIONID \
+        -p AZURE_TENANT_ID=$TENANTID \
+        -p AZURE_CLIENT_ID=$AADCLIENTID \
+        -p AZURE_CLIENT_SECRET=$AADCLIENTSECRET \
+        | oc create -f -
 fi
 
 # Configure Metrics

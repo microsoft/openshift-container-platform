@@ -399,6 +399,13 @@
 			"metadata": {
 				"description": "Static Private IP address to use for infra load balancer when creating a cluster with private infra nodes"
 			}
+		},
+		"customHeaderImage": {
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "URL to a custom image for the header in the web console. If no valid image type is specified then it will use the default. 20px is the default height as well."
+			}
 		}
 	},
 	"variables": {
@@ -469,6 +476,10 @@
 			"cns": {
 				"skuName": "[variables('vmSizesMap')[parameters('cnsVmSize')].storageAccountType]",
 				"skuTier": "[variables('vmSizesMap')[parameters('cnsVmSize')].storageAccountTier]"
+			},
+			"web": {
+				"skuName": "Standard_RAGRS",
+				"skuTier": "Standard"
 			},
 			"diagnostics": {
 				"skuName": "Standard_LRS",
@@ -1235,6 +1246,23 @@
 			"sku": {
 				"name": "[variables('newStorageAccountArray')[copyIndex()].skuName]",
 				"tier": "[variables('newStorageAccountArray')[copyIndex()].skuTier]"
+			}
+		}, {
+			"type": "Microsoft.Storage/storageAccounts",
+			"name": "[variables('webStorageAccount')]",
+			"location": "[variables('location')]",
+			"kind": "StorageV2",
+			"apiVersion": "[variables('apiVersionStorage')]",
+			"tags": {
+				"displayName": "webStorageAccount",
+				"provider": "[variables('redHatTags').provider]",
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
+			},
+			"sku": {
+				"name": "[variables('storageSkuObject').web.skuName]"
+				"tier": "[variables('storageSkuObject').web.skuTier]"
 			}
 		}, {
 			"type": "Microsoft.Storage/storageAccounts",
@@ -2433,6 +2461,12 @@
 					},
 					"routerPublicIpName": {
 						"value": "[variables('infraLbPublicIpDnsLabel')]"
+					},
+					"customHeaderImage": {
+						"value": "[parameters('customHeaderImage')]"
+					},
+					"webStorageAccount": {
+						"value": "[variables('webStorageAccount')]"
 					}
 				}
 			}

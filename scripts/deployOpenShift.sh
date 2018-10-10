@@ -39,6 +39,8 @@ export PRIVATEDNS=${32}
 export MASTERPIPNAME=${33}
 export ROUTERCLUSTERTYPE=${34}
 export INFRAPIPNAME=${35}
+export WEBSTORAGE=${36}
+export IMAGEURL=${37}
 
 export BASTION=$(hostname)
 
@@ -55,6 +57,14 @@ export CLOUD=${CLOUD^^}
 export MASTERLOOP=$((MASTERCOUNT - 1))
 export INFRALOOP=$((INFRACOUNT - 1))
 export NODELOOP=$((NODECOUNT - 1))
+
+# Logging into Azure CLI
+echo $(date) " - Logging into Azure CLI"
+az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
+az account set -s $SUBSCRIPTIONID
+
+# Adding Storage Extension
+az extension add --name storage-preview
 
 echo $(date) " - Configuring SSH ControlPath to use shorter path name"
 
@@ -187,6 +197,49 @@ EOF
 echo $(date) " - Running DNS Hostname resolution check"
 runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
 
+# Working with custom header logo
+# Getting the image type - it is ok if these fail
+IMAGECT=nope
+if [[ $IMAGEURL =~ ^http ]]
+then
+    # If this curl fails then the script will just use the default image
+    # no retries required
+    IMAGECT=$(curl --head $IMAGEURL | grep -i content-type: | awk '{print $NF}' | tr -d '\r') || true
+    IMAGETYPE=$(echo $IMAGECT | awk -F/ '{print $2}' | awk -F+ '{print $1}')
+else
+    echo "Custom Header: No Valid Image URL specified"
+fi
+
+if [[ $IMAGECT =~ ^image ]]
+then
+    # If this curl fails then the script will just use the default image
+    # no retries required
+    curl -o /tmp/customlogo.$IMAGETYPE $IMAGEURL || true
+fi
+
+# Enabling static web site on the web storage account
+az storage blob service-properties update --account-name $WEBSTORAGE
+
+# Retrieving URL
+WEBSTORAGEURL=$(az storage account show -n $WEBSTORAGE --query primaryEndpoints.web -o tsv)
+
+cat > /tmp/customlogo.css <<EOF
+#header-logo {
+    background-image: url("${WEBSTORAGEURL}customlogo.${IMAGETYPE}");
+    height: 20px;
+}
+EOF
+
+# Uploading the custom css and image
+az storage blob upload-batch -s /tmp --pattern customlogo.* -d \$web --account-name $WEBSTORAGE
+
+# If there is an image then activate it
+CUSTOMCSS=''
+if ["${IMAGECT}" != "nope" ] 
+then
+    CUSTOMCSS="openshift_web_console_extension_stylesheet_urls=['${WEBSTORAGEURL}customlogo.${IMAGETYPE}']"
+fi
+
 # Create glusterfs configuration if CNS is enabled
 if [ $ENABLECNS == "true" ]
 then
@@ -238,6 +291,7 @@ osm_default_node_selector='node-role.kubernetes.io/compute=true'
 openshift_disable_check=memory_availability,docker_image_availability
 $CLOUDKIND
 $SCKIND
+$CUSTOMCSS
 
 # Workaround for docker image failure
 # https://access.redhat.com/solutions/3480921
@@ -453,8 +507,6 @@ then
 	runuser -l $SUDOUSER -c "ansible-playbook -f 30 ~/openshift-container-platform-playbooks/activate-private-lb.yaml"
 
 	echo $(date) " - Delete Master Public IP if cluster is using private masters"
-	az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
-	az account set -s $SUBSCRIPTIONID
 	az network public-ip delete -g $RESOURCEGROUP -n $MASTERPIPNAME
 fi
 
@@ -462,8 +514,6 @@ fi
 if [ $ROUTERCLUSTERTYPE == "private" ]
 then
 	echo $(date) " - Delete Router / Infra Public IP address"
-	az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
-	az account set -s $SUBSCRIPTIONID
 	az network public-ip delete -g $RESOURCEGROUP -n $INFRAPIPNAME
 fi
 

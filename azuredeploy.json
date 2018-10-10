@@ -429,6 +429,7 @@
 		"newStorageAccountInfra": "[concat('infra', uniqueString(concat(resourceGroup().id, 'isa')))]",
 		"newStorageAccountNodeOs": "[concat('nodeos', uniqueString(concat(resourceGroup().id, 'nodeossa')))]",
 		"newStorageAccountNodeData": "[concat('nodedata', uniqueString(concat(resourceGroup().id, 'nodedatasa')))]",
+		"newStorageAccountWeb": "[concat('web', uniqueString(concat(resourceGroup().id, 'csa')))]",
 		"newStorageAccountCns": "[concat('cns', uniqueString(concat(resourceGroup().id, 'csa')))]",
 		"diagStorageAccount1": "[concat('diag1', uniqueString(concat(resourceGroup().id, 'dsa1')))]",
 		"diagStorageAccount2": "[concat('diag2', uniqueString(concat(resourceGroup().id, 'dsa2')))]",
@@ -1249,12 +1250,12 @@
 			}
 		}, {
 			"type": "Microsoft.Storage/storageAccounts",
-			"name": "[variables('webStorageAccount')]",
+			"name": "[variables('newStorageAccountWeb')]",
 			"location": "[variables('location')]",
 			"kind": "StorageV2",
 			"apiVersion": "[variables('apiVersionStorage')]",
 			"tags": {
-				"displayName": "webStorageAccount",
+				"displayName": "newStorageAccountWeb",
 				"provider": "[variables('redHatTags').provider]",
 				"app": "[variables('redHatTags').app]",
 				"version": "[variables('redHatTags').version]",
@@ -2465,8 +2466,8 @@
 					"customHeaderImage": {
 						"value": "[parameters('customHeaderImage')]"
 					},
-					"webStorageAccount": {
-						"value": "[variables('webStorageAccount')]"
+					"newStorageAccountWeb": {
+						"value": "[variables('newStorageAccountWeb')]"
 					}
 				}
 			}

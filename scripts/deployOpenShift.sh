@@ -253,7 +253,7 @@ if [ -f /tmp/customlogo.$IMAGETYPE ]
 then
     # To be added to /etc/ansible/hosts
     echo "Custom Header: Adding Image to Ansible Hosts file"
-    CUSTOMCSS="openshift_web_console_extension_stylesheet_urls=['${WEBSTORAGEURL}customlogo.${IMAGETYPE}']"
+    CUSTOMCSS="openshift_web_console_extension_stylesheet_urls=['${WEBSTORAGEURL}customlogo.css']"
 fi
 
 # Create glusterfs configuration if CNS is enabled

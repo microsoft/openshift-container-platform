@@ -202,7 +202,7 @@ IMAGECT=nope
 if [ $AZURE == "true" ]
 then
     # Enabling static web site on the web storage account
-    az storage blob service-properties update --account-name $WEBSTORAGE
+    az storage blob service-properties update --account-name $WEBSTORAGE --static-website
 
     # Retrieving URL
     WEBSTORAGEURL=$(az storage account show -n $WEBSTORAGE --query primaryEndpoints.web -o tsv)

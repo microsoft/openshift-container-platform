@@ -202,30 +202,28 @@ IMAGECT=nope
 if [ $AZURE == "true" ]
 then
     # Enabling static web site on the web storage account
+    echo "Custom Header: Enabling a static-website in the web storage account"
     az storage blob service-properties update --account-name $WEBSTORAGE --static-website
 
     # Retrieving URL
     WEBSTORAGEURL=$(az storage account show -n $WEBSTORAGE --query primaryEndpoints.web -o tsv)
 else
+    # If its not a valid HTTP or HTTPS Url set it to empty
+    echo "Custom Header: Invalid http or https URL"
     IMAGEURL=""
 fi
 
-# Getting the image type - it is ok if these fail
+# Getting the image type assuming a valid URL
+# Failing is ok it will just default to the standard image
 if [[ $IMAGEURL =~ ^http ]]
 then
     # If this curl fails then the script will just use the default image
     # no retries required
     IMAGECT=$(curl --head $IMAGEURL | grep -i content-type: | awk '{print $NF}' | tr -d '\r') || true
     IMAGETYPE=$(echo $IMAGECT | awk -F/ '{print $2}' | awk -F+ '{print $1}')
+    echo "Custom Header: $IMAGETYPE identified"
 else
     echo "Custom Header: No Valid Image URL specified"
-fi
-
-if [[ $IMAGECT =~ ^image ]]
-then
-    # If this curl fails then the script will just use the default image
-    # no retries required
-    curl -o /tmp/customlogo.$IMAGETYPE $IMAGEURL || true
 fi
 
 # Create base CSS file
@@ -236,14 +234,25 @@ cat > /tmp/customlogo.css <<EOF
 }
 EOF
 
-# If there is an image then activate it
-CUSTOMCSS=""
-if ["${IMAGECT}" != "nope" ] 
+# If there is an image then transfer it
+if [[ $IMAGECT =~ ^image ]]
 then
-    # Uploading the custom css and image
-    az storage blob upload-batch -s /tmp --pattern customlogo.* -d \$web --account-name $WEBSTORAGE
+    # If this curl fails then the script will just use the default image
+    # no retries required
+    echo "Custom Header: $IMAGETYPE downloaded"
+    curl -o /tmp/customlogo.$IMAGETYPE $IMAGEURL || true
 
+    # Uploading the custom css and image
+    echo "Custom Header: Uploading a logo of type $IMAGECT"
+    az storage blob upload-batch -s /tmp --pattern customlogo.* -d \$web --account-name $WEBSTORAGE
+fi
+
+# If there is an image then activate it in the install
+CUSTOMCSS=""
+if [ -f /tmp/customlogo.$IMAGETYPE ]
+then
     # To be added to /etc/ansible/hosts
+    echo "Custom Header: Adding Image to Ansible Hosts file"
     CUSTOMCSS="openshift_web_console_extension_stylesheet_urls=['${WEBSTORAGEURL}customlogo.${IMAGETYPE}']"
 fi
 

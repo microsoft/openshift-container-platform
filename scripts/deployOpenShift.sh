@@ -240,8 +240,8 @@ then
     # If this curl fails then the script will just use the default image
     # no retries required
     echo "Custom Header: $IMAGETYPE downloaded"
-    curl -o /tmp/customlogo.$IMAGETYPE $IMAGEURL || true
-
+    curl -o /tmp/originallogo.$IMAGETYPE $IMAGEURL || true
+    convert /tmp/originallogo.$IMAGETYPE -geometry x20 /tmp/customlogo.$IMAGETYPE || true
     # Uploading the custom css and image
     echo "Custom Header: Uploading a logo of type $IMAGECT"
     az storage blob upload-batch -s /tmp --pattern customlogo.* -d \$web --account-name $WEBSTORAGE

@@ -89,6 +89,9 @@ sudo sh -c 'echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.micro
 sudo yum install -y azure-cli
 echo $(date) " - Azure CLI installation complete"
 
+# Install ImageMagick to resize image for Custom Header
+sudo yum install -y ImageMagick
+
 # Configure DNS so it always has the domain name
 echo $(date) " - Adding DOMAIN to search for resolv.conf"
 echo "DOMAIN=`domainname -d`" >> /etc/sysconfig/network-scripts/ifcfg-eth0

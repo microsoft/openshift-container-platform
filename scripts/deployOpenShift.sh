@@ -81,17 +81,20 @@ else
     export CLOUDNAME="AzurePublicCloud"
 fi
 
-# Setting the default openshift_cloudprovider_kind if Azure enabled
-if [ $AZURE == "true" ]
+# Logging into Azure CLI
+if [ "$AADCLIENTID" != "" ]
 then
-    # Logging into Azure CLI
     echo $(date) " - Logging into Azure CLI"
     az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
     az account set -s $SUBSCRIPTIONID
 
     # Adding Storage Extension
     az extension add --name storage-preview
+fi
 
+# Setting the default openshift_cloudprovider_kind if Azure enabled
+if [ $AZURE == "true" ]
+then
     CLOUDKIND="openshift_cloudprovider_kind=azure
 openshift_cloudprovider_azure_client_id=\"{{ aadClientId }}\"
 openshift_cloudprovider_azure_client_secret=\"{{ aadClientSecret }}\"
@@ -530,7 +533,7 @@ then
 fi
 
 # Configure cluster for private masters
-if [[ $MASTERCLUSTERTYPE == "private" && $AZURE == "true" ]]
+if [[ $MASTERCLUSTERTYPE == "private" ]]
 then
 	echo $(date) " - Configure cluster for private masters"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 30 ~/openshift-container-platform-playbooks/activate-private-lb.yaml"
@@ -540,7 +543,7 @@ then
 fi
 
 # Delete Router / Infra Public IP if cluster is using private router
-if [ $ROUTERCLUSTERTYPE == "private" && $AZURE == "true" ]
+if [[ $ROUTERCLUSTERTYPE == "private" ]]
 then
 	echo $(date) " - Delete Router / Infra Public IP address"
 	az network public-ip delete -g $RESOURCEGROUP -n $INFRAPIPNAME

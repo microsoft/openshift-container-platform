@@ -39,6 +39,8 @@ export PRIVATEDNS=${32}
 export MASTERPIPNAME=${33}
 export ROUTERCLUSTERTYPE=${34}
 export INFRAPIPNAME=${35}
+export IMAGEURL=${36}
+export WEBSTORAGE=${37}
 
 export BASTION=$(hostname)
 
@@ -77,6 +79,17 @@ then
 else
     DOCKERREGISTRYYAML=dockerregistrypublic.yaml
     export CLOUDNAME="AzurePublicCloud"
+fi
+
+# Logging into Azure CLI
+if [ "$AADCLIENTID" != "" ]
+then
+    echo $(date) " - Logging into Azure CLI"
+    az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
+    az account set -s $SUBSCRIPTIONID
+
+    # Adding Storage Extension
+    az extension add --name storage-preview
 fi
 
 # Setting the default openshift_cloudprovider_kind if Azure enabled
@@ -187,6 +200,65 @@ EOF
 echo $(date) " - Running DNS Hostname resolution check"
 runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
 
+# Working with custom header logo can only happen is Azure is enabled
+IMAGECT=nope
+if [ $AZURE == "true" ]
+then
+    # Enabling static web site on the web storage account
+    echo "Custom Header: Enabling a static-website in the web storage account"
+    az storage blob service-properties update --account-name $WEBSTORAGE --static-website
+
+    # Retrieving URL
+    WEBSTORAGEURL=$(az storage account show -n $WEBSTORAGE --query primaryEndpoints.web -o tsv)
+else
+    # If its not a valid HTTP or HTTPS Url set it to empty
+    echo "Custom Header: Invalid http or https URL"
+    IMAGEURL=""
+fi
+
+# Getting the image type assuming a valid URL
+# Failing is ok it will just default to the standard image
+if [[ $IMAGEURL =~ ^http ]]
+then
+    # If this curl fails then the script will just use the default image
+    # no retries required
+    IMAGECT=$(curl --head $IMAGEURL | grep -i content-type: | awk '{print $NF}' | tr -d '\r') || true
+    IMAGETYPE=$(echo $IMAGECT | awk -F/ '{print $2}' | awk -F+ '{print $1}')
+    echo "Custom Header: $IMAGETYPE identified"
+else
+    echo "Custom Header: No Valid Image URL specified"
+fi
+
+# Create base CSS file
+cat > /tmp/customlogo.css <<EOF
+#header-logo {
+    background-image: url("${WEBSTORAGEURL}customlogo.${IMAGETYPE}");
+    height: 20px;
+}
+EOF
+
+# If there is an image then transfer it
+if [[ $IMAGECT =~ ^image ]]
+then
+    # If this curl fails then the script will just use the default image
+    # no retries required
+    echo "Custom Header: $IMAGETYPE downloaded"
+    curl -o /tmp/originallogo.$IMAGETYPE $IMAGEURL || true
+    convert /tmp/originallogo.$IMAGETYPE -geometry x20 /tmp/customlogo.$IMAGETYPE || true
+    # Uploading the custom css and image
+    echo "Custom Header: Uploading a logo of type $IMAGECT"
+    az storage blob upload-batch -s /tmp --pattern customlogo.* -d \$web --account-name $WEBSTORAGE
+fi
+
+# If there is an image then activate it in the install
+CUSTOMCSS=""
+if [ -f /tmp/customlogo.$IMAGETYPE ]
+then
+    # To be added to /etc/ansible/hosts
+    echo "Custom Header: Adding Image to Ansible Hosts file"
+    CUSTOMCSS="openshift_web_console_extension_stylesheet_urls=['${WEBSTORAGEURL}customlogo.css']"
+fi
+
 # Create glusterfs configuration if CNS is enabled
 if [ $ENABLECNS == "true" ]
 then
@@ -238,6 +310,7 @@ osm_default_node_selector='node-role.kubernetes.io/compute=true'
 openshift_disable_check=memory_availability,docker_image_availability
 $CLOUDKIND
 $SCKIND
+$CUSTOMCSS
 
 # Workaround for docker image failure
 # https://access.redhat.com/solutions/3480921
@@ -400,9 +473,22 @@ runuser -l $SUDOUSER -c "ansible-playbook -f 30 ~/openshift-container-platform-p
 sleep 20
 
 # Installing Service Catalog, Ansible Service Broker and Template Service Broker
-if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
+if [[ $AZURE == "true" || $ENABLECNS == "true" ]]
 then
     runuser -l $SUDOUSER -c "ansible-playbook -e openshift_cloudprovider_azure_client_id=$AADCLIENTID -e openshift_cloudprovider_azure_client_secret=\"$AADCLIENTSECRET\" -e openshift_cloudprovider_azure_tenant_id=$TENANTID -e openshift_cloudprovider_azure_subscription_id=$SUBSCRIPTIONID -e openshift_enable_service_catalog=true -f 30 /usr/share/ansible/openshift-ansible/playbooks/openshift-service-catalog/config.yml"
+fi
+
+# Adding Open Sevice Broker for Azaure (requires service catalog)
+if [[ $AZURE == "true" ]]
+then
+    oc new-project osba
+    oc process -f https://raw.githubusercontent.com/Azure/open-service-broker-azure/master/contrib/openshift/osba-os-template.yaml  \
+        -p ENVIRONMENT=AzurePublicCloud \
+        -p AZURE_SUBSCRIPTION_ID=$SUBSCRIPTIONID \
+        -p AZURE_TENANT_ID=$TENANTID \
+        -p AZURE_CLIENT_ID=$AADCLIENTID \
+        -p AZURE_CLIENT_SECRET=$AADCLIENTSECRET \
+        | oc create -f -
 fi
 
 # Configure Metrics
@@ -410,7 +496,7 @@ if [ $METRICS == "true" ]
 then
     sleep 30
     echo $(date) "- Deploying Metrics"
-    if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
+    if [[ $AZURE == "true" || $ENABLECNS == "true" ]]
     then
         runuser -l $SUDOUSER -c "ansible-playbook -e openshift_cloudprovider_azure_client_id=$AADCLIENTID -e openshift_cloudprovider_azure_client_secret=\"$AADCLIENTSECRET\" -e openshift_cloudprovider_azure_tenant_id=$TENANTID -e openshift_cloudprovider_azure_subscription_id=$SUBSCRIPTIONID -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic -f 30 /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml"
     else
@@ -431,7 +517,7 @@ if [ $LOGGING == "true" ]
 then
     sleep 60
     echo $(date) "- Deploying Logging"
-    if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
+    if [[ $AZURE == "true" || $ENABLECNS == "true" ]]
     then
         runuser -l $SUDOUSER -c "ansible-playbook -e openshift_cloudprovider_azure_client_id=$AADCLIENTID -e openshift_cloudprovider_azure_client_secret=\"$AADCLIENTSECRET\" -e openshift_cloudprovider_azure_tenant_id=$TENANTID -e openshift_cloudprovider_azure_subscription_id=$SUBSCRIPTIONID -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true -f 30 /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml"
     else
@@ -447,23 +533,19 @@ then
 fi
 
 # Configure cluster for private masters
-if [ $MASTERCLUSTERTYPE == "private" ]
+if [[ $MASTERCLUSTERTYPE == "private" ]]
 then
 	echo $(date) " - Configure cluster for private masters"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 30 ~/openshift-container-platform-playbooks/activate-private-lb.yaml"
 
 	echo $(date) " - Delete Master Public IP if cluster is using private masters"
-	az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
-	az account set -s $SUBSCRIPTIONID
 	az network public-ip delete -g $RESOURCEGROUP -n $MASTERPIPNAME
 fi
 
 # Delete Router / Infra Public IP if cluster is using private router
-if [ $ROUTERCLUSTERTYPE == "private" ]
+if [[ $ROUTERCLUSTERTYPE == "private" ]]
 then
 	echo $(date) " - Delete Router / Infra Public IP address"
-	az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
-	az account set -s $SUBSCRIPTIONID
 	az network public-ip delete -g $RESOURCEGROUP -n $INFRAPIPNAME
 fi
 

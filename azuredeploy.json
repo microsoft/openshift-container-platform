@@ -399,6 +399,13 @@
 			"metadata": {
 				"description": "Static Private IP address to use for infra load balancer when creating a cluster with private infra nodes"
 			}
+		},
+		"customHeaderImage": {
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "URL to a custom image for the header in the web console. If no valid image type is specified then it will use the default. 20px is the default height as well."
+			}
 		}
 	},
 	"variables": {
@@ -408,7 +415,7 @@
 		"subscriptionId": "[subscription().subscriptionId]",
 		"apiVersionCompute": "2017-03-30",
 		"apiVersionNetwork": "2017-09-01",
-		"apiVersionStorage": "2017-06-01",
+		"apiVersionStorage": "2018-07-01",
 		"apiVersionLinkTemplate": "2015-01-01",
 		"defaultSubDomain": "[toLower(parameters('defaultSubDomain'))]",
 		"namingInfix": "[toLower(parameters('openshiftClusterPrefix'))]",
@@ -422,6 +429,7 @@
 		"newStorageAccountInfra": "[concat('infra', uniqueString(concat(resourceGroup().id, 'isa')))]",
 		"newStorageAccountNodeOs": "[concat('nodeos', uniqueString(concat(resourceGroup().id, 'nodeossa')))]",
 		"newStorageAccountNodeData": "[concat('nodedata', uniqueString(concat(resourceGroup().id, 'nodedatasa')))]",
+		"newStorageAccountWeb": "[concat('web', uniqueString(concat(resourceGroup().id, 'csa')))]",
 		"newStorageAccountCns": "[concat('cns', uniqueString(concat(resourceGroup().id, 'csa')))]",
 		"diagStorageAccount1": "[concat('diag1', uniqueString(concat(resourceGroup().id, 'dsa1')))]",
 		"diagStorageAccount2": "[concat('diag2', uniqueString(concat(resourceGroup().id, 'dsa2')))]",
@@ -469,6 +477,10 @@
 			"cns": {
 				"skuName": "[variables('vmSizesMap')[parameters('cnsVmSize')].storageAccountType]",
 				"skuTier": "[variables('vmSizesMap')[parameters('cnsVmSize')].storageAccountTier]"
+			},
+			"web": {
+				"skuName": "Standard_RAGRS",
+				"skuTier": "Standard"
 			},
 			"diagnostics": {
 				"skuName": "Standard_LRS",
@@ -1235,6 +1247,23 @@
 			"sku": {
 				"name": "[variables('newStorageAccountArray')[copyIndex()].skuName]",
 				"tier": "[variables('newStorageAccountArray')[copyIndex()].skuTier]"
+			}
+		}, {
+			"type": "Microsoft.Storage/storageAccounts",
+			"name": "[variables('newStorageAccountWeb')]",
+			"location": "[variables('location')]",
+			"kind": "StorageV2",
+			"apiVersion": "[variables('apiVersionStorage')]",
+			"tags": {
+				"displayName": "newStorageAccountWeb",
+				"provider": "[variables('redHatTags').provider]",
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
+			},
+			"sku": {
+				"name": "[variables('storageSkuObject').web.skuName]",
+				"tier": "[variables('storageSkuObject').web.skuTier]"
 			}
 		}, {
 			"type": "Microsoft.Storage/storageAccounts",
@@ -2433,6 +2462,12 @@
 					},
 					"routerPublicIpName": {
 						"value": "[variables('infraLbPublicIpDnsLabel')]"
+					},
+					"customHeaderImage": {
+						"value": "[parameters('customHeaderImage')]"
+					},
+					"newStorageAccountWeb": {
+						"value": "[variables('newStorageAccountWeb')]"
 					}
 				}
 			}

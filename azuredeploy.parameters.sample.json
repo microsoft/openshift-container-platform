@@ -138,6 +138,9 @@
 		},
 		"routerPrivateClusterIp": {
 			"value": "10.1.0.201"
+		},
+		"customHeaderImage": {
+			"value": "https://client.power.sh/logo.png"
 		}
 	}
 }

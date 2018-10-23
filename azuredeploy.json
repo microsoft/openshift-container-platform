@@ -458,7 +458,7 @@
 			"metadata": {
 				"description": "URL to a custom image for the header in the web console. If no valid image type is specified then it will use the default. 20px is the default height as well."
 			}
-		}
+		},
 		"routingCertType": {
 			"type": "string",
 			"defaultValue": "selfsigned",

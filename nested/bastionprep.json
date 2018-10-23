@@ -65,49 +65,49 @@
 		"routingCertType": {
 			"type": "string",
 			"metadata": {
-				"description": "Pool Id with OpenShift entitlements"
+				"description": "Use custom certificate for routing domain or the default self-signed certificate"
 			}
 		},
 		"masterCertType": {
 			"type": "string",
 			"metadata": {
-				"description": "Pool Id with OpenShift entitlements"
+				"description": "Use custom certificate for master domain or the default self-signed certificate"
 			}
 		},
 		"customRoutingCaFile": {
 			"type": "securestring",
 			"metadata": {
-				"description": "SSH private key for deploying OpenShift"
+				"description": "Routing domain CA file"
 			}
 		},
 		"customRoutingCertFile": {
 			"type": "securestring",
 			"metadata": {
-				"description": "SSH private key for deploying OpenShift"
+				"description": "Routing domain Cert file"
 			}
 		},
 		"customRoutingKeyFile": {
 			"type": "securestring",
 			"metadata": {
-				"description": "SSH private key for deploying OpenShift"
+				"description": "Routing domain Key file"
 			}
 		},
 		"customMasterCaFile": {
 			"type": "securestring",
 			"metadata": {
-				"description": "SSH private key for deploying OpenShift"
+				"description": "Master domain CA file"
 			}
 		},
 		"customMasterCertFile": {
 			"type": "securestring",
 			"metadata": {
-				"description": "SSH private key for deploying OpenShift"
+				"description": "Master domain Cert file"
 			}
 		},
 		"customMasterKeyFile": {
 			"type": "securestring",
 			"metadata": {
-				"description": "SSH private key for deploying OpenShift"
+				"description": "Master domain Key file"
 			}
 		},
 		"proxySettings": {

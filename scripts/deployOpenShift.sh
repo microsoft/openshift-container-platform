@@ -41,7 +41,12 @@ export ROUTERCLUSTERTYPE=${34}
 export INFRAPIPNAME=${35}
 export IMAGEURL=${36}
 export WEBSTORAGE=${37}
-
+export CUSTOMROUTINGCERTTYPE=${38}
+export CUSTOMMASTERCERTTYPE=${39}
+export PROXYSETTING=${40}
+export HTTPPROXYENTRY="${41}"
+export HTTSPPROXYENTRY="${42}"
+export NOPROXYENTRY="${43}"
 export BASTION=$(hostname)
 
 # Set CNS to default storage type.  Will be overridden later if Azure is true
@@ -70,9 +75,8 @@ sed -i -e "s/^#pipelining = False/pipelining = True/" /etc/ansible/ansible.cfg
 sed -i -e "s/Defaults    requiretty/# Defaults    requiretty/" /etc/sudoers
 sed -i -e '/Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"/aDefaults    env_keep += "PATH"' /etc/sudoers
 
-# Run on MASTER-0 node - configure registry to use Azure Storage
 # Create docker registry config based on Commercial Azure or Azure Government
-if [ $CLOUD == "US" ]
+if [[ $CLOUD == "US" ]]
 then
     DOCKERREGISTRYYAML=dockerregistrygov.yaml
     export CLOUDNAME="AzureUSGovernmentCloud"
@@ -93,7 +97,7 @@ then
 fi
 
 # Setting the default openshift_cloudprovider_kind if Azure enabled
-if [ $AZURE == "true" ]
+if [[ $AZURE == "true" ]]
 then
     CLOUDKIND="openshift_cloudprovider_kind=azure
 openshift_cloudprovider_azure_client_id=\"{{ aadClientId }}\"
@@ -115,6 +119,14 @@ openshift_cloudprovider_azure_location=$LOCATION"
 	fi
 fi
 
+# Configure PROXY settings for OpenShift cluster
+if [[ $PROXYSETTING == "custom" ]]
+then
+    PROXY="openshift_http_proxy=$HTTPPROXYENTRY
+openshift_https_proxy=$HTTSPPROXYENTRY
+openshift_no_proxy='$NOPROXYENTRY'"
+fi
+
 # Cloning Ansible playbook repository
 
 echo $(date) " - Cloning Ansible playbook repository"
@@ -129,7 +141,26 @@ else
     exit 99
 fi
 
-# Configure Master cluster address information based on Cluster type (private or public)
+# Configure custom routing certificate
+echo $(date) " - Create variable for routing certificate based on certificate type"
+if [[ $CUSTOMROUTINGCERTTYPE == "custom" ]]
+then
+	ROUTINGCERTIFICATE="openshift_hosted_router_certificate={\"cafile\": \"/tmp/routingca.pem\", \"certfile\": \"/tmp/routingcert.pem\", \"keyfile\": \"/tmp/routingkey.pem\"}"
+else
+	ROUTINGCERTIFICATE=""
+fi
+
+# Configure custom master API certificate
+echo $(date) " - Create variable for master api certificate based on certificate type"
+if [[ $CUSTOMMASTERCERTTYPE == "custom" ]]
+then
+	MASTERCERTIFICATE="openshift_master_overwrite_named_certificates=true
+openshift_master_named_certificates=[{\"names\": [\"$MASTERPUBLICIPHOSTNAME\"], \"cafile\": \"/tmp/masterca.pem\", \"certfile\": \"/tmp/mastercert.pem\", \"keyfile\": \"/tmp/masterkey.pem\"}]"
+else
+	MASTERCERTIFICATE=""
+fi
+
+# Configure master cluster address information based on Cluster type (private or public)
 echo $(date) " - Create variable for master cluster address based on cluster type"
 if [[ $MASTERCLUSTERTYPE == "private" ]]
 then
@@ -167,7 +198,7 @@ $NODE-$c openshift_hostname=$NODE-$c openshift_node_group_name='node-config-comp
 done
 
 # Create CNS nodes grouping if CNS is enabled
-if [ $ENABLECNS == "true" ]
+if [[ $ENABLECNS == "true" ]]
 then
     echo $(date) " - Creating CNS nodes grouping"
 
@@ -260,7 +291,7 @@ then
 fi
 
 # Create glusterfs configuration if CNS is enabled
-if [ $ENABLECNS == "true" ]
+if [[ $ENABLECNS == "true" ]]
 then
     echo $(date) " - Creating glusterfs configuration"
 
@@ -311,6 +342,9 @@ openshift_disable_check=memory_availability,docker_image_availability
 $CLOUDKIND
 $SCKIND
 $CUSTOMCSS
+$ROUTINGCERTIFICATE
+$MASTERCERTIFICATE
+$PROXY
 
 # Workaround for docker image failure
 # https://access.redhat.com/solutions/3480921
@@ -453,7 +487,7 @@ EOF
 fi
 
 # Ensuring selinux is configured properly
-if [ $ENABLECNS == "true" ]
+if [[ $ENABLECNS == "true" ]]
 then
     # Setting selinux to allow gluster-fusefs access
     echo $(date) " - Setting selinux to allow gluster-fuse access"
@@ -492,7 +526,7 @@ then
 fi
 
 # Configure Metrics
-if [ $METRICS == "true" ]
+if [[ $METRICS == "true" ]]
 then
     sleep 30
     echo $(date) "- Deploying Metrics"
@@ -513,7 +547,7 @@ fi
 
 # Configure Logging
 
-if [ $LOGGING == "true" ]
+if [[ $LOGGING == "true" ]]
 then
     sleep 60
     echo $(date) "- Deploying Logging"

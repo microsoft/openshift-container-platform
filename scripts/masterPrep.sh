@@ -1,22 +1,34 @@
 #!/bin/bash
 echo $(date) " - Starting Master Prep Script"
 
-USERNAME_ORG=$1
-PASSWORD_ACT_KEY="$2"
-POOL_ID=$3
-SUDOUSER=$4
-LOCATION=$5
-STORAGEACCOUNT=$6
+export USERNAME_ORG=$1
+export PASSWORD_ACT_KEY="$2"
+export POOL_ID=$3
+export SUDOUSER=$4
+export PROXYSETTING=$5
+export HTTPPROXYENTRY="$6"
+export HTTSPPROXYENTRY="$7"
+export NOPROXYENTRY="$8"
 
 # Remove RHUI
 
 rm -f /etc/yum.repos.d/rh-cloud.repo
 sleep 10
 
+# Configure Proxy settings
+if [[ $PROXYSETTING == "custom" ]]
+then
+    echo $(date) " - Configure proxy settings"
+    echo "http_proxy=$HTTPPROXYENTRY
+https_proxy=$HTTSPPROXYENTRY
+no_proxy=$NOPROXYENTRY
+" > /etc/environment
+fi
+
 # Register Host with Cloud Access Subscription
 echo $(date) " - Register host with Cloud Access Subscription"
 
-subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
+subscription-manager register --force --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --force --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
 RETCODE=$?
 
 if [ $RETCODE -eq 0 ]
@@ -54,7 +66,7 @@ subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
     --enable="rhel-7-server-ose-3.10-rpms" \
-    --enable="rhel-7-server-ansible-2.5-rpms" \
+    --enable="rhel-7-server-ansible-2.4-rpms" \
     --enable="rhel-7-fast-datapath-rpms" \
     --enable="rh-gluster-3-client-for-rhel-7-server-rpms"
 

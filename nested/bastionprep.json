@@ -62,6 +62,85 @@
 				"description": "SSH private key for deploying OpenShift"
 			}
 		},
+		"routingCertType": {
+			"type": "string",
+			"metadata": {
+				"description": "Pool Id with OpenShift entitlements"
+			}
+		},
+		"masterCertType": {
+			"type": "string",
+			"metadata": {
+				"description": "Pool Id with OpenShift entitlements"
+			}
+		},
+		"customRoutingCaFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "SSH private key for deploying OpenShift"
+			}
+		},
+		"customRoutingCertFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "SSH private key for deploying OpenShift"
+			}
+		},
+		"customRoutingKeyFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "SSH private key for deploying OpenShift"
+			}
+		},
+		"customMasterCaFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "SSH private key for deploying OpenShift"
+			}
+		},
+		"customMasterCertFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "SSH private key for deploying OpenShift"
+			}
+		},
+		"customMasterKeyFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "SSH private key for deploying OpenShift"
+			}
+		},
+		"proxySettings": {
+			"type": "string",
+			"defaultValue": "none",
+			"allowedValues": [
+				"none", "custom"
+			],
+			"metadata": {
+				"description": "Use custom proxy settings"
+			}
+		},
+		"httpProxyEntry": {
+			"type": "string",
+			"defaultValue": "none",
+			"metadata": {
+				"description": "If custom proxy settings selected, enter http_proxy settings to use"
+			}
+		},
+		"httpsProxyEntry": {
+			"type": "string",
+			"defaultValue": "none",
+			"metadata": {
+				"description": "If custom proxy settings selected, enter https_proxy settings to use"
+			}
+		},
+		"noProxyEntry": {
+			"type": "string",
+			"defaultValue": "none",
+			"metadata": {
+				"description": "If custom proxy settings selected, enter no_proxy settings to use"
+			}
+		},
 		"redHatTags": {
 			"type": "object",
 			"metadata": {
@@ -98,7 +177,7 @@
 				]
 			},
 			"protectedSettings": {
-				"commandToExecute": "[concat('bash ', parameters('bastionPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ',variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', variables('singlequote'), parameters('sshPrivateKey'), variables('singlequote'), ' ', variables('singlequote'), parameters('adminUsername'), variables('singlequote'))]"
+				"commandToExecute": "[concat('bash ', parameters('bastionPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ',variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', variables('singlequote'), parameters('sshPrivateKey'), variables('singlequote'), ' ', variables('singlequote'), parameters('adminUsername'), variables('singlequote'), ' ', variables('singlequote'), parameters('proxySettings'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpsProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('noProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('routingCertType'), variables('singlequote'), ' ', variables('singlequote'), parameters('masterCertType'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingCaFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingCertFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingKeyFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterCaFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterCertFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterKeyFile'), variables('singlequote'))]"
 			}
 		}
 	}],

@@ -285,7 +285,24 @@
 				"description": "Azure AD Client Secret"
 			}
 		},
-		"defaultSubDomainType": {
+		"masterClusterDnsType": {
+			"type": "string",
+			"defaultValue": "default",
+			"allowedValues": [
+				"default", "custom"
+			],
+			"metadata": {
+				"description": "Domain type for web console - default (use DNS label of master infra public IP) or custom (defined in next parameter)"
+			}
+		},
+		"masterClusterDns": {
+			"type": "string",
+			"defaultValue": "console.contoso.com",
+			"metadata": {
+				"description": "Custom domain name for access to OpenShift web console. Must be all lowercase"
+			}
+		},
+		"routingSubDomainType": {
 			"type": "string",
 			"defaultValue": "nipio",
 			"allowedValues": [
@@ -295,7 +312,7 @@
 				"description": "Default Subdomain type - nip.io or custom (defined in next parameter)"
 			}
 		},
-		"defaultSubDomain": {
+		"routingSubDomain": {
 			"type": "string",
 			"defaultValue": "contoso.com",
 			"metadata": {
@@ -307,57 +324,99 @@
 		  "defaultValue": "new",
 		  "allowedValues": ["new", "existing"],
 		  "metadata": {
-			"description": "Determines whether or not a new virtual network should be provisioned"
+			"description": "Determines whether to provision a new virtual network or use an existing virtual network"
 		  }
 		},
 		"virtualNetworkResourceGroupName": {
 		  "type": "string",
 		  "defaultValue": "[resourceGroup().name]",
 		  "metadata": {
-			"description": "Name of the resource group for the existing virtual network"
+			"description": "Name of the resource group for the new virtual network"
 		  }
 		},
 		"virtualNetworkName": {
 		  "type": "string",
 		  "defaultValue": "openshiftvnet",
 		  "metadata": {
-			"description": "Name of the virtual network"
+			"description": "Name of the new virtual network"
 		  }
 		},
 		"addressPrefixes": {
 		  "type": "string",
 		  "defaultValue": "10.0.0.0/14",
 		  "metadata": {
-			"description": "Address prefix of the virtual network"
+			"description": "Address prefix of the new virtual network"
 		  }
 		},
 		"masterSubnetName": {
 		  "type": "string",
 		  "defaultValue": "mastersubnet",
 		  "metadata": {
-			"description": "Name of the subnet"
+			"description": "Name of the subnet for Master nodes and Bastion node"
 		  }
 		},
 		"masterSubnetPrefix": {
 			"type": "string",
 			"defaultValue": "10.1.0.0/16",
 			"metadata": {
-				"description": "Base subnet used for the master servers, and needs to be a subset of the addressPrefix - default is 10.1.0.0/16"
+				"description": "CIDR used for the master subnet - needs to be a subset of the addressPrefix - default is 10.1.0.0/16"
+			}
+		},
+		"infraSubnetName": {
+		  "type": "string",
+		  "defaultValue": "infrasubnet",
+		  "metadata": {
+			"description": "Name of the subnet for Infra nodes"
+		  }
+		},
+		"infraSubnetPrefix": {
+			"type": "string",
+			"defaultValue": "10.2.0.0/16",
+			"metadata": {
+				"description": "CIDR used for the infra subnet - needs to be a subset of the addressPrefix - default is 10.2.0.0/16"
 			}
 		},
 		"nodeSubnetName": {
 			"type": "string",
 			"defaultValue": "nodesubnet",
 			"metadata": {
-				"description": "Name of the subnet"
+				"description": "Name of the subnet for Compute and CNS nodes"
 		  }
 		},
 		"nodeSubnetPrefix": {
 			"type": "string",
-			"defaultValue": "10.2.0.0/16",
+			"defaultValue": "10.3.0.0/16",
 			"metadata": {
-				"description": "Base subnet used for the infra, node, and CNS servers, and needs to be a subset of the addressPrefix - default is 10.2.0.0/16"
+				"description": "CIDR used for the node subnet - needs to be a subset of the addressPrefix - default is 10.3.0.0/16"
 			}
+		},
+		"existingMasterSubnetReference": {
+		  "type": "string",
+		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/mastersubnet",
+		  "metadata": {
+			"description": "Full reference to existing subnet for Master nodes"
+		  }
+		},
+		"existingInfraSubnetReference": {
+		  "type": "string",
+		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/infrasubnet",
+		  "metadata": {
+			"description": "Full reference to existing subnet for Infra nodes"
+		  }
+		},
+		"existingCnsSubnetReference": {
+		  "type": "string",
+		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/cnssubnet",
+		  "metadata": {
+			"description": "Full reference to existing subnet for CNS nodes"
+		  }
+		},
+		"existingNodeSubnetReference": {
+		  "type": "string",
+		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/nodesubnet",
+		  "metadata": {
+			"description": "Full reference to existing subnet for Compute nodes"
+		  }
 		},
 		"masterClusterType": {
 			"type": "string",
@@ -376,13 +435,6 @@
 				"description": "Static Private IP address to use for master load balancer when creating a cluster with private master nodes"
 			}
 		},
-		"masterPrivateClusterDns": {
-			"type": "string",
-			"defaultValue": "internalmaster.net",
-			"metadata": {
-				"description": "DNS name to use for master load balancer when creating a cluster with private master nodes.  Needs to resolve to Private IP."
-			}
-		},
 		"routerClusterType": {
 			"type": "string",
 			"defaultValue": "public",
@@ -395,7 +447,7 @@
 		},
 		"routerPrivateClusterIp": {
 			"type": "string",
-			"defaultValue": "10.1.0.201",
+			"defaultValue": "10.2.0.201",
 			"metadata": {
 				"description": "Static Private IP address to use for infra load balancer when creating a cluster with private infra nodes"
 			}
@@ -405,6 +457,57 @@
 			"defaultValue": "",
 			"metadata": {
 				"description": "URL to a custom image for the header in the web console. If no valid image type is specified then it will use the default. 20px is the default height as well."
+			}
+		}
+		"routingCertType": {
+			"type": "string",
+			"defaultValue": "selfsigned",
+			"allowedValues": [
+				"selfsigned", "custom"
+			],
+			"metadata": {
+				"description": "Use custom certificate for routing domain or the default self-signed certificate"
+			}
+		},
+		"masterCertType": {
+			"type": "string",
+			"defaultValue": "selfsigned",
+			"allowedValues": [
+				"selfsigned", "custom"
+			],
+			"metadata": {
+				"description": "Use custom certificate for master domain or the default self-signed certificate"
+			}
+		},
+		"proxySettings": {
+			"type": "string",
+			"defaultValue": "none",
+			"allowedValues": [
+				"none", "custom"
+			],
+			"metadata": {
+				"description": "Use custom proxy settings"
+			}
+		},
+		"httpProxyEntry": {
+			"type": "string",
+			"defaultValue": "none",
+			"metadata": {
+				"description": "If custom proxy settings selected, enter http_proxy settings to use"
+			}
+		},
+		"httpsProxyEntry": {
+			"type": "string",
+			"defaultValue": "none",
+			"metadata": {
+				"description": "If custom proxy settings selected, enter https_proxy settings to use"
+			}
+		},
+		"noProxyEntry": {
+			"type": "string",
+			"defaultValue": "none",
+			"metadata": {
+				"description": "If custom proxy settings selected, enter no_proxy settings to use"
 			}
 		}
 	},
@@ -417,7 +520,8 @@
 		"apiVersionNetwork": "2017-09-01",
 		"apiVersionStorage": "2018-07-01",
 		"apiVersionLinkTemplate": "2015-01-01",
-		"defaultSubDomain": "[toLower(parameters('defaultSubDomain'))]",
+		"routingSubDomain": "[toLower(parameters('routingSubDomain'))]",
+		"masterClusterDns": "[toLower(parameters('masterClusterDns'))]",
 		"namingInfix": "[toLower(parameters('openshiftClusterPrefix'))]",
 		"openshiftBastionHostname": "[concat(variables('namingInfix'), '-bastion')]",
 		"openshiftMasterHostname": "[concat(variables('namingInfix'), '-master')]",
@@ -516,9 +620,6 @@
 		"nodeOsUri": "[concat(parameters('storageKind'), 'NodeOsUri')]",
 		"nodeDataUri": "[concat(parameters('storageKind'), 'NodeDataUri')]",
 		"cnsUri": "[concat(parameters('storageKind'), 'CnsUri')]",
-		"virtualNetworkName": "openshiftvnet",
-		"masterSubnetName": "mastersubnet",
-		"nodeSubnetName": "nodesubnet",
 		"bastionPublicIp": "bastionpublicip",
 		"bastionPublicIpDnsLabel": "[concat('bastiondns', uniqueString(resourceGroup().id))]",
 		"infraLbPublicIpDnsLabel": "[concat('infradns', uniqueString(concat(resourceGroup().id, 'infra')))]",
@@ -531,7 +632,7 @@
 		"masterLbFrontEndConfigId": "[concat(variables('masterLbId'), '/frontendIPConfigurations/loadBalancerFrontEnd')]",
 		"masterLbBackendPoolId": "[concat(variables('masterLbId'),'/backendAddressPools/loadBalancerBackend')]",
 		"masterLbHttpProbeId": "[concat(variables('masterLbId'),'/probes/httpProbe')]",
-		"masterLb443ProbeId": "[concat(variables('masterLbId'),'/probes/443Probe')]",
+		"masterLbHttpsProbeId": "[concat(variables('masterLbId'),'/probes/httpsProbe')]",
 
 		"infraLoadBalancerName": "[concat(variables('openshiftInfraHostname'), 'lb')]",
 		"infraPublicIpAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('infraLbPublicIpDnsLabel'))]",
@@ -545,7 +646,7 @@
 			"privateIPAddress": "[parameters('masterPrivateClusterIp')]",
 			"privateIPAllocationMethod": "Static",
 			"subnet": {
-				"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName'))]"
+				"id": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName')), parameters('existingMasterSubnetReference'))]"
 			}
 		},
 		"publicMasterFrontEndIpConfigurationProperties": {
@@ -558,7 +659,7 @@
 			"privateIPAddress": "[parameters('routerPrivateClusterIp')]",
 			"privateIPAllocationMethod": "Static",
 			"subnet": {
-				"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName'))]"
+				"id": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('infraSubnetName')), parameters('existingInfraSubnetReference'))]"
 			}
 		},
 		"publicInfraFrontEndIpConfigurationProperties": {
@@ -580,7 +681,7 @@
 		},
 		"redHatTags": {
 			"app": "OpenShiftContainerPlatform",
-			"version": "3.9",
+			"version": "3.10",
 			"platform": "AzurePublic",
 			"provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
 		},
@@ -602,6 +703,7 @@
 		"basicDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/gallerybasic.json')]",
 		"openshiftDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/openshiftdeploy.json')]",
 		"bastionPrepTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/bastionprep.json')]",
+		"masterPrepTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/masterprep.json')]",
 		"vmSizesMap": {
 			"Standard_A4": {
 				"storageAccountType": "Standard_LRS",
@@ -1000,8 +1102,8 @@
 				"displayName": "BastionNSG",
 				"provider": "[variables('redHatTags').provider]",
 				"app": "[variables('redHatTags').app]",
-				"platform": "Azure",
-				"version": "[variables('redHatTags').version]"
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"properties": {
 				"securityRules": [{
@@ -1028,7 +1130,8 @@
 				"displayName": "MasterNSG",
 				"provider": "[variables('redHatTags').provider]",
 				"app": "[variables('redHatTags').app]",
-				"version": "[variables('redHatTags').version]"
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"properties": {
 				"securityRules": [{
@@ -1068,7 +1171,8 @@
 				"displayName": "InfraNSG",
 				"provider": "[variables('redHatTags').provider]",
 				"app": "[variables('redHatTags').app]",
-				"version": "[variables('redHatTags').version]"
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"properties": {
 				"securityRules": [{
@@ -1122,7 +1226,8 @@
 				"displayName": "InfraNSG",
 				"provider": "[variables('redHatTags').provider]",
 				"app": "[variables('redHatTags').app]",
-				"version": "[variables('redHatTags').version]"
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"properties": {
 				"securityRules": [{
@@ -1149,7 +1254,8 @@
 				"displayName": "NodeNSG",
 				"provider": "[variables('redHatTags').provider]",
 				"app": "[variables('redHatTags').app]",
-				"version": "[variables('redHatTags').version]"
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"properties": {
 				"securityRules": [{
@@ -1224,6 +1330,11 @@
 					"name": "[parameters('nodeSubnetName')]",
 					"properties": {
 						"addressPrefix": "[parameters('nodeSubnetPrefix')]"
+					}
+				}, {
+					"name": "[parameters('infraSubnetName')]",
+					"properties": {
+						"addressPrefix": "[parameters('infraSubnetPrefix')]"
 					}
 				}]
 			}
@@ -1417,12 +1528,12 @@
 						"frontendPort": 443,
 						"backendPort": 443,
 						"probe": {
-							"id": "[variables('masterLb443ProbeId')]"
+							"id": "[variables('masterLbHttpsProbeId')]"
 						}
 					}
 				}],
 				"probes": [{
-					"name": "443Probe",
+					"name": "httpsProbe",
 					"properties": {
 						"protocol": "Tcp",
 						"port": 443,
@@ -1531,7 +1642,7 @@
 							"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/publicIPAddresses/', variables('bastionPublicIp'))]"
 						},
 						"subnet": {
-							"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName'))]"
+							"id": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName')), parameters('existingMasterSubnetReference'))]"
 						}
 					}
 				}],
@@ -1567,7 +1678,7 @@
 					"properties": {
 						"privateIPAllocationMethod": "Dynamic",
 						"subnet": {
-							"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName'))]"
+							"id": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName')), parameters('existingMasterSubnetReference'))]"
 						},
 						"loadBalancerBackendAddressPools": [{
 							"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('masterLoadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]"
@@ -1606,7 +1717,7 @@
 					"properties": {
 						"privateIPAllocationMethod": "Dynamic",
 						"subnet": {
-							"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName'))]"
+							"id": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('infraSubnetName')), parameters('existingInfraSubnetReference'))]"
 						},
 						"loadBalancerBackendAddressPools": [{
 							"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('infraLoadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]"
@@ -1645,7 +1756,7 @@
 					"properties": {
 						"privateIPAllocationMethod": "Dynamic",
 						"subnet": {
-							"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName'))]"
+							"id": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('nodeSubnetName')), parameters('existingCnsSubnetReference'))]"
 						}
 					}
 				}],
@@ -1680,7 +1791,7 @@
 					"properties": {
 						"privateIPAllocationMethod": "Dynamic",
 						"subnet": {
-							"id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('nodeSubnetName'))]"
+							"id": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('nodeSubnetName')), parameters('existingNodeSubnetReference'))]"
 						}
 					}
 				}],
@@ -2181,23 +2292,81 @@
 							"secretName": "[parameters('keyVaultSecret')]"
 						}
 					},
+					"routingCertType": {
+						"value": "[parameters('routingCertType')]"
+					},
+					"masterCertType": {
+						"value": "[parameters('masterCertType')]"
+					},
+					"customRoutingCaFile": {
+						"reference": {
+							"keyvault": {
+								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+							},
+							"secretName": "[if(equals(parameters('routingCertType'),'custom'), 'routingcafile', parameters('keyVaultSecret'))]"
+						}
+					},
+					"customRoutingCertFile": {
+						"reference": {
+							"keyvault": {
+								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+							},
+							"secretName": "[if(equals(parameters('routingCertType'),'custom'), 'routingcertfile', parameters('keyVaultSecret'))]"
+						}
+					},
+					"customRoutingKeyFile": {
+						"reference": {
+							"keyvault": {
+								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+							},
+							"secretName": "[if(equals(parameters('routingCertType'),'custom'), 'routingkeyfile', parameters('keyVaultSecret'))]"
+						}
+					},
+					"customMasterCaFile": {
+						"reference": {
+							"keyvault": {
+								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+							},
+							"secretName": "[if(equals(parameters('masterCertType'),'custom'), 'mastercafile', parameters('keyVaultSecret'))]"
+						}
+					},
+					"customMasterCertFile": {
+						"reference": {
+							"keyvault": {
+								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+							},
+							"secretName": "[if(equals(parameters('masterCertType'),'custom'), 'mastercertfile', parameters('keyVaultSecret'))]"
+						}
+					},
+					"customMasterKeyFile": {
+						"reference": {
+							"keyvault": {
+								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+							},
+							"secretName": "[if(equals(parameters('masterCertType'),'custom'), 'masterkeyfile', parameters('keyVaultSecret'))]"
+						}
+					},
+					"proxySettings": {
+						"value": "[parameters('proxySettings')]"
+					},
+					"httpProxyEntry": {
+						"value": "[parameters('httpProxyEntry')]"
+					},
+					"httpsProxyEntry": {
+						"value": "[parameters('httpsProxyEntry')]"
+					},
+					"noProxyEntry": {
+						"value": "[parameters('noProxyEntry')]"
+					},
 					"redHatTags": {
 						"value": "[variables('redHatTags')]"
 					}
 				}
 			}
 		}, {
-			"type": "Microsoft.Compute/virtualMachines/extensions",
-			"name": "[concat(variables('openshiftMasterHostname'), '-', copyIndex(), '/prepMasters')]",
-			"location": "[variables('location')]",
-			"apiVersion": "[variables('apiVersionCompute')]",
-			"tags": {
-				"displayName": "PrepMaster",
-				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]",
-				"version": "[variables('redHatTags').version]",
-				"platform": "[variables('redHatTags').platform]"
-			},
+			"name": "[concat('MasterPrep', copyindex())]",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [
 				"[concat('masterVmDeployment', copyindex())]"
 			],
@@ -2206,17 +2375,54 @@
 				"count": "[parameters('masterInstanceCount')]"
 			},
 			"properties": {
-				"publisher": "Microsoft.Azure.Extensions",
-				"type": "CustomScript",
-				"typeHandlerVersion": "2.0",
-				"autoUpgradeMinorVersion": true,
-				"settings": {
-					"fileUris": [
-						"[variables('masterPrepScriptUrl')]"
-					]
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('masterPrepTemplateUrl')]",
+					"contentVersion": "1.0.0.0"
 				},
-				"protectedSettings": {
-					"commandToExecute": "[concat('bash ', variables('masterPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmBrokerPoolId'), ' ', parameters('adminUsername'), ' ', variables('location'), ' ', variables('newStorageAccountPersistentVolume1'))]"
+				"parameters": {
+					"location": {
+						"value": "[variables('location')]"
+					},
+					"apiVersionCompute": {
+						"value": "[variables('apiVersionCompute')]"
+					},
+					"masterPrepScriptUrl": {
+						"value": "[variables('masterPrepScriptUrl')]"
+					},
+					"masterPrepScriptFileName": {
+						"value": "[variables('masterPrepScriptFileName')]"
+					},
+					"openshiftMasterHostname": {
+						"value": "[concat(variables('openshiftMasterHostname'), '-', copyIndex())]"
+					},
+					"adminUsername": {
+						"value": "[parameters('adminUsername')]"
+					},
+					"rhsmUsernameOrOrgId": {
+						"value": "[parameters('rhsmUsernameOrOrgId')]"
+					},
+					"rhsmPasswordOrActivationKey": {
+						"value": "[parameters('rhsmPasswordOrActivationKey')]"
+					},
+					"rhsmPoolId": {
+						"value": "[parameters('rhsmBrokerPoolId')]"
+					},
+					"proxySettings": {
+						"value": "[parameters('proxySettings')]"
+					},
+					"httpProxyEntry": {
+						"value": "[parameters('httpProxyEntry')]"
+					},
+					"httpsProxyEntry": {
+						"value": "[parameters('httpsProxyEntry')]"
+					},
+					"noProxyEntry": {
+						"value": "[parameters('noProxyEntry')]"
+					},
+					"redHatTags": {
+						"value": "[variables('redHatTags')]"
+					}
 				}
 			}
 		}, {
@@ -2249,7 +2455,7 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('bash ', variables('nodePrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmBrokerPoolId'))]"	
+					"commandToExecute": "[concat('bash ', variables('nodePrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmBrokerPoolId'), ' ', variables('singlequote'), parameters('proxySettings'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpsProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('noProxyEntry'), variables('singlequote'))]"	
 				}
 			}
 		}, {
@@ -2283,7 +2489,7 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('bash ', variables('nodePrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'))]"
+					"commandToExecute": "[concat('bash ', variables('nodePrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', variables('singlequote'), parameters('proxySettings'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpsProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('noProxyEntry'), variables('singlequote'))]"
 				}
 			}
 		}, {
@@ -2316,7 +2522,7 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('bash ', variables('nodePrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'))]"
+					"commandToExecute": "[concat('bash ', variables('nodePrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', variables('singlequote'), parameters('proxySettings'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpsProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('noProxyEntry'), variables('singlequote'))]"
 				}
 			}
 		}, {
@@ -2371,7 +2577,7 @@
 						"value": "[variables('openshiftMasterHostname')]"
 					},
 					"openshiftMasterPublicIpFqdn": {
-						"value": "[reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn]"
+						"value": "[if(equals(parameters('masterClusterDnsType'),'default'), reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, variables('masterClusterDns'))]"
 					},
 					"openshiftMasterPublicIpAddress": {
 						"value": "[reference(variables('openshiftMasterPublicIpDnsLabel')).ipAddress]"
@@ -2428,10 +2634,10 @@
 						"value": "[concat(reference(variables('infraLbPublicIpDnsLabel')).ipAddress, '.nip.io')]"
 					},
 					"customDomain": {
-						"value": "[variables('defaultSubDomain')]"
+						"value": "[variables('routingSubDomain')]"
 					},
 					"subDomainChosen": {
-						"value": "[concat(parameters('defaultSubDomainType'), 'Domain')]"
+						"value": "[concat(parameters('routingSubDomainType'), 'Domain')]"
 					},
 					"redHatTags": {
 						"value": "[variables('redHatTags')]"
@@ -2451,8 +2657,8 @@
 					"masterPrivateClusterIp": {
 						"value": "[parameters('masterPrivateClusterIp')]"
 					},
-					"masterPrivateClusterDns": {
-						"value": "[parameters('masterPrivateClusterDns')]"
+					"masterClusterDns": {
+						"value": "[variables('masterClusterDns')]"
 					},
 					"masterPublicIpName": {
 						"value": "[variables('openshiftMasterPublicIpDnsLabel')]"
@@ -2468,6 +2674,24 @@
 					},
 					"newStorageAccountWeb": {
 						"value": "[variables('newStorageAccountWeb')]"
+					},
+					"routingCertType": {
+						"value": "[parameters('routingCertType')]"
+					},
+					"masterCertType": {
+						"value": "[parameters('masterCertType')]"
+					},
+					"proxySettings": {
+						"value": "[parameters('proxySettings')]"
+					},
+					"httpProxyEntry": {
+						"value": "[parameters('httpProxyEntry')]"
+					},
+					"httpsProxyEntry": {
+						"value": "[parameters('httpsProxyEntry')]"
+					},
+					"noProxyEntry": {
+						"value": "[parameters('noProxyEntry')]"
 					}
 				}
 			}
@@ -2480,7 +2704,7 @@
 		},
 		"OpenshiftConsoleUrl": {
 			"type": "string",
-			"value": "[if(equals(parameters('masterClusterType'),'public'), concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, '/console'), concat('https://', parameters('masterPrivateClusterDns'), '/console'))]"
+			"value": "[if(equals(parameters('masterClusterDnsType'),'default'), concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, '/console'), concat('https://', variables('masterClusterDns'), '/console'))]"
 		}
 	}
 }

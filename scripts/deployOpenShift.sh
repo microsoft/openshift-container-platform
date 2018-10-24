@@ -595,6 +595,10 @@ sed -i -e "s/# Defaults    requiretty/Defaults    requiretty/" /etc/sudoers
 echo $(date) " - Deleting unecessary files"
 rm -rf /home/${SUDOUSER}/openshift-container-platform-playbooks
 
+# Delete pem files
+echo $(date) " - Delete pem files"
+rm -rf /tmp/*.pem
+
 echo $(date) " - Sleep for 30"
 sleep 30
 

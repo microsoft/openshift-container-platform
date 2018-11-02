@@ -389,7 +389,7 @@
 		"imageReference": {
 			"publisher": "RedHat",
 			"offer": "RHEL",
-			"sku": "7-RAW",
+			"sku": "7.5",
 			"version": "latest"
 		},
 		"redHatTags": {

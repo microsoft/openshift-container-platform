@@ -65,7 +65,8 @@ subscription-manager repos \
 echo $(date) " - Install base packages and update system to latest packages"
 
 yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion httpd-tools kexec-tools sos psacct
-#yum -y update --releasever=7.5 --exclude=WALinuxAgent
+yum -y update --releasever=7.5 --exclude=WALinuxAgent
+yum -y downgrade iptables-services-1.4.21-24.el7.x86_64 iptables-1.4.21-24.el7.x86_64
 yum -y install atomic-openshift-excluder atomic-openshift-docker-excluder
 atomic-openshift-excluder unexclude
 

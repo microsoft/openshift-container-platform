@@ -19,8 +19,6 @@ export CUSTOMMASTERCAFILE="${15}"
 export CUSTOMMASTERCERTFILE="${16}"
 export CUSTOMMASTERKEYFILE="${17}"
 
-export http_proxy=$HTTPPROXYENTRY
-export https_proxy=$HTTSPPROXYENTRY
 
 # Generate private keys for use by Ansible
 echo $(date) " - Generating Private keys for use by Ansible for OpenShift Installation"
@@ -36,6 +34,8 @@ sleep 10
 # Configure Proxy settings
 if [[ $PROXYSETTING == "custom" ]]
 then
+	export http_proxy=$HTTPPROXYENTRY
+	export https_proxy=$HTTSPPROXYENTRY
     echo $(date) " - Configure proxy settings"
     echo "export http_proxy=$HTTPPROXYENTRY
 export https_proxy=$HTTSPPROXYENTRY

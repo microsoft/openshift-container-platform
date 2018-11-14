@@ -97,7 +97,7 @@
 			"type": "string",
 			"defaultValue": "defaultgallery",
 			"allowedValues": [
-				"defaultgallery", "marketplace"
+				"defaultgallery", "marketplace", "sourceImageURI"
 			],
 			"metadata": {
 				"description": "OpenShift OS image type. 'defaultgallery' will use the on demand RHEL image. 'marketplace' allows you to define a third party marketplace image to use."
@@ -115,6 +115,12 @@
 				"description": "Enter the appropriate publisher, offer, sku and version values for the appropriate marketplace image you want to use."
 			}
 		},
+		"sourceImageURI": {
+            		"type": "string",
+             		"metadata": {
+                		"description": "Full URIs for one or more custom images (VHDs) that should be copied to the deployment storage account to spin up new VMs from them. URLs must be comma separated."
+			}
+                },
 		"storageKind": {
 			"type": "string",
 			"defaultValue": "managed",

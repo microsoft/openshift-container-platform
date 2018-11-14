@@ -86,7 +86,7 @@
 			"value": "changeme"
 		},
 		"enableAzure": {
-			"value": "true"
+			"value": "false"
 		},
 		"aadClientId": {
 			"value": "changeme"

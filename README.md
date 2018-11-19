@@ -235,13 +235,7 @@ You will also need to get the Pool ID that contains your entitlements for OpenSh
 
 ## Deploy Template
 
-Deploy to Azure using Azure Portal: 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
-<a href="https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/AzureGov.png"/></a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-container-platform%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://armviz.io/visualizebutton.png"/></a>
-<br/>
-
-Once you have collected all of the prerequisites for the template, you can deploy the template by clicking Deploy to Azure or populating the **azuredeploy.parameters.json** file and executing Resource Manager deployment commands with PowerShell or the Azure CLI.
+Once you have collected all of the prerequisites for the template, you can deploy the template by populating the **azuredeploy.parameters.json** file and executing Resource Manager deployment commands with PowerShell or the Azure CLI.
 
 **Azure CLI 2.0**
 
@@ -271,6 +265,8 @@ If you encounter an error during deployment of the cluster, please view the depl
 2.  Exit Code 4:  Your Red Hat Pool ID is incorrect or there are no entitlements available
 3.  Exit Code 5:  Unable to provision Docker Thin Pool Volume
 4.  Exit Code 99: Configuration playbooks were not downloaded
+
+Before opening an issue, ssh to the Bastion node and review the stdout and stderr files as explained below. The stdout file will most likely contain the most useful information so please do include the last 50 lines of the stdout file in the issue description.  Do NOT copy the error output from the Azure portal.
 
 You can SSH to the Bastion node and from there SSH to each of the nodes in the cluster and fix the issues.
 

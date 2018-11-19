@@ -1,6 +1,13 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
 
+# UPDATES for Master (Release 3.10) - November 19, 2018
+
+1.  Add support for custom SSL Certificates
+2.  Add support for proxy settings
+3.  Change configuration for networking. For new vNet, supply vNet name, address CIDR and all subnet information
+4.  For existing vNet, provide full resource ID of each subnet. 
+
 # UPDATES for Master (Release 3.10) - September 13, 2018
 
 1.  Update to deploy 3.10

@@ -88,14 +88,14 @@ subscription-manager repos --disable="*"
 subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
-    --enable="rhel-7-server-ose-3.10-rpms" \
-    --enable="rhel-7-server-ansible-2.4-rpms" \
+    --enable="rhel-7-server-ose-3.11-rpms" \
+    --enable="rhel-7-server-ansible-2.6-rpms" \
     --enable="rhel-7-fast-datapath-rpms" \
     --enable="rh-gluster-3-client-for-rhel-7-server-rpms"
 
 # Update system to latest packages
 echo $(date) " - Update system to latest packages"
-yum -y update --exclude=WALinuxAgent
+yum -y update --releasever=7.5 --exclude=WALinuxAgent
 echo $(date) " - System update complete"
 
 # Install base packages and update system to latest packages

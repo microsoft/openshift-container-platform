@@ -2,7 +2,7 @@
 
 ## NOTE: Structure of Repo
 
-**The Master branch has been updated to deploy version 3.10**
+**The Master branch has been updated to deploy version 3.11**
 
 The master branch contains the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new items or enable new configuration options.
 
@@ -18,7 +18,7 @@ Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
 **For OpenShift Origin refer to https://github.com/Microsoft/openshift-origin**
 
-## OpenShift Container Platform 3.10 with Username / Password authentication for OpenShift
+## OpenShift Container Platform 3.11 with Username / Password authentication for OpenShift
 
 1.  Single master option available
 2.  VM types that support Accelerated Networking will automatically have this feature enabled

@@ -17,11 +17,18 @@ sleep 10
 # Configure Proxy settings
 if [[ $PROXYSETTING == "custom" ]]
 then
+	export http_proxy=$HTTPPROXYENTRY
+	export https_proxy=$HTTSPPROXYENTRY
     echo $(date) " - Configure proxy settings"
-    echo "http_proxy=$HTTPPROXYENTRY
-https_proxy=$HTTSPPROXYENTRY
-no_proxy=$NOPROXYENTRY
-" > /etc/environment
+    echo "export http_proxy=$HTTPPROXYENTRY
+export https_proxy=$HTTSPPROXYENTRY
+export no_proxy=$NOPROXYENTRY
+" >> /etc/environment
+    echo $(date) " - Configure proxy settings"
+    echo "export http_proxy=$HTTPPROXYENTRY
+export https_proxy=$HTTSPPROXYENTRY
+export no_proxy=$NOPROXYENTRY
+" >> /etc/profile
 fi
 
 # Register Host with Cloud Access Subscription

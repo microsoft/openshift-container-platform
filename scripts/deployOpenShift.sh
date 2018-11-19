@@ -570,7 +570,7 @@ fi
 if [[ $MASTERCLUSTERTYPE == "private" ]]
 then
 	echo $(date) " - Configure cluster for private masters"
-	runuser -l $SUDOUSER -c "ansible-playbook -f 30 ~/openshift-container-platform-playbooks/activate-private-lb.yaml"
+	runuser -l $SUDOUSER -c "ansible-playbook -f 30 ~/openshift-container-platform-playbooks/activate-private-lb.31x.yaml"
 
 	echo $(date) " - Delete Master Public IP if cluster is using private masters"
 	az network public-ip delete -g $RESOURCEGROUP -n $MASTERPIPNAME

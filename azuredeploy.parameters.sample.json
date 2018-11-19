@@ -47,10 +47,10 @@
 			"value": 128
 		},
 		"adminUsername": {
-			"value": "clusteradmin"
+			"value": "ocpadmin"
 		},
 		"openshiftPassword": {
-			"value": "GEN-PASSWORD"
+			"value": "changeme"
 		},
 		"enableMetrics": {
 			"value": "false"
@@ -62,52 +62,55 @@
 			"value": "false"
 		},
 		"rhsmUsernameOrOrgId": {
-			"value": "rhsmuser"
+			"value": "changeme"
 		},
 		"rhsmPasswordOrActivationKey": {
-			"value": "GEN-PASSWORD"
+			"value": "changeme"
 		},
 		"rhsmPoolId": {
-			"value": "8a81234151631b3201a5e6f4322e42a9"
+			"value": "changeme"
 		},
 		"rhsmBrokerPoolId": {
-			"value": "8a81234151631b3201a5e6f4322e42a9"
+			"value": "changeme"
 		},
 		"sshPublicKey": {
 			"value": "GEN-SSH-PUB-KEY"
 		},
 		"keyVaultResourceGroup": {
-			"value": "kvrg"
+			"value": "keyvaultrg"
 		},
 		"keyVaultName": {
-			"value": "keyvaultname"
+			"value": "keyvault"
 		},
 		"keyVaultSecret": {
-			"value": "mysecret"
+			"value": "openshift"
 		},
 		"enableAzure": {
 			"value": "true"
 		},
 		"aadClientId": {
-			"value": "12345678-abcd-47bf-9b6f-12345678abcd"
+			"value": "changeme"
 		},
 		"aadClientSecret": {
-			"value": "GEN-PASSWORD"
+			"value": "changeme"
 		},
-		"defaultSubDomainType": {
+		"masterClusterDnsType": {
+			"value": "default"
+		},
+		"masterClusterDns": {
+			"value": "console.contoso.com"
+		},
+		"routingSubDomainType": {
 			"value": "nipio"
 		},
-		"defaultSubDomain": {
-			"value": "domain.com"
+		"routingSubDomain": {
+			"value": "apps.contoso.com"
 		},
 		"virtualNetworkNewOrExisting": {
 			"value": "new"
 		},
-		"virtualNetworkResourceGroupName": {
-			"value": "vnetrg"
-		},
 		"virtualNetworkName": {
-			"value": "openshiftvnet"
+			"value": "ocpvnet"
 		},
 		"addressPrefixes": {
 			"value": "10.0.0.0/14"
@@ -118,11 +121,29 @@
 		"masterSubnetPrefix": {
 			"value": "10.1.0.0/16"
 		},
+		"infraSubnetName": {
+			"value": "infrasubnet"
+		},
+		"infraSubnetPrefix": {
+			"value": "10.2.0.0/16"
+		},
 		"nodeSubnetName": {
 			"value": "nodesubnet"
 		},
 		"nodeSubnetPrefix": {
-			"value": "10.2.0.0/16"
+			"value": "10.3.0.0/16"
+		},
+		"existingMasterSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/mastersubnet"
+		},
+		"existingInfraSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/infrasubnet"
+		},
+		"existingCnsSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/cnssubnet"
+		},
+		"existingNodeSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/nodesubnet"
 		},
 		"masterClusterType": {
 			"value": "public"
@@ -130,17 +151,32 @@
 		"masterPrivateClusterIp": {
 			"value": "10.1.0.200"
 		},
-		"masterPrivateClusterDns": {
-			"value": "internalmaster.net"
-		},
 		"routerClusterType": {
 			"value": "public"
 		},
 		"routerPrivateClusterIp": {
-			"value": "10.1.0.201"
+			"value": "10.2.0.200"
+		},
+		"routingCertType": {
+			"value": "selfsigned"
+		},
+		"masterCertType": {
+			"value": "selfsigned"
+		},
+		"proxySettings": {
+			"value": ""
+		},
+		"httpProxyEntry": {
+			"value": ""
+		},
+		"httpsProxyEntry": {
+			"value": ""
+		},
+		"noProxyEntry": {
+			"value": ""
 		},
 		"customHeaderImage": {
-			"value": "https://client.power.sh/logo.png"
+			"value": ""
 		}
 	}
 }

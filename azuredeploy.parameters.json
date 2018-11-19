@@ -94,17 +94,20 @@
 		"aadClientSecret": {
 			"value": "changeme"
 		},
-		"defaultSubDomainType": {
+		"masterClusterDnsType": {
+			"value": "default"
+		},
+		"masterClusterDns": {
+			"value": "console.contoso.com"
+		},
+		"routingSubDomainType": {
 			"value": "nipio"
 		},
-		"defaultSubDomain": {
-			"value": "changeme"
+		"routingSubDomain": {
+			"value": "apps.contoso.com"
 		},
 		"virtualNetworkNewOrExisting": {
 			"value": "new"
-		},
-		"virtualNetworkResourceGroupName": {
-			"value": "changeme"
 		},
 		"virtualNetworkName": {
 			"value": "changeme"
@@ -118,11 +121,29 @@
 		"masterSubnetPrefix": {
 			"value": "10.1.0.0/16"
 		},
+		"infraSubnetName": {
+			"value": "infrasubnet"
+		},
+		"infraSubnetPrefix": {
+			"value": "10.2.0.0/16"
+		},
 		"nodeSubnetName": {
 			"value": "changeme"
 		},
 		"nodeSubnetPrefix": {
-			"value": "10.2.0.0/16"
+			"value": "10.3.0.0/16"
+		},
+		"existingMasterSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/mastersubnet"
+		},
+		"existingInfraSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/infrasubnet"
+		},
+		"existingCnsSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/cnssubnet"
+		},
+		"existingNodeSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/nodesubnet"
 		},
 		"masterClusterType": {
 			"value": "public"
@@ -130,14 +151,29 @@
 		"masterPrivateClusterIp": {
 			"value": "10.1.0.200"
 		},
-		"masterPrivateClusterDns": {
-			"value": "changeme"
-		},
 		"routerClusterType": {
 			"value": "public"
 		},
 		"routerPrivateClusterIp": {
-			"value": "10.1.0.201"
+			"value": "10.2.0.200"
+		},
+		"routingCertType": {
+			"value": "selfsigned"
+		},
+		"masterCertType": {
+			"value": "selfsigned"
+		},
+		"proxySettings": {
+			"value": ""
+		},
+		"httpProxyEntry": {
+			"value": ""
+		},
+		"httpsProxyEntry": {
+			"value": ""
+		},
+		"noProxyEntry": {
+			"value": ""
 		},
 		"customHeaderImage": {
 			"value": ""

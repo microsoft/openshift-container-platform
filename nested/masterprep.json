@@ -1,0 +1,131 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"location": {
+			"type": "string",
+			"metadata": {
+				"description": "Datacenter Region Location"
+			}
+		},
+		"apiVersionCompute": {
+			"type": "string",
+			"metadata": {
+				"description": "API version for compute resources"
+			}
+		},
+		"masterPrepScriptUrl": {
+			"type": "string",
+			"metadata": {
+				"description": "Master prep script Url"
+			}
+		},
+		"masterPrepScriptFileName": {
+			"type": "string",
+			"metadata": {
+				"description": "Master prep script file name"
+			}
+		},
+		"openshiftMasterHostname": {
+			"type": "string",
+			"metadata": {
+				"description": "OpenShift Master hostname"
+			}
+		},
+		"adminUsername": {
+			"type": "string",
+			"metadata": {
+				"description": "Administrator username on all VMs"
+			}
+		},
+		"rhsmUsernameOrOrgId": {
+			"type": "string",
+			"metadata": {
+				"description": "Red Hat Subscription Manager username or Organization Id"
+			}
+		},
+		"rhsmPasswordOrActivationKey": {
+			"type": "securestring",
+			"metadata": {
+				"description": "Red Hat Subscription Manager password or activation key"
+			}
+		},
+		"rhsmPoolId": {
+			"type": "string",
+			"metadata": {
+				"description": "Pool Id with OpenShift entitlements"
+			}
+		},
+		"proxySettings": {
+			"type": "string",
+			"defaultValue": "none",
+			"allowedValues": [
+				"none", "custom"
+			],
+			"metadata": {
+				"description": "Use custom proxy settings"
+			}
+		},
+		"httpProxyEntry": {
+			"type": "string",
+			"defaultValue": "none",
+			"metadata": {
+				"description": "If custom proxy settings selected, enter http_proxy settings to use"
+			}
+		},
+		"httpsProxyEntry": {
+			"type": "string",
+			"defaultValue": "none",
+			"metadata": {
+				"description": "If custom proxy settings selected, enter https_proxy settings to use"
+			}
+		},
+		"noProxyEntry": {
+			"type": "string",
+			"defaultValue": "none",
+			"metadata": {
+				"description": "If custom proxy settings selected, enter no_proxy settings to use"
+			}
+		},
+		"redHatTags": {
+			"type": "object",
+			"metadata": {
+				"description": "Red Hat Tags"
+			}
+		}
+	},
+	"variables": {
+		"singlequote": "'",
+		"tenantId": "[subscription().tenantId]",
+		"subscriptionId": "[subscription().subscriptionId]",
+		"resourceGroupName": "[resourceGroup().name]"
+	},
+	"resources": [{
+		"type": "Microsoft.Compute/virtualMachines/extensions",
+		"name": "[concat(parameters('openshiftMasterHostname'), '/prepMasters')]",
+		"location": "[parameters('location')]",
+		"apiVersion": "[parameters('apiVersionCompute')]",
+		"tags": {
+			"displayName": "PrepMaster",
+				"provider": "[parameters('redHatTags').provider]",
+				"app": "[parameters('redHatTags').app]",
+				"version": "[parameters('redHatTags').version]",
+				"platform": "[parameters('redHatTags').platform]"
+		},
+		"properties": {
+			"publisher": "Microsoft.Azure.Extensions",
+			"type": "CustomScript",
+			"typeHandlerVersion": "2.0",
+			"autoUpgradeMinorVersion": true,
+			"settings": {
+				"fileUris": [
+					"[parameters('masterPrepScriptUrl')]"
+				]
+			},
+			"protectedSettings": {
+				"commandToExecute": "[concat('bash ', parameters('masterPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ',variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', variables('singlequote'), parameters('adminUsername'), variables('singlequote'), ' ', variables('singlequote'), parameters('proxySettings'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpsProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('noProxyEntry'), variables('singlequote'))]"
+			}
+		}
+	}],
+	"outputs": {}
+}

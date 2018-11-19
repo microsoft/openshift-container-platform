@@ -1,19 +1,40 @@
 #!/bin/bash
 echo $(date) " - Starting Infra / Node Prep Script"
 
-USERNAME_ORG=$1
-PASSWORD_ACT_KEY="$2"
-POOL_ID=$3
+export USERNAME_ORG=$1
+export PASSWORD_ACT_KEY="$2"
+export POOL_ID=$3
+export PROXYSETTING=$4
+export HTTPPROXYENTRY="$5"
+export HTTSPPROXYENTRY="$6"
+export NOPROXYENTRY="$7"
 
 # Remove RHUI
 
 rm -f /etc/yum.repos.d/rh-cloud.repo
 sleep 10
 
+# Configure Proxy settings
+if [[ $PROXYSETTING == "custom" ]]
+then
+	export http_proxy=$HTTPPROXYENTRY
+	export https_proxy=$HTTSPPROXYENTRY
+    echo $(date) " - Configure proxy settings"
+    echo "export http_proxy=$HTTPPROXYENTRY
+export https_proxy=$HTTSPPROXYENTRY
+export no_proxy=$NOPROXYENTRY
+" >> /etc/environment
+    echo $(date) " - Configure proxy settings"
+    echo "export http_proxy=$HTTPPROXYENTRY
+export https_proxy=$HTTSPPROXYENTRY
+export no_proxy=$NOPROXYENTRY
+" >> /etc/profile
+fi
+
 # Register Host with Cloud Access Subscription
 echo $(date) " - Register host with Cloud Access Subscription"
 
-subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
+subscription-manager register --force --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --force --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
 RETCODE=$?
 
 if [ $RETCODE -eq 0 ]
@@ -51,7 +72,7 @@ subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
     --enable="rhel-7-server-ose-3.10-rpms" \
-    --enable="rhel-7-server-ansible-2.5-rpms" \
+    --enable="rhel-7-server-ansible-2.4-rpms" \
     --enable="rhel-7-fast-datapath-rpms" \
     --enable="rh-gluster-3-client-for-rhel-7-server-rpms"
 

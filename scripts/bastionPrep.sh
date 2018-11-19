@@ -1,11 +1,24 @@
 #!/bin/bash
 echo $(date) " - Starting Bastion Prep Script"
 
-USERNAME_ORG=$1
-PASSWORD_ACT_KEY="$2"
-POOL_ID=$3
-PRIVATEKEY=$4
-SUDOUSER=$5
+export USERNAME_ORG=$1
+export PASSWORD_ACT_KEY="$2"
+export POOL_ID=$3
+export PRIVATEKEY=$4
+export SUDOUSER=$5
+export PROXYSETTING=$6
+export HTTPPROXYENTRY="$7"
+export HTTSPPROXYENTRY="$8"
+export NOPROXYENTRY="$9"
+export CUSTOMROUTINGCERTTYPE=${10}
+export CUSTOMMASTERCERTTYPE=${11}
+export CUSTOMROUTINGCAFILE="${12}"
+export CUSTOMROUTINGCERTFILE="${13}"
+export CUSTOMROUTINGKEYFILE="${14}"
+export CUSTOMMASTERCAFILE="${15}"
+export CUSTOMMASTERCERTFILE="${16}"
+export CUSTOMMASTERKEYFILE="${17}"
+
 
 # Generate private keys for use by Ansible
 echo $(date) " - Generating Private keys for use by Ansible for OpenShift Installation"
@@ -18,10 +31,27 @@ runuser -l $SUDOUSER -c "chmod 600 ~/.ssh/id_rsa*"
 rm -f /etc/yum.repos.d/rh-cloud.repo
 sleep 10
 
+# Configure Proxy settings
+if [[ $PROXYSETTING == "custom" ]]
+then
+	export http_proxy=$HTTPPROXYENTRY
+	export https_proxy=$HTTSPPROXYENTRY
+    echo $(date) " - Configure proxy settings"
+    echo "export http_proxy=$HTTPPROXYENTRY
+export https_proxy=$HTTSPPROXYENTRY
+export no_proxy=$NOPROXYENTRY
+" >> /etc/environment
+    echo $(date) " - Configure proxy settings"
+    echo "export http_proxy=$HTTPPROXYENTRY
+export https_proxy=$HTTSPPROXYENTRY
+export no_proxy=$NOPROXYENTRY
+" >> /etc/profile
+fi
+
 # Register Host with Cloud Access Subscription
 echo $(date) " - Register host with Cloud Access Subscription"
 
-subscription-manager register --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
+subscription-manager register --force --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --force --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
 RETCODE=$?
 
 if [ $RETCODE -eq 0 ]
@@ -59,7 +89,7 @@ subscription-manager repos \
     --enable="rhel-7-server-rpms" \
     --enable="rhel-7-server-extras-rpms" \
     --enable="rhel-7-server-ose-3.10-rpms" \
-    --enable="rhel-7-server-ansible-2.5-rpms" \
+    --enable="rhel-7-server-ansible-2.4-rpms" \
     --enable="rhel-7-fast-datapath-rpms" \
     --enable="rh-gluster-3-client-for-rhel-7-server-rpms"
 
@@ -100,6 +130,26 @@ echo "DOMAIN=`domainname -d`" >> /etc/sysconfig/network-scripts/ifcfg-eth0
 echo $(date) " - Updating ansible.cfg file"
 wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 5 https://raw.githubusercontent.com/microsoft/openshift-container-platform-playbooks/master/updateansiblecfg.yaml
 ansible-playbook -f 10 ./updateansiblecfg.yaml
+
+# Create certificate files 
+
+if [[ $CUSTOMMASTERCERTTYPE == "custom" ]]
+then
+    echo $(date) " - Creating custom master certificate files"
+    runuser -l $SUDOUSER -c "echo \"$CUSTOMMASTERCAFILE\" > /tmp/masterca.pem"
+	runuser -l $SUDOUSER -c "echo \"$CUSTOMMASTERCERTFILE\" > /tmp/mastercert.pem"
+	runuser -l $SUDOUSER -c "echo \"$CUSTOMMASTERKEYFILE\" > /tmp/masterkey.pem"
+	echo $(date) " - Custom master certificate files masterca.pem, mastercert.pem, masterkey.pem created in /tmp"
+fi
+
+if [ $CUSTOMROUTINGCERTTYPE == "custom" ]
+then
+    echo $(date) " - Creating custom routing certificate files"
+	runuser -l $SUDOUSER -c "echo \"$CUSTOMROUTINGCAFILE\" > /tmp/routingca.pem"
+	runuser -l $SUDOUSER -c "echo \"$CUSTOMROUTINGCERTFILE\" > /tmp/routingcert.pem"
+	runuser -l $SUDOUSER -c "echo \"$CUSTOMROUTINGKEYFILE\" > /tmp/routingkey.pem"
+	echo $(date) " - Custom routing certificate files routingca.pem, routingcert.pem, routingkey.pem created in /tmp"
+fi
 
 echo $(date) " - Script Complete"
 

@@ -6,12 +6,24 @@
 - Azure service principal
 - SSH public and private keys generated
 
+### Red Hat Subscription Access
+
+For security reasons, the method for registering the RHEL system allows the use of an Organization ID and Activation Key as well as a Username and Password. Please know that it is more secure to use the Organization ID and Activation Key.
+
+You can determine your Organization ID by running ```subscription-manager identity``` on a registered machine.  To create or find your Activation Key, please go here: https://access.redhat.com/management/activation_keys.
+
+You will also need to get the Pool ID that contains your entitlements for OpenShift.  You can retrieve this from the Red Hat portal by examining the details of the subscription that has the OpenShift entitlements.  Or you can contact your Red Hat administrator to help you.
+
 ## Setting up OpenShift
 
 Copy **vars.example.yml** to **vars.yml** and edit the file to update all the variables with your information.
 
 In general the only thing you will have to do is to make sure you have proper SSH keys available. By default your private key will be used from **~/.ssh/id_rsa**. Copy your public key content to **admin_pubkey:**
 
+In addition you need to provide your RHEL username/password or organisation/key in following fields:
+- **rhsm_username_org**
+- **rhsm_password_key**
+Please check last paragraph of this document to learn more.
 
 Run the playbook:
 
@@ -104,3 +116,11 @@ In the fourth phase, after all the virtual machines are successfully deployed:
 |`deploy_cns`||||
 |`deploy_logging`||||
 |`deploy_azure_cloud_provider`||||
+
+### Red Hat Subscription Access
+
+For security reasons, the method for registering the RHEL system allows the use of an Organization ID and Activation Key as well as a Username and Password. Please know that it is more secure to use the Organization ID and Activation Key.
+
+You can determine your Organization ID by running ```subscription-manager identity``` on a registered machine.  To create or find your Activation Key, please go here: https://access.redhat.com/management/activation_keys.
+
+You will also need to get the Pool ID that contains your entitlements for OpenShift.  You can retrieve this from the Red Hat portal by examining the details of the subscription that has the OpenShift entitlements.  Or you can contact your Red Hat administrator to help you.

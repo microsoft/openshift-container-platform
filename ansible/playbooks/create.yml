@@ -4,8 +4,6 @@
 
 ---
 - hosts: localhost
-  roles:
-    - ../custom-role
   tasks:
     # --- PRE TASKS ---
     # All the other tasks require these tasks
@@ -23,15 +21,6 @@
     # --- PARALLELIZABLE TASKS ---
     # All these tasks have no requirements other than RG and vNet
     # They can be run in any order
-    - name: Create public IP address for Bastion node
-      azure_rm_publicipaddress:
-        resource_group: "{{ resource_group }}"
-        allocation_method: Static
-        name: bastion_publicip
-      async: 150
-      poll: 0
-      register: bastion_ip_output
-
     - name: Create public IP address for Master LB
       azure_rm_publicipaddress:
         resource_group: "{{ resource_group }}"
@@ -60,7 +49,7 @@
         name: "{{ bastion_publicip }}"
       async: 150
       poll: 0
-      register: output
+      register: bastion_ip_output
 
     - name: Add master subnet
       azure_rm_subnet:
@@ -68,9 +57,6 @@
         name: mastersubnet
         address_prefix: "{{ master_subnet_cidr }}"
         virtual_network: "{{ virtual_network_name }}"
-      async: 150
-      poll: 0
-      register: master_subnet_output
   
     - name: Add node subnet
       azure_rm_subnet:
@@ -78,9 +64,6 @@
         name: nodesubnet
         address_prefix: "{{ node_subnet_cidr }}"
         virtual_network: "{{ virtual_network_name }}"
-      async: 150
-      poll: 0
-      register: node_subnet_output
   
     - name: Add infra subnet
       azure_rm_subnet:
@@ -88,9 +71,6 @@
         name: infrasubnet
         address_prefix: "{{ infra_subnet_cidr }}"
         virtual_network: "{{ virtual_network_name }}"
-      async: 150
-      poll: 0
-      register: infra_subnet_output
 
     - name: Create infrastructure NSG
       azure_rm_securitygroup:
@@ -172,6 +152,7 @@
         sku: Aligned
       async: 150
       poll: 0
+      register: master_as_output
 
     - name: Create node availability set
       azure_rm_availabilityset:
@@ -181,6 +162,7 @@
         sku: Aligned
       async: 150
       poll: 0
+      register: node_as_output
 
     - name: Create infra availability set
       azure_rm_availabilityset:
@@ -190,8 +172,9 @@
         sku: Aligned
       async: 150
       poll: 0
+      register: infra_as_output
 
-    - name: Wait for IP addresses and subnets to be ready
+    - name: Wait for IP addresses, and Availability Sets to be ready
       async_status:
         jid: "{{ item.ansible_job_id }}"
         mode: status
@@ -200,9 +183,9 @@
           - "{{ bastion_ip_output }}"
           - "{{ master_ip_output }}"
           - "{{ infra_ip_output }}"
-          - "{{ master_subnet_output }}"
-          - "{{ node_subnet_output }}"
-          - "{{ infra_subnet_output }}"
+          - "{{ infra_as_output }}"
+          - "{{ master_as_output }}"
+          - "{{ node_as_output }}"
       until: item_result.finished
       retries: 5
       delay: 30
@@ -272,7 +255,7 @@
         security_group: "{{ cluster_prefix }}-infra-nsg"
         ip_configurations:
           - name: ipconfig0
-            public_ip_address_name: bastion_publicip
+            public_ip_address_name: "{{ bastion_publicip }}"
       async: 400
       poll: 0
       register: output_nic_bastion

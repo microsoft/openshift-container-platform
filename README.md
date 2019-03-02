@@ -4,15 +4,19 @@
 
 **The Master branch has been updated to deploy version 3.11**
 
-The master branch contains the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new items or enable new configuration options.
+The master branch contains the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new items or enable new configuration options. We will maintain the templates for the current version of OCP as well as one version back (N-1). The older branches will not be deleted but will no longer be maintained or updated.
 
-We have branches for the stable releases:
+The following branches exist:
+
+**Commercial Azure**
 - Release-3.6 (As is; no longer updated)
-- Release-3.7
-- Release-3.9
+- Release-3.7 (As is; no longer updated)
+- Release-3.9 (As is; no longer updated)
 - Release-3.10
-- azurestack-release-3.7
-- azurestack-release-3.9
+
+**Azure Stack**
+- azurestack-release-3.7 (As is; no longer updated)
+- azurestack-release-3.9 (As is; no longer updated)
 
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 

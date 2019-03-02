@@ -38,6 +38,12 @@
 				"description": "Administrator username on all VMs"
 			}
 		},
+		"domainName": {
+			"type": "string",
+			"metadata": {
+				"description": "Domain name search"
+			}
+		},
 		"rhsmUsernameOrOrgId": {
 			"type": "string",
 			"metadata": {
@@ -110,35 +116,10 @@
 				"description": "Master domain Key file"
 			}
 		},
-		"proxySettings": {
+		"minorVersion": {
 			"type": "string",
-			"defaultValue": "none",
-			"allowedValues": [
-				"none", "custom"
-			],
 			"metadata": {
-				"description": "Use custom proxy settings"
-			}
-		},
-		"httpProxyEntry": {
-			"type": "string",
-			"defaultValue": "none",
-			"metadata": {
-				"description": "If custom proxy settings selected, enter http_proxy settings to use"
-			}
-		},
-		"httpsProxyEntry": {
-			"type": "string",
-			"defaultValue": "none",
-			"metadata": {
-				"description": "If custom proxy settings selected, enter https_proxy settings to use"
-			}
-		},
-		"noProxyEntry": {
-			"type": "string",
-			"defaultValue": "none",
-			"metadata": {
-				"description": "If custom proxy settings selected, enter no_proxy settings to use"
+				"description": "Minor version of OpenShift 3.11 to deploy"
 			}
 		},
 		"redHatTags": {
@@ -149,10 +130,7 @@
 		}
 	},
 	"variables": {
-		"singlequote": "'",
-		"tenantId": "[subscription().tenantId]",
-		"subscriptionId": "[subscription().subscriptionId]",
-		"resourceGroupName": "[resourceGroup().name]"
+		"singlequote": "'"
 	},
 	"resources": [{
 		"type": "Microsoft.Compute/virtualMachines/extensions",
@@ -177,7 +155,7 @@
 				]
 			},
 			"protectedSettings": {
-				"commandToExecute": "[concat('bash ', parameters('bastionPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ',variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', variables('singlequote'), parameters('sshPrivateKey'), variables('singlequote'), ' ', variables('singlequote'), parameters('adminUsername'), variables('singlequote'), ' ', variables('singlequote'), parameters('proxySettings'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpsProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('noProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('routingCertType'), variables('singlequote'), ' ', variables('singlequote'), parameters('masterCertType'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingCaFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingCertFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingKeyFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterCaFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterCertFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterKeyFile'), variables('singlequote'))]"
+				"commandToExecute": "[concat('bash ', parameters('bastionPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ',variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', variables('singlequote'), parameters('sshPrivateKey'), variables('singlequote'), ' ', variables('singlequote'), parameters('adminUsername'), variables('singlequote'), ' ', variables('singlequote'), parameters('proxySettings'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('httpsProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('noProxyEntry'), variables('singlequote'), ' ', variables('singlequote'), parameters('routingCertType'), variables('singlequote'), ' ', variables('singlequote'), parameters('masterCertType'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingCaFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingCertFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingKeyFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterCaFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterCertFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterKeyFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('domainName'), variables('singlequote'), ' ', variables('singlequote'), parameters('minorVersion'), variables('singlequote'))]"
 			}
 		}
 	}],

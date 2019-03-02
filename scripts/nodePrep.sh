@@ -4,32 +4,11 @@ echo $(date) " - Starting Infra / Node Prep Script"
 export USERNAME_ORG=$1
 export PASSWORD_ACT_KEY="$2"
 export POOL_ID=$3
-export PROXYSETTING=$4
-export HTTPPROXYENTRY="$5"
-export HTTSPPROXYENTRY="$6"
-export NOPROXYENTRY="$7"
 
 # Remove RHUI
 
 rm -f /etc/yum.repos.d/rh-cloud.repo
 sleep 10
-
-# Configure Proxy settings
-if [[ $PROXYSETTING == "custom" ]]
-then
-	export http_proxy=$HTTPPROXYENTRY
-	export https_proxy=$HTTSPPROXYENTRY
-    echo $(date) " - Configure proxy settings"
-    echo "export http_proxy=$HTTPPROXYENTRY
-export https_proxy=$HTTSPPROXYENTRY
-export no_proxy=$NOPROXYENTRY
-" >> /etc/environment
-    echo $(date) " - Configure proxy settings"
-    echo "export http_proxy=$HTTPPROXYENTRY
-export https_proxy=$HTTSPPROXYENTRY
-export no_proxy=$NOPROXYENTRY
-" >> /etc/profile
-fi
 
 # Register Host with Cloud Access Subscription
 echo $(date) " - Register host with Cloud Access Subscription"
@@ -79,11 +58,10 @@ subscription-manager repos \
 # Install base packages and update system to latest packages
 echo $(date) " - Install base packages and update system to latest packages"
 
-yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion kexec-tools sos psacct
+yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion kexec-tools sos psacct ansible
 yum -y install cloud-utils-growpart.noarch
-yum -y install ansible
 yum -y update glusterfs-fuse
-yum -y update --releasever=7.5 --exclude=WALinuxAgent
+yum -y update --exclude=WALinuxAgent
 echo $(date) " - Base package insallation and updates complete"
 
 # Grow Root File System
@@ -97,6 +75,14 @@ part_number=${name#*${rootdrivename}}
 
 growpart $rootdrive $part_number -u on
 xfs_growfs $rootdev
+
+if [ $? -eq 0 ]
+then
+    echo "Root partition expanded"
+else
+    echo "Root partition failed to expand"
+    exit 6
+fi
 
 # Install Docker
 echo $(date) " - Installing Docker"

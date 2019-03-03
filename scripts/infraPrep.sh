@@ -74,7 +74,6 @@ yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash
 yum -y install cloud-utils-growpart.noarch
 yum -y install ansible
 yum -y update glusterfs-fuse
-# yum -y update --releasever=7.5 --exclude=WALinuxAgent
 yum -y update --exclude=WALinuxAgent
 echo $(date) " - Base package insallation and updates complete"
 
@@ -94,7 +93,7 @@ xfs_growfs $rootdev
 echo $(date) " - Installing Docker"
 yum -y install docker
 
-# Update docker storage
+# Update docker config for insecure registry
 echo "
 # Adding insecure-registry option required by OpenShift
 OPTIONS=\"\$OPTIONS --insecure-registry 172.30.0.0/16\"

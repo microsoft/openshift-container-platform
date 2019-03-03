@@ -337,7 +337,7 @@ ${MASTER}[01:${MASTERLIST}]
 
 # host group for etcd
 [etcd]
-${MASTER}[01:0${MASTERLIST}]
+${MASTER}[01:${MASTERLIST}]
 
 [master0]
 ${MASTER}01

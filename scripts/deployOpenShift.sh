@@ -174,7 +174,7 @@ then
 	for (( c=1; c<=9; c++ ))
 	do
 		nodegroup="$nodegroup
-${NODE0}0$c openshift_node_group_name='node-config-compute'"
+${NODE}0$c openshift_node_group_name='node-config-compute'"
 	done
 
 	for (( c=10; c<=$NODECOUNT; c++ ))
@@ -187,7 +187,7 @@ else
 	for (( c=1; c<=$NODECOUNT; c++ ))
 	do
 		nodegroup="$nodegroup
-${NODE0}0$c openshift_node_group_name='node-config-compute'"
+${NODE}0$c openshift_node_group_name='node-config-compute'"
 	done
 fi
 

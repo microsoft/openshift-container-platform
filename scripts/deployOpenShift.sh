@@ -154,7 +154,7 @@ fi
 # Create Master nodes grouping
 echo $(date) " - Creating Master nodes grouping"
 MASTERLIST="0$MASTERCOUNT"
-for (( c=1; c<$MASTERCOUNT; c++ ))
+for (( c=1; c<=$MASTERCOUNT; c++ ))
 do
     mastergroup="$mastergroup
 ${MASTER}0$c openshift_node_group_name='node-config-master'"
@@ -162,7 +162,7 @@ done
 
 # Create Infra nodes grouping 
 echo $(date) " - Creating Infra nodes grouping"
-for (( c=1; c<$INFRACOUNT; c++ ))
+for (( c=1; c<=$INFRACOUNT; c++ ))
 do
     infragroup="$infragroup
 ${INFRA}0$c openshift_node_group_name='node-config-infra'"

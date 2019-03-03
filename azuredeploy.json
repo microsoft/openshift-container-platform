@@ -545,7 +545,6 @@
 		"diagStorageAccount1": "[concat('diag1', uniqueString(concat(resourceGroup().id, 'dsa1')))]",
 		"diagStorageAccount2": "[concat('diag2', uniqueString(concat(resourceGroup().id, 'dsa2')))]",
 		"newStorageAccountRegistry": "[concat('registry', uniqueString(concat(resourceGroup().id, 'registry')))]",
-		"newStorageAccountPersistentVolume1": "[concat('pv1sa', uniqueString(concat(resourceGroup().id, 'persistentvolume1')))]",
 		"newStorageAccountArray": [
 			{ "name": "[variables('diagStorageAccount1')]", "tagName": "DiagnosticsStorageAccount", "skuName": "[variables('storageSkuObject').diagnostics.skuName]", "skuTier": "[variables('storageSkuObject').diagnostics.skuTier]" },
 			{ "name": "[variables('diagStorageAccount2')]", "tagName": "DiagnosticsStorageAccount", "skuName": "[variables('storageSkuObject').diagnostics.skuName]", "skuTier": "[variables('storageSkuObject').diagnostics.skuTier]" },
@@ -554,8 +553,7 @@
 			{ "name": "[variables('newStorageAccountMaster')]", "tagName": "MasterStorageAccount", "skuName": "[variables('storageSkuObject').master.skuName]", "skuTier": "[variables('storageSkuObject').master.skuTier]" },
 			{ "name": "[variables('newStorageAccountInfra')]", "tagName": "InfraStorageAccount", "skuName": "[variables('storageSkuObject').infra.skuName]", "skuTier": "[variables('storageSkuObject').infra.skuTier]" },
 			{ "name": "[variables('newStorageAccountNodeOs')]", "tagName": "NodeStorageAccount", "skuName": "[variables('storageSkuObject').node.skuName]", "skuTier": "[variables('storageSkuObject').node.skuTier]" },
-			{ "name": "[variables('newStorageAccountNodeData')]", "tagName": "NodeStorageAccount", "skuName": "[variables('storageSkuObject').node.skuName]", "skuTier": "[variables('storageSkuObject').node.skuTier]" },
-			{ "name": "[variables('newStorageAccountPersistentVolume1')]", "tagName": "PersistentVolume1StorageAccount", "skuName": "[variables('storageSkuObject').persistent.skuName]", "skuTier": "[variables('storageSkuObject').persistent.skuTier]" }
+			{ "name": "[variables('newStorageAccountNodeData')]", "tagName": "NodeStorageAccount", "skuName": "[variables('storageSkuObject').node.skuName]", "skuTier": "[variables('storageSkuObject').node.skuTier]" }
 		],
 		"availabilitySetArray": [
 			{ "name": "masteravailabilityset", "tagName": "MasterAvailabilitySet" },
@@ -707,22 +705,23 @@
 		"bastionVmSize": "Standard_D2s_v3",
 		"singlequote": "'",
 		"sshKeyPath": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-		"bastionPrepScriptUrl": "[uri(parameters('_artifactsLocation'), concat('/scripts/bastionPrep.sh', parameters('_artifactsLocationSasToken')))]",
-		"nodePrepScriptUrl": "[uri(parameters('_artifactsLocation'), concat('/scripts/nodePrep.sh', parameters('_artifactsLocationSasToken')))]",
-		"masterPrepScriptUrl": "[uri(parameters('_artifactsLocation'), concat('/scripts/masterPrep.sh', parameters('_artifactsLocationSasToken')))]",
-		"infraPrepScriptUrl": "[uri(parameters('_artifactsLocation'), concat('/scripts/infraPrep.sh', parameters('_artifactsLocationSasToken')))]",
-		"openshiftDeploymentScriptUrl": "[uri(parameters('_artifactsLocation'), concat('/scripts/deployOpenShift.sh', parameters('_artifactsLocationSasToken')))]",
+		"bastionPrepScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/bastionPrep.sh')]",
+		"nodePrepScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/nodePrep.sh')]",
+		"masterPrepScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/masterPrep.sh')]",
+		"infraPrepScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/infraPrep.sh')]",
+		"openshiftDeploymentScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/deployOpenShift.sh')]",
 		"bastionPrepScriptFileName": "bastionPrep.sh",
 		"nodePrepScriptFileName": "nodePrep.sh",
 		"masterPrepScriptFileName": "masterPrep.sh",
 		"infraPrepScriptFileName": "infraPrep.sh",
 		"openshiftDeploymentScriptFileName": "deployOpenShift.sh",
-		"clusterNodeDeploymentTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('/nested/galleryclusternode.json', parameters('_artifactsLocationSasToken')))]",
-		"clusterCnsNodeDeploymentTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('/nested/galleryclustercnsnode.json', parameters('_artifactsLocationSasToken')))]",
-		"basicDeploymentTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('/nested/gallerybasic.json', parameters('_artifactsLocationSasToken')))]",
-		"openshiftDeploymentTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('/nested/openshiftdeploy.json', parameters('_artifactsLocationSasToken')))]",
-		"bastionPrepTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('/nested/bastionprep.json', parameters('_artifactsLocationSasToken')))]",
-		"masterPrepTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('/nested/masterprep.json', parameters('_artifactsLocationSasToken')))]",
+		"clusterNodeDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/galleryclusternode.json')]",
+		"clusterCnsNodeDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/galleryclustercnsnode.json')]",
+		"basicDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/gallerybasic.json')]",
+		"openshiftDeploymentTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/openshiftdeploy.json')]",
+		"bastionPrepTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/bastionprep.json')]",
+		"masterPrepTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/masterprep.json')]",
+		"nodePrepTemplateUrl": "[concat(parameters('_artifactsLocation'), '/nested/nodeprep.json')]",
 		"vmSizesMap": {
 			"Standard_D2": {
 				"storageAccountType": "Standard_LRS",
@@ -1630,7 +1629,7 @@
 		}, {
 			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
-			"name": "[concat(variables('openshiftMasterHostname'), '-', padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
+			"name": "[concat(variables('openshiftMasterHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
 			"tags": {
 				"displayName": "OpenShiftMasterNetworkInterface",
@@ -1669,7 +1668,7 @@
 		}, {
 			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
-			"name": "[concat(variables('openshiftInfraHostname'), '-', padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
+			"name": "[concat(variables('openshiftInfraHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
 			"tags": {
 				"displayName": "OpenShiftInfraNetworkInterfaces",
@@ -1709,7 +1708,7 @@
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
 			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
-			"name": "[concat(variables('openshiftCnsHostname'), '-', padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
+			"name": "[concat(variables('openshiftCnsHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
 			"tags": {
 				"displayName": "OpenShiftInfraNetworkInterfaces",
@@ -1744,7 +1743,7 @@
 		}, {
 			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
-			"name": "[concat(variables('openshiftNodeHostname'), '-', padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
+			"name": "[concat(variables('openshiftNodeHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
 			"tags": {
 				"displayName": "OpenShiftNodeNetworkInterfaces",
@@ -1853,7 +1852,7 @@
 		}, {
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
-			"name": "[concat('masterVmDeployment', copyindex())]",
+			"name": "[concat('masterVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('diagStorageAccount1'))]",
 				"masterNicLoop",
@@ -1904,7 +1903,7 @@
 						"value": "masteravailabilityset"
 					},
 					"hostName": {
-						"value": "[concat(variables('openshiftMasterHostname'), '-', padLeft(add(copyIndex(), 1), 2, '0'))]"
+						"value": "[concat(variables('openshiftMasterHostname'), padLeft(add(copyIndex(), 1), 2, '0'))]"
 					},
 					"unmanagedOsDiskUri": {
 						"value": "[reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', variables(variables('masterUri'))), variables('apiVersionStorage')).primaryEndpoints['blob']]"
@@ -1947,7 +1946,7 @@
 		}, {
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
-			"name": "[concat('infraVmDeployment', copyindex())]",
+			"name": "[concat('infraVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('diagStorageAccount1'))]",
 				"infraNicLoop",
@@ -1998,7 +1997,7 @@
 						"value": "infraavailabilityset"
 					},
 					"hostName": {
-						"value": "[concat(variables('openshiftInfraHostname'), '-', padLeft(add(copyIndex(), 1), 2, '0'))]"
+						"value": "[concat(variables('openshiftInfraHostname'), padLeft(add(copyIndex(), 1), 2, '0'))]"
 					},
 					"unmanagedOsDiskUri": {
 						"value": "[reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', variables(variables('infraUri'))), variables('apiVersionStorage')).primaryEndpoints['blob']]"
@@ -2041,7 +2040,7 @@
 		}, {
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
-			"name": "[concat('nodeVmDeployment', copyindex())]",
+			"name": "[concat('nodeVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('diagStorageAccount2'))]",
 				"nodeNicLoop",
@@ -2092,7 +2091,7 @@
 						"value": "nodeavailabilityset"
 					},
 					"hostName": {
-						"value": "[concat(variables('openshiftNodeHostname'), '-', padLeft(add(copyIndex(), 1), 2, '0'))]"
+						"value": "[concat(variables('openshiftNodeHostname'), padLeft(add(copyIndex(), 1), 2, '0'))]"
 					},
 					"unmanagedOsDiskUri": {
 						"value": "[reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', variables(variables('nodeOsUri'))), variables('apiVersionStorage')).primaryEndpoints['blob']]"
@@ -2136,7 +2135,7 @@
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
-			"name": "[concat('cnsVmDeployment', copyindex())]",
+			"name": "[concat('cnsVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('newStorageAccountCns'))]",
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('diagStorageAccount1'))]",
@@ -2191,7 +2190,7 @@
 						"value": "cnsavailabilityset"
 					},
 					"hostName": {
-						"value": "[concat(variables('openshiftCnsHostname'), '-', padLeft(add(copyIndex(), 1), 2, '0'))]"
+						"value": "[concat(variables('openshiftCnsHostname'), padLeft(add(copyIndex(), 1), 2, '0'))]"
 					},
 					"unmanagedOsDiskUri": {
 						"value": "[reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', variables(variables('cnsUri'))), variables('apiVersionStorage')).primaryEndpoints['blob']]"
@@ -2299,7 +2298,7 @@
 							"keyvault": {
 								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
 							},
-							"secretName": "[if(equals(parameters('routingCertType'),'custom'), 'routingcafile', parameters('keyVaultSecret'))]"
+							"secretName": "[if(equals(parameters('routingCertType'),'custom'), 'routingcafile', 'sshPrivateKey')]"
 						}
 					},
 					"customRoutingCertFile": {
@@ -2307,7 +2306,7 @@
 							"keyvault": {
 								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
 							},
-							"secretName": "[if(equals(parameters('routingCertType'),'custom'), 'routingcertfile', parameters('keyVaultSecret'))]"
+							"secretName": "[if(equals(parameters('routingCertType'),'custom'), 'routingcertfile', 'sshPrivateKey')]"
 						}
 					},
 					"customRoutingKeyFile": {
@@ -2315,7 +2314,7 @@
 							"keyvault": {
 								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
 							},
-							"secretName": "[if(equals(parameters('routingCertType'),'custom'), 'routingkeyfile', parameters('keyVaultSecret'))]"
+							"secretName": "[if(equals(parameters('routingCertType'),'custom'), 'routingkeyfile', 'sshPrivateKey')]"
 						}
 					},
 					"customMasterCaFile": {
@@ -2323,7 +2322,7 @@
 							"keyvault": {
 								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
 							},
-							"secretName": "[if(equals(parameters('masterCertType'),'custom'), 'mastercafile', parameters('keyVaultSecret'))]"
+							"secretName": "[if(equals(parameters('masterCertType'),'custom'), 'mastercafile', 'sshPrivateKey')]"
 						}
 					},
 					"customMasterCertFile": {
@@ -2331,7 +2330,7 @@
 							"keyvault": {
 								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
 							},
-							"secretName": "[if(equals(parameters('masterCertType'),'custom'), 'mastercertfile', parameters('keyVaultSecret'))]"
+							"secretName": "[if(equals(parameters('masterCertType'),'custom'), 'mastercertfile', 'sshPrivateKey')]"
 						}
 					},
 					"customMasterKeyFile": {
@@ -2339,7 +2338,7 @@
 							"keyvault": {
 								"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
 							},
-							"secretName": "[if(equals(parameters('masterCertType'),'custom'), 'masterkeyfile', parameters('keyVaultSecret'))]"
+							"secretName": "[if(equals(parameters('masterCertType'),'custom'), 'masterkeyfile', 'sshPrivateKey')]"
 						}
 					},
 					"minorVersion": {
@@ -2369,7 +2368,7 @@
 				},
 				"parameters": {
 					"location": {
-						"value": "[variables('location')]"
+						"value": "[parameters('location')]"
 					},
 					"apiVersionCompute": {
 						"value": "[variables('apiVersionCompute')]"
@@ -2424,7 +2423,7 @@
 				},
 				"parameters": {
 					"location": {
-						"value": "[variables('location')]"
+						"value": "[parameters('location')]"
 					},
 					"apiVersionCompute": {
 						"value": "[variables('apiVersionCompute')]"
@@ -2458,11 +2457,10 @@
 				}
 			}
 		}, {
-			"name": "[concat('CNSPrep', padLeft(add(copyIndex(), 1), 2, '0'))]",
-			"type": "Microsoft.Resources/deployments",
-			"resourceGroup": "[parameters('coreinfrastructureResourceGroup')]",
-            "subscriptionId": "[parameters('coreinfrastructureSubscriptionID')]",
+			"condition": "[equals(parameters('enableCNS'), 'true')]",
 			"apiVersion": "[variables('apiVersionLinkTemplate')]",
+			"type": "Microsoft.Resources/deployments",
+			"name": "[concat('CNSPrep', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
 				"[concat('cnsVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]"
 			],
@@ -2478,7 +2476,7 @@
 				},
 				"parameters": {
 					"location": {
-						"value": "[variables('location')]"
+						"value": "[parameters('location')]"
 					},
 					"apiVersionCompute": {
 						"value": "[variables('apiVersionCompute')]"
@@ -2530,7 +2528,7 @@
 				},
 				"parameters": {
 					"location": {
-						"value": "[variables('location')]"
+						"value": "[parameters('location')]"
 					},
 					"apiVersionCompute": {
 						"value": "[variables('apiVersionCompute')]"

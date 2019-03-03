@@ -76,8 +76,10 @@ sed -i -e '/Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSE
 if [[ $CLOUD == "US" ]]
 then
     export DOCKERREGISTRYREALM=core.usgovcloudapi.net
+	export CLOUDNAME="AzureUSGovernmentCloud"
 else
 	export DOCKERREGISTRYREALM=core.windows.net
+	export CLOUDNAME="AzurePublicCloud"
 fi
 
 # Setting the default openshift_cloudprovider_kind if Azure enabled

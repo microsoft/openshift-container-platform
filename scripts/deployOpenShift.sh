@@ -359,6 +359,10 @@ $cnsgroup
 [new_nodes]
 EOF
 
+# Update WALinuxAgent
+echo $(date) " - Updating WALinuxAgent on all cluster nodes"
+runuser $SUDOUSER -c "ansible all -f 30 -b -m yum -a 'name=WALinuxAgent state=latest'"
+
 # Setup NetworkManager to manage eth0
 echo $(date) " - Running NetworkManager playbook"
 runuser -l $SUDOUSER -c "ansible-playbook -f 30 /usr/share/ansible/openshift-ansible/playbooks/openshift-node/network_manager.yml"

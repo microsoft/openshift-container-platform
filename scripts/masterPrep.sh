@@ -23,8 +23,20 @@ elif [ $RETCODE -eq 64 ]
 then
     echo "This system is already registered."
 else
-    echo "Incorrect Username / Password or Organization ID / Activation Key specified"
-    exit 3
+    sleep 5
+	subscription-manager register --force --username="$USERNAME_ORG" --password="$PASSWORD_ACT_KEY" || subscription-manager register --force --activationkey="$PASSWORD_ACT_KEY" --org="$USERNAME_ORG"
+	RETCODE2=$?
+	if [ $RETCODE2 -eq 0 ]
+	then
+		echo "Subscribed successfully"
+	elif [ $RETCODE2 -eq 64 ]
+	then
+		echo "This system is already registered."
+	else
+		echo "Incorrect Username / Password or Organization ID / Activation Key specified. Unregistering system from RHSM"
+		subscription-manager unregister
+		exit 3
+	fi
 fi
 
 subscription-manager attach --pool=$POOL_ID > attach.log

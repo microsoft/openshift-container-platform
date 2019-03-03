@@ -50,10 +50,10 @@
 				"description": "Pool Id with OpenShift entitlements"
 			}
 		},
-		"customTags": {
+		"redHatTags": {
 			"type": "object",
 			"metadata": {
-				"description": "Custom Tags"
+				"description": "Red Hat Tags"
 			}
 		}
 	},
@@ -65,7 +65,13 @@
 		"name": "[concat(parameters('openshiftNodeHostname'), '/prepNodes')]",
 		"location": "[parameters('location')]",
 		"apiVersion": "[parameters('apiVersionCompute')]",
-		"tags": "[parameters('customTags')]",
+		"tags": {
+			"displayName": "PrepMaster",
+				"provider": "[parameters('redHatTags').provider]",
+				"app": "[parameters('redHatTags').app]",
+				"version": "[parameters('redHatTags').version]",
+				"platform": "[parameters('redHatTags').platform]"
+		},
 		"properties": {
 			"publisher": "Microsoft.Azure.Extensions",
 			"type": "CustomScript",

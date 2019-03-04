@@ -237,7 +237,7 @@
 		},
 		"enableCNS": {
 			"type": "string",
-			"defaultValue": "true",
+			"defaultValue": "false",
 			"allowedValues": [
 				"true", "false"
 			],
@@ -343,7 +343,7 @@
 		},
 		"routingSubDomain": {
 			"type": "string",
-			"defaultValue": "contoso.com",
+			"defaultValue": "apps.contoso.com",
 			"metadata": {
 				"description": "Default Subdomain for application routing (Wildcard DNS) - must enter something even if you are using nip.io. Must be all lowercase"
 			}
@@ -447,16 +447,6 @@
 			"description": "Full reference to existing subnet for Compute nodes"
 		  }
 		},
-		"bastionIpType": {
-			"type": "string",
-			"defaultValue": "public",
-			"allowedValues": [
-				"private", "public"
-			],
-			"metadata": {
-				"description": "Specify whether the cluster uses private or public bastion node"
-			}
-		},
 		"masterClusterType": {
 			"type": "string",
 			"defaultValue": "public",
@@ -486,16 +476,9 @@
 		},
 		"routerPrivateClusterIp": {
 			"type": "string",
-			"defaultValue": "10.2.0.201",
+			"defaultValue": "10.2.0.200",
 			"metadata": {
 				"description": "Static Private IP address to use for infra load balancer when creating a cluster with private infra nodes"
-			}
-		},
-		"customHeaderImage": {
-			"type": "string",
-			"defaultValue": "",
-			"metadata": {
-				"description": "URL to a custom image for the header in the web console. If no valid image type is specified then it will use the default. 20px is the default height as well."
 			}
 		},
 		"routingCertType": {
@@ -540,7 +523,6 @@
 		"newStorageAccountInfra": "[concat('infra', uniqueString(concat(resourceGroup().id, 'isa')))]",
 		"newStorageAccountNodeOs": "[concat('nodeos', uniqueString(concat(resourceGroup().id, 'nodeossa')))]",
 		"newStorageAccountNodeData": "[concat('nodedata', uniqueString(concat(resourceGroup().id, 'nodedatasa')))]",
-		"newStorageAccountWeb": "[concat('web', uniqueString(concat(resourceGroup().id, 'csa')))]",
 		"newStorageAccountCns": "[concat('cns', uniqueString(concat(resourceGroup().id, 'csa')))]",
 		"diagStorageAccount1": "[concat('diag1', uniqueString(concat(resourceGroup().id, 'dsa1')))]",
 		"diagStorageAccount2": "[concat('diag2', uniqueString(concat(resourceGroup().id, 'dsa2')))]",
@@ -669,22 +651,6 @@
 			}
 		},
 		"infraFrontEndIpConfigurationProperties": "[concat(parameters('routerClusterType'), 'InfraFrontEndIpConfigurationProperties')]",
-		"privateBastionIpConfigurationProperties": {
-			"privateIPAllocationMethod": "Dynamic",
-			"subnet": {
-				"id": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName')), parameters('existingMasterSubnetReference'))]"
-			}
-		},
-		"publicBastionIpConfigurationProperties": {
-			"privateIPAllocationMethod": "Dynamic",
-			"publicIPAddress": {
-				"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/publicIPAddresses/', variables('bastionPublicIp'))]"
-			},
-			"subnet": {
-				"id": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('masterSubnetName')), parameters('existingMasterSubnetReference'))]"
-			}
-		},
-		"bastionIpConfigurationProperties": "[concat(parameters('bastionIpType'), 'BastionIpConfigurationProperties')]",
 		"imageReference": {
 			"publisher": "RedHat",
 			"offer": "RHEL",
@@ -1333,23 +1299,6 @@
 			"sku": {
 				"name": "[variables('newStorageAccountArray')[copyIndex()].skuName]",
 				"tier": "[variables('newStorageAccountArray')[copyIndex()].skuTier]"
-			}
-		}, {
-			"apiVersion": "[variables('apiVersionStorage')]",
-			"type": "Microsoft.Storage/storageAccounts",
-			"name": "[variables('newStorageAccountWeb')]",
-			"location": "[parameters('location')]",
-			"kind": "StorageV2",
-			"tags": {
-				"displayName": "newStorageAccountWeb",
-				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]",
-				"version": "[variables('redHatTags').version]",
-				"platform": "[variables('redHatTags').platform]"
-			},
-			"sku": {
-				"name": "[variables('storageSkuObject').web.skuName]",
-				"tier": "[variables('storageSkuObject').web.skuTier]"
 			}
 		}, {
 			"apiVersion": "[variables('apiVersionStorage')]",
@@ -2714,12 +2663,6 @@
 					},
 					"routerPublicIpName": {
 						"value": "[variables('infraLbPublicIpDnsLabel')]"
-					},
-					"customHeaderImage": {
-						"value": "[parameters('customHeaderImage')]"
-					},
-					"newStorageAccountWeb": {
-						"value": "[variables('newStorageAccountWeb')]"
 					},
 					"routingCertType": {
 						"value": "[parameters('routingCertType')]"

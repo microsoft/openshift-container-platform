@@ -39,11 +39,9 @@ export PRIVATEDNS=${32}
 export MASTERPIPNAME=${33}
 export ROUTERCLUSTERTYPE=${34}
 export INFRAPIPNAME=${35}
-export IMAGEURL=${36}
-export WEBSTORAGE=${37}
-export CUSTOMROUTINGCERTTYPE=${38}
-export CUSTOMMASTERCERTTYPE=${39}
-export MINORVERSION=${40}
+export CUSTOMROUTINGCERTTYPE=${36}
+export CUSTOMMASTERCERTTYPE=${37}
+export MINORVERSION=${38}
 export BASTION=$(hostname)
 
 # Set CNS to default storage type.  Will be overridden later if Azure is true

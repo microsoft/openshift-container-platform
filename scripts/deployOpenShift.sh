@@ -196,7 +196,7 @@ if [[ $ENABLECNS == "true" ]]
 then
     echo $(date) " - Creating CNS nodes grouping"
 
-    for (( c=1; c<$CNSCOUNT; c++ ))
+    for (( c=1; c<=$CNSCOUNT; c++ ))
     do
         cnsgroup="$cnsgroup
 ${CNS}0$c openshift_node_group_name='node-config-compute'"
@@ -235,10 +235,10 @@ then
     runuser -l $SUDOUSER -c "ansible all -o -f 30 -b -a 'sudo setsebool -P virt_sandbox_use_fusefs on'" || true
 	runuser -l $SUDOUSER -c "ansible all -o -f 30 -b -a 'sudo setsebool -P virt_use_fusefs on'" || true
 
-    for (( c=0; c<$CNSCOUNT; c++ ))
+    for (( c=1; c<=$CNSCOUNT; c++ ))
     do
-        runuser $SUDOUSER -c "ssh-keyscan -H $CNS-$c >> ~/.ssh/known_hosts"
-        drive=$(runuser $SUDOUSER -c "ssh $CNS-$c 'sudo /usr/sbin/fdisk -l'" | awk '$1 == "Disk" && $2 ~ /^\// && ! /mapper/ {if (drive) print drive; drive = $2; sub(":", "", drive);} drive && /^\// {drive = ""} END {if (drive) print drive;}')
+        runuser $SUDOUSER -c "ssh-keyscan -H ${CNS}0$c >> ~/.ssh/known_hosts"
+        drive=$(runuser $SUDOUSER -c "ssh ${CNS}0$c 'sudo /usr/sbin/fdisk -l'" | awk '$1 == "Disk" && $2 ~ /^\// && ! /mapper/ {if (drive) print drive; drive = $2; sub(":", "", drive);} drive && /^\// {drive = ""} END {if (drive) print drive;}')
         drive1=$(echo $drive | cut -d ' ' -f 1)
         drive2=$(echo $drive | cut -d ' ' -f 2)
         drive3=$(echo $drive | cut -d ' ' -f 3)

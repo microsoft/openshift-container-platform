@@ -16,6 +16,8 @@ export CUSTOMMASTERCERTFILE="${12}"
 export CUSTOMMASTERKEYFILE="${13}"
 export CUSTOMDOMAIN="${14}"
 export MINORVERSION=${15}
+export CUSTOMMASTERTYPE=${16}
+export CUSTOMROUTINGTYPE=${17}
 
 # Generate private keys for use by Ansible
 echo $(date) " - Generating Private keys for use by Ansible for OpenShift Installation"
@@ -103,7 +105,7 @@ sudo yum install -y ImageMagick
 
 # Configure DNS so it always has the domain name
 echo $(date) " - Adding DOMAIN to search for resolv.conf"
-if [ $CUSTOMROUTINGCERTTYPE == "custom" ]
+if [[ $CUSTOMMASTERTYPE == "custom" && $CUSTOMROUTINGTYPE== "custom" ]]
 then
 	DOMAINNAME=$CUSTOMDOMAIN
 else

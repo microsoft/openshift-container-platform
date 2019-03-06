@@ -2293,6 +2293,12 @@
 					"minorVersion": {
 						"value": "[parameters('minorVersion')]"
 					},
+					"masterClusterDnsType": {
+						"value": "[parameters('masterClusterDnsType')]"
+					},
+					"routingSubDomainType": {
+						"value": "[parameters('routingSubDomainType')]"
+					},
 					"redHatTags": {
 						"value": "[variables('redHatTags')]"
 					}

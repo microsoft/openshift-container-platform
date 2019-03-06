@@ -73,7 +73,9 @@ Deploying private OpenShift clusters requires more than just not having a public
 
 If private masters is selected (**masterClusterType**=private), a static private IP needs to be specified for **masterPrivateClusterIp** which will be assigned to the front end of the master load balancer.  This must be within the CIDR for the master subnet and not already in use.  **masterClusterDnsType** must be set to "custom" and the master DNS name must be provided for **masterClusterDns** and this needs to map to the static Private IP and will be used to access the console on the master nodes.
 
-If private router is selected (**routerClusterType**=private), a static private IP needs to be specified for **routerPrivateClusterIp** which will be assigned to the front end of the infra load balancer.  This must be within the CIDR for the infra subnet and not already in use.  **routingSubDomainType** must be set to "custom" and the wildcard DNS name for routing must be provided for **routingSubDomain**.  The custom domain name must also be entered for **domainName**
+If private router is selected (**routerClusterType**=private), a static private IP needs to be specified for **routerPrivateClusterIp** which will be assigned to the front end of the infra load balancer.  This must be within the CIDR for the infra subnet and not already in use.  **routingSubDomainType** must be set to "custom" and the wildcard DNS name for routing must be provided for **routingSubDomain**.  
+
+If private masters and private router is selected, the custom domain name must also be entered for **domainName**
 
 After successful deployment, the Bastion Node is the only node with a public IP that you can ssh into.  Even if the master nodes are configured for public access, they are not exposed for ssh access.
 

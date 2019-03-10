@@ -105,7 +105,7 @@ sudo yum install -y ImageMagick
 
 # Configure DNS so it always has the domain name
 echo $(date) " - Adding DOMAIN to search for resolv.conf"
-if [[ $CUSTOMMASTERTYPE == "custom" && $CUSTOMROUTINGTYPE== "custom" ]]
+if [[ $CUSTOMMASTERTYPE == "custom" && $CUSTOMROUTINGTYPE == "custom" ]]
 then
 	DOMAINNAME=$CUSTOMDOMAIN
 else

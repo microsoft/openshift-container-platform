@@ -20,6 +20,12 @@
 				"description": "SSH Public Key"
 			}
 		},
+		"osDiskSize": {
+			"type": "int",
+			"metadata": {
+				"description": "Size of Data Disk"
+			}
+		},
 		"dataDiskSize": {
 			"type": "int",
 			"metadata": {
@@ -157,7 +163,7 @@
 				},
 				"caching": "ReadWrite",
 				"createOption": "FromImage",
-				"diskSizeGB": 64,
+				"diskSizeGB": "[parameters('osDiskSize')]",
 				"osType": "Linux"
 			},
 			"dataDisks": [{

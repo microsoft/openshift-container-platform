@@ -34,6 +34,9 @@
 		"openshiftClusterPrefix": {
 			"value": "ocpcluster"
 		},
+		"minorVersion": {
+			"value": "69"
+		},
 		"masterInstanceCount": {
 			"value": 3
 		},
@@ -43,14 +46,17 @@
 		"nodeInstanceCount": {
 			"value": 3
 		},
+		"cnsInstanceCount": {
+			"value": 3
+		},
 		"dataDiskSize": {
+			"value": 128
+		},
+		"cnsGlusterDiskSize": {
 			"value": 128
 		},
 		"adminUsername": {
 			"value": "ocpadmin"
-		},
-		"openshiftPassword": {
-			"value": "changeme"
 		},
 		"enableMetrics": {
 			"value": "false"
@@ -62,19 +68,19 @@
 			"value": "false"
 		},
 		"rhsmUsernameOrOrgId": {
-			"value": "changeme"
-		},
-		"rhsmPasswordOrActivationKey": {
-			"value": "changeme"
+			"value": "myrhsmusername"
 		},
 		"rhsmPoolId": {
-			"value": "changeme"
+			"value": "1a23f12345c8c8380166abcde01a251b"
 		},
 		"rhsmBrokerPoolId": {
-			"value": "changeme"
+			"value": "1a23f12345c8c8380166abcde01a111a"
 		},
 		"sshPublicKey": {
 			"value": "GEN-SSH-PUB-KEY"
+		},
+		"keyVaultSubscriptionId": {
+			"value": "255a325e-8276-4ada-af8f-33af5658eb34"
 		},
 		"keyVaultResourceGroup": {
 			"value": "keyvaultrg"
@@ -82,17 +88,14 @@
 		"keyVaultName": {
 			"value": "keyvault"
 		},
-		"keyVaultSecret": {
-			"value": "openshift"
-		},
 		"enableAzure": {
 			"value": "true"
 		},
 		"aadClientId": {
-			"value": "changeme"
+			"value": "aa1f18d9-1234-4f11-11cb-d6da4f6def11"
 		},
-		"aadClientSecret": {
-			"value": "changeme"
+		"domainName": {
+			"value": "contoso.com"
 		},
 		"masterClusterDnsType": {
 			"value": "default"
@@ -162,21 +165,6 @@
 		},
 		"masterCertType": {
 			"value": "selfsigned"
-		},
-		"proxySettings": {
-			"value": ""
-		},
-		"httpProxyEntry": {
-			"value": ""
-		},
-		"httpsProxyEntry": {
-			"value": ""
-		},
-		"noProxyEntry": {
-			"value": ""
-		},
-		"customHeaderImage": {
-			"value": ""
 		}
 	}
 }

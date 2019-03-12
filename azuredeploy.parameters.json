@@ -80,7 +80,7 @@
 			"value": "GEN-SSH-PUB-KEY"
 		},
 		"keyVaultSubscriptionId": {
-			"value": "295a325e-8276-4dda-af8f-33df5658eb38"
+			"value": "255a325e-8276-4ada-af8f-33af5658eb34"
 		},
 		"keyVaultResourceGroup": {
 			"value": "changeme"
@@ -125,7 +125,7 @@
 			"value": "10.1.0.0/16"
 		},
 		"infraSubnetName": {
-			"value": "infrasubnet"
+			"value": "changeme"
 		},
 		"infraSubnetPrefix": {
 			"value": "10.2.0.0/16"

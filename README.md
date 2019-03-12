@@ -63,7 +63,7 @@ This template deploys multiple VMs and requires some pre-work before you can suc
 By default, this template uses the On-Demand Red Hat Enterprise Linux image from the Azure Gallery. 
 >When using the On-Demand image, there is an hourly charge for using this image.  At the same time, the instance will be registered to your Red Hat subscription, so you will also be using one of your entitlements. This will lead to "double billing".
 
-If you have a valid Red Hat subscription, register for Cloud Access and request access to the BYOS RHEL image in the Private Azure Marketplace to avoid the double billing. To use a 3rd party marketplace offer (such as the BYOS private image), you need to provide the following information for the offer - publisher, offer, sku, and version.  You also need to enable the offer for programmatic deployment.
+If you have a valid Red Hat subscription, register for Cloud Access and [request access](http://aka.ms/rhel-byos-preview) to the BYOS RHEL image in the Private Azure Marketplace to avoid the double billing. To use a 3rd party marketplace offer (such as the BYOS private image), you need to provide the following information for the offer - publisher, offer, sku, and version.  You also need to enable the offer for programmatic deployment.
 
 If you are only using one pool ID for all nodes, then enter the same pool ID for both 'rhsmPoolId' and 'rhsmBrokerPoolId'.
 
@@ -103,7 +103,7 @@ If you are using a Windows computer, you can download puttygen.exe.  You will ne
 
 From a Linux or Mac, you can just use the ssh-keygen command.  Once you are finished deploying the cluster, you can always generate new keys that uses a passphrase and replace the original ones used during initial deployment.
 
-**Sore SSH Private key in Secret**
+**Store SSH Private key in Secret**
 
 1.  Create Secret: az keyvault secret set --vault-name \<vault-name\> -n \<secret-name\> --file \<private-key-file-name\><br/>
     Ex: `az keyvault secret set --vault-name KeyVaultName -n sshPrivateKey --file ~/.ssh/id_rsa`<br/>
@@ -208,8 +208,9 @@ az keyvault secret set --vault-name KeyVaultName -n mastercafile --file ~/certif
 | `masterInstanceCount`     | Number of Masters nodes to deploy                                                                           | - 1, 3, 5                                                              | 3                 |
 | `infraInstanceCount`      | Number of infra nodes to deploy                                                                             | - 1, 2, 3                                                              | 3                 |
 | `nodeInstanceCount`       | Number of Nodes to deploy                          | - 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30                 | 2                 |
+| `cnsInstanceCount`        | Number of CNS nodes to deploy                                                                               | - 3, 4                                                                 | 3                 |
 | `osDiskSize`              | Size of OS disk for the VM (in GB)                                                                          | - 64 <br>- 128 <br>- 256 <br>- 512 <br>- 1024 <br>- 2048               | 64                |
-| `dataDiskSize`            | Size of data disk to attach to nodes for Docker volume (in GB)                                              | - 32 <br>- 64 <br>- 128 <br>- 256 <br>- 512 <br>- 1024 <br>- 2048      | 64                |
+| `dataDiskSize`            | Size of data disk to attach to nodes for Docker volume (in GB)                                              | - 32 <br>- 64 <br>- 128 <br>- 256 <br>- 512 <br>- 1024 <br>- 2048      | 128               |
 | `cnsGlusterDiskSize`      | Size of data disk to attach to CNS nodes for use by gluster (in GB)                                         | - 32 <br>- 64 <br>- 128 <br>- 256 <br>- 512 <br>- 1024 <br>- 2048      | 128               |
 | `adminUsername`           | Admin username for both OS (VM) login and initial OpenShift user                                            |                                                                        | ocpadmin          |
 | `enableMetrics`           | Enable Metrics. Metrics require more resources so select proper size for Infra VM                           | - "true"<br>- "false"                                                  | false             |
@@ -239,10 +240,10 @@ az keyvault secret set --vault-name KeyVaultName -n mastercafile --file ~/certif
 | `infraSubnetPrefix`             | CIDR used for the infra subnet - needs to be a subset of the addressPrefix                            |         | 10.2.0.0/16   |
 | `nodeSubnetName`                | The name of the node subnet                                                                           |         | nodesubnet    |
 | `nodeSubnetPrefix`              | CIDR used for the node subnet - needs to be a subset of the addressPrefix                             |         | 10.3.0.0/16   |
-| `existingMasterSubnetReference` | Full reference to existing subnet for master nodes                                                    |         |               |
-| `existingInfraSubnetReference`  | Full reference to existing subnet for infra nodes                                                     |         |               |
-| `existingCnsSubnetReference`    | Full reference to existing subnet for cns nodes                                                       |         |               |
-| `existingNodeSubnetReference`   | Full reference to existing subnet for compute nodes                                                   |         |               |
+| `existingMasterSubnetReference` | Full reference to existing subnet for master nodes. Not needed if creating new vNet / Subnet          |         |               |
+| `existingInfraSubnetReference`  | Full reference to existing subnet for infra nodes. Not needed if creating new vNet / Subnet           |         |               |
+| `existingCnsSubnetReference`    | Full reference to existing subnet for cns nodes. Not needed if creating new vNet / Subnet             |         |               |
+| `existingNodeSubnetReference`   | Full reference to existing subnet for compute nodes. Not needed if creating new vNet / Subnet         |         |               |
 | `masterClusterType`             | Specify whether the cluster uses private or public master nodes. If private is chosen, the master nodes will not be exposed to the Internet via a public IP. Instead, it will use the private IP specified in the `masterPrivateClusterIp`                                                                                                                  | - "public"<br>- "private"                                                       | public        |
 | `masterPrivateClusterIp`        | If private master nodes is selected, then a private IP address must be specified for use by the internal load balancer for master nodes. This will be a static IP so it must reside within the CIDR block for the master subnet and not already in use. If public master nodes is selected, this value will not be used but must still be specified.        |                                                                                 | 10.1.0.200    |
 | `routerClusterType`             | Specify whether the cluster uses private or public infra nodes. If private is chosen, the infra nodes will not be exposed to the Internet via a public IP. Instead, it will use the private IP specified in the `routerPrivateClusterIp`                                                                                                                  | - "public"<br>- "private"                                                       | public        |

@@ -35,7 +35,7 @@ Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 7.  Support for default gallery RHEL On Demand image and 3rd party Marketplace offer such as BYOS image in Private Marketplace
 8.  Support self-signed certificates or custom SSL certificates for master load balancer (Web Console)
 9.  Support self-signed certificates or custom SSL certificates for infra load balancer (Router)
-10. 
+
 
 This template deploys OpenShift Container Platform with basic username / password for authentication to OpenShift. It includes the following resources:
 
@@ -63,7 +63,7 @@ This template deploys multiple VMs and requires some pre-work before you can suc
 By default, this template uses the On-Demand Red Hat Enterprise Linux image from the Azure Gallery. 
 >When using the On-Demand image, there is an hourly charge for using this image.  At the same time, the instance will be registered to your Red Hat subscription, so you will also be using one of your entitlements. This will lead to "double billing".
 
-If you have a valid Red Hat subscription, register for Cloud Access and [request access](http://aka.ms/rhel-byos-preview) to the BYOS RHEL image in the Private Azure Marketplace to avoid the double billing. To use a 3rd party marketplace offer (such as the BYOS private image), you need to provide the following information for the offer - publisher, offer, sku, and version.  You also need to enable the offer for programmatic deployment.
+If you have a valid Red Hat subscription, register for Cloud Access and [request access](http://aka.ms/rhel-byos) to the BYOS RHEL image in the Private Azure Marketplace to avoid the double billing. To use a 3rd party marketplace offer (such as the BYOS private image), you need to provide the following information for the offer - publisher, offer, sku, and version.  You also need to enable the offer for programmatic deployment.
 
 If you are only using one pool ID for all nodes, then enter the same pool ID for both 'rhsmPoolId' and 'rhsmBrokerPoolId'.
 

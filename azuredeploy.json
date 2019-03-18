@@ -309,7 +309,7 @@
 		},
 		"domainName": {
 			"type": "string",
-			"defaultValue": "contoso.com",
+			"defaultValue": "none",
 			"metadata": {
 				"description": "Domain search name"
 			}

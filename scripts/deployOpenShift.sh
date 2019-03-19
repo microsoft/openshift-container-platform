@@ -221,9 +221,14 @@ $nodegroup
 $cnsgroup
 EOF
 
-# Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
-echo $(date) " - Running DNS Hostname resolution check"
-runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
+# If we are NOT running nipio, then run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
+if echo $ROUTING | grep nip.io >/dev/null
+then
+    echo $(date) " - Will not run Hostname resolution check, we are using nip.io"
+else
+    echo $(date) " - Running DNS Hostname resolution check"
+    runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
+fi
 
 # Create glusterfs configuration if CNS is enabled
 if [[ $ENABLECNS == "true" ]]

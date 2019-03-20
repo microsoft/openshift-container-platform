@@ -482,6 +482,14 @@ then
     fi
 fi
 
+# Creating variables file for private master and Azure AD configuration playbook
+echo $(date) " - Creating variables file for future playbooks"
+cat > /home/$SUDOUSER/openshift-container-platform-playbooks/vars.yaml <<EOF
+admin_user: $SUDOUSER
+master_lb_private_dns: $PRIVATEDNS
+domain: $DOMAIN
+EOF
+
 # Configure cluster for private masters
 if [[ $MASTERCLUSTERTYPE == "private" ]]
 then

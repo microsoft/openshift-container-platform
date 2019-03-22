@@ -1,6 +1,7 @@
 {
 	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
 	"contentVersion": "1.0.0.0",
+	"apiProfile": "2018-03-01-hybrid"
 	"parameters": {
 		"_artifactsLocation": {
 			"type": "string",
@@ -107,9 +108,9 @@
 		},
 		"osImageType": {
 			"type": "string",
-			"defaultValue": "defaultgallery",
+			"defaultValue": "marketplace",
 			"allowedValues": [
-				"defaultgallery", "marketplace"
+				"marketplace"
 			],
 			"metadata": {
 				"description": "OpenShift OS image type. 'defaultgallery' will use the on demand RHEL image. 'marketplace' allows you to define a third party marketplace image to use."
@@ -654,7 +655,7 @@
 		"imageReference": {
 			"publisher": "RedHat",
 			"offer": "RHEL",
-			"sku": "7.5",
+			"sku": "7-RAW",
 			"version": "latest"
 		},
 		"marketplacePlan":{
@@ -1023,7 +1024,6 @@
 	},
 	"resources": [
 		{ 
-			"apiVersion": "2018-02-01",
 			"type": "Microsoft.Resources/deployments",
 			"name": "pid-5c55d719-e293-4b46-8d7b-9c6221a227e4",
 			"properties": {
@@ -1035,7 +1035,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[concat(variables('openshiftBastionHostname'), '-nsg')]",
 			"location": "[parameters('location')]",
@@ -1063,7 +1062,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[concat(variables('openshiftMasterHostname'), '-nsg')]",
 			"location": "[parameters('location')]",
@@ -1104,7 +1102,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[concat(variables('openshiftInfraHostname'), '-nsg')]",
 			"location": "[parameters('location')]",
@@ -1159,7 +1156,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[concat(variables('openshiftCnsHostname'), '-nsg')]",
 			"location": "[parameters('location')]",
@@ -1187,7 +1183,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[concat(variables('openshiftNodeHostname'), '-nsg')]",
 			"location": "[parameters('location')]",
@@ -1242,7 +1237,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/virtualNetworks",
 			"name": "[parameters('virtualNetworkName')]",
 			"location": "[parameters('location')]",
@@ -1280,7 +1274,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionStorage')]",
 			"type": "Microsoft.Storage/storageAccounts",
 			"name": "[variables('newStorageAccountArray')[copyIndex()].name]",
 			"location": "[parameters('location')]",
@@ -1301,7 +1294,6 @@
 				"tier": "[variables('newStorageAccountArray')[copyIndex()].skuTier]"
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionStorage')]",
 			"type": "Microsoft.Storage/storageAccounts",
 			"name": "[variables('newStorageAccountCns')]",
 			"location": "[parameters('location')]",
@@ -1317,7 +1309,6 @@
 				"name": "[variables('storageSkuObject').cns.skuName]"
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[variables('bastionPublicIp')]",
 			"location": "[parameters('location')]",
@@ -1336,7 +1327,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('routerClusterType'), 'public')]",
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[variables('infraLbPublicIpDnsLabel')]",
 			"location": "[parameters('location')]",
@@ -1355,7 +1345,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('masterClusterType'), 'public')]",
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[variables('openshiftMasterPublicIpDnsLabel')]",
 			"location": "[parameters('location')]",
@@ -1373,7 +1362,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionCompute')]",
 			"type": "Microsoft.Compute/availabilitySets",
 			"name": "[variables('availabilitySetArray')[copyIndex()].name]",
 			"location": "[parameters('location')]",
@@ -1397,7 +1385,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
-			"apiVersion": "[variables('apiVersionCompute')]",
 			"type": "Microsoft.Compute/availabilitySets",
 			"name": "cnsavailabilityset",
 			"location": "[parameters('location')]",
@@ -1416,7 +1403,6 @@
 				"platform": "[variables('redHatTags').platform]"
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/loadBalancers",
 			"name": "[variables('masterLoadBalancerName')]",
 			"location": "[parameters('location')]",
@@ -1468,7 +1454,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/loadBalancers",
 			"name": "[variables('infraLoadBalancerName')]",
 			"location": "[parameters('location')]",
@@ -1542,7 +1527,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('openshiftBastionHostname'), '-nic')]",
 			"location": "[parameters('location')]",
@@ -1576,7 +1560,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('openshiftMasterHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
@@ -1615,7 +1598,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('openshiftInfraHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
@@ -1655,7 +1637,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('openshiftCnsHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
@@ -1690,7 +1671,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('openshiftNodeHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
@@ -1725,7 +1705,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "bastionVmDeployment",
 			"dependsOn": [
@@ -1799,7 +1778,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('masterVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -1893,7 +1871,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('infraVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -1987,7 +1964,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('nodeVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -2082,7 +2058,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('cnsVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -2180,7 +2155,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "bastionPrep",
 			"dependsOn": [
@@ -2305,7 +2279,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('masterPrep', padLeft(add(copyIndex(), 1), 2, '0'))]",			
 			"dependsOn": [
@@ -2360,7 +2333,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('InfraPrep', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -2413,7 +2385,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('CNSPrep', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -2465,7 +2436,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('NodePrep', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -2517,7 +2487,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "OpenShiftDeployment",
 			"dependsOn": [

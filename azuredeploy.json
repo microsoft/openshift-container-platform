@@ -9,7 +9,7 @@
 				"description": "Base URL for Template Files",
 				"artifactsBaseUrl": ""
 			},
-			"defaultValue": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/master"
+			"defaultValue": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/azurestack-release-3.11"
 		},
 		"_artifactsLocationSasToken": {
           "type": "securestring",
@@ -131,7 +131,7 @@
 		"storageKind": {
 			"type": "string",
 			"defaultValue": "managed",
-			"allowedValues": ["managed", "unmanaged"],
+			"allowedValues": ["managed"],
 			"metadata": {
 				"description": "Use Managed or Unmanaged Disks"
 			}
@@ -293,9 +293,9 @@
 		},
 		"enableAzure": {
 			"type": "string",
-			"defaultValue": "true",
+			"defaultValue": "false",
 			"allowedValues": [
-				"true", "false"
+				"false"
 			],
 			"metadata": {
 				"description": "Enable Azure as Cloud Provider - true or false"

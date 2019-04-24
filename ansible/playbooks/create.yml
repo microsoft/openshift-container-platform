@@ -512,7 +512,6 @@
         jid: "{{ item.ansible_job_id }}"
         mode: status
       register: async_poll_results
-      loop: "{{ jobs_vm }}"
       loop: "{{ [ output_vm_bastion ] + output_vms_master.results + output_vms_node.results + output_vms_infra.results }}"
       until: async_poll_results.finished
       retries: 30
@@ -534,8 +533,9 @@
           commandToExecute: "bash masterPrep.sh {{ rhsm_username_org }} '{{ rhsm_password_key }}' {{ rhsm_pool }} {{ admin_username }} {{ location }} {{ unmanaged_storage_class_account }}"
       with_sequence: start=0 end={{ master_count - 1 }}
       when: runvmext == "true"
-      async: 150
+      async: 1000
       poll: 0
+      register: output_vmext_master
     
 
     - name: Create infra VM extension
@@ -552,8 +552,9 @@
           commandToExecute: "bash nodePrep.sh {{ rhsm_username_org }} '{{ rhsm_password_key }}' {{ rhsm_pool }}"
       with_sequence: start=0 end={{ infra_count - 1 }}
       when: runvmext == "true"
-      async: 150
+      async: 1000
       poll: 0
+      register: output_vmext_infra
 
     - name: Create node VM extension
       azure_rm_virtualmachine_extension:
@@ -569,8 +570,20 @@
           commandToExecute: "bash nodePrep.sh {{ rhsm_username_org }} '{{ rhsm_password_key }}' {{ rhsm_pool }}"
       with_sequence: start=0 end={{ node_count - 1 }}
       when: runvmext == "true"
-      async: 150
+      async: 1000
       poll: 0
+      register: output_vmext_node
+
+    - name: Wait for VM extensions setup to be completed
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+        mode: status
+      register: async_poll_results
+      loop: "{{ output_vmext_master.results + output_vmext_node.results + output_vmext_infra.results }}"
+      until: async_poll_results.finished
+      retries: 30
+      delay: 60
+
 
 # Bastion playbook tasks to set it up
 - hosts: bastion_vm
@@ -662,7 +675,7 @@
           - python-devel
           - git
           - azure-cli
-          - python27-python-pip
+          #- python27-python-pip
           - atomic-openshift-excluder
           - atomic-openshift-docker-excluder
         state: present
@@ -695,7 +708,7 @@
     - file:
         path: export-all.sh
         mode: "a+x"
-    
+
     # Deploying openshift CP with deployOpenShift.sh
     # 'bash ', parameters('openshiftDeploymentScriptFileName')
     - name: Run deployOpenShift.sh Container Platform
@@ -708,9 +721,9 @@
           # $3 MASTER=$3 - parameters('openshiftMasterHostname')
           "{{ cluster_prefix }}-master" \
           # $4 MASTERPUBLICIPHOSTNAME=$4 - parameters('openshiftMasterPublicIpFqdn')
-          "{{ master_publicip_fqdn }}" \
+          "{{ hostvars['localhost']['master_publicip_fqdn'] }}" \
           # $5 MASTERPUBLICIPADDRESS=$5 - parameters('openshiftMasterPublicIpAddress')
-          "{{ master_publicip }}" \
+          "{{ hostvars['localhost']['master_publicip'] }}" \
           # $6 INFRA=$6 - parameters('openshiftInfraHostname')
           "{{ cluster_prefix }}-infra" \
           # $7 NODE=$7 - parameters('openshiftNodeHostname')
@@ -726,7 +739,7 @@
           # $12 REGISTRYSA=${12} - parameters('newStorageAccountRegistry')
           "{{ registry_storage_account }}" \
           # $13 ACCOUNTKEY="${13}" - parameters('newStorageAccountKey')
-          "{{ registry_storage_account_key }}" \
+          "{{ hostvars['localhost']['registry_storage_account_key'] }}" \
           # $14 METRICS=${14} - parameters('enableMetrics')
           "{{ deploy_metrics }}"
           # $15 LOGGING=${15}
@@ -761,4 +774,3 @@
           "{{ empty_var }}"
         )
         ./export-all.sh "${args[@]}"
-        

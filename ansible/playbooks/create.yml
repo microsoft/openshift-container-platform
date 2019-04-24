@@ -774,4 +774,3 @@
           "{{ empty_var }}"
         )
         ./export-all.sh "${args[@]}"
-

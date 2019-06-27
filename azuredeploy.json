@@ -120,7 +120,7 @@
 			"defaultValue": {
 				"publisher": "redhat",
 				"offer": "rhel-byos",
-				"sku": "rhel-75",
+				"sku": "rhel-76",
 				"version": "latest"
 			},
 			"metadata": {
@@ -654,7 +654,7 @@
 		"imageReference": {
 			"publisher": "RedHat",
 			"offer": "RHEL",
-			"sku": "7.5",
+			"sku": "7-RAW",
 			"version": "latest"
 		},
 		"marketplacePlan":{

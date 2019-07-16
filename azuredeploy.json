@@ -1,7 +1,7 @@
 {
 	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
 	"contentVersion": "1.0.0.0",
-	"apiProfile": "2018-03-01-hybrid"
+	"apiProfile": "2018-03-01-hybrid",
 	"parameters": {
 		"_artifactsLocation": {
 			"type": "string",
@@ -27,22 +27,16 @@
 		},
 		"masterVmSize": {
 			"type": "string",
-			"defaultValue": "Standard_E2s_v3",
+			"defaultValue": "Standard_DS3_v2",
 			"allowedValues": [
 				"Standard_D2", "Standard_D3", "Standard_D4",
 				"Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14",
 				"Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
 				"Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2",
-				"Standard_G1", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5",
 				"Standard_DS2", "Standard_DS3", "Standard_DS4",
 				"Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14",
 				"Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
-				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2",
-				"Standard_GS1", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5",
-				"Standard_D2_v3", "Standard_D4_v3", "Standard_D8_v3", "Standard_D16_v3", "Standard_D32_v3", "Standard_D64_v3",
-				"Standard_D2s_v3", "Standard_D4s_v3", "Standard_D8s_v3", "Standard_D16s_v3", "Standard_D32s_v3", "Standard_D64s_v3",
-				"Standard_E2_v3", "Standard_E4_v3", "Standard_E8_v3", "Standard_E16_v3", "Standard_E32_v3", "Standard_E64_v3",
-				"Standard_E2s_v3", "Standard_E4s_v3", "Standard_E8s_v3", "Standard_E16s_v3", "Standard_E32s_v3", "Standard_E64s_v3"
+				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2"
 			],
 			"metadata": {
 				"description": "OpenShift Master VM size"
@@ -56,16 +50,10 @@
 				"Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14",
 				"Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
 				"Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2",
-				"Standard_G1", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5",
 				"Standard_DS2", "Standard_DS3", "Standard_DS4",
 				"Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14",
 				"Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
-				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2",
-				"Standard_GS1", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5",
-				"Standard_D2_v3", "Standard_D4_v3", "Standard_D8_v3", "Standard_D16_v3", "Standard_D32_v3", "Standard_D64_v3",
-				"Standard_D2s_v3", "Standard_D4s_v3", "Standard_D8s_v3", "Standard_D16s_v3", "Standard_D32s_v3", "Standard_D64s_v3",
-				"Standard_E2_v3", "Standard_E4_v3", "Standard_E8_v3", "Standard_E16_v3", "Standard_E32_v3", "Standard_E64_v3",
-				"Standard_E2s_v3", "Standard_E4s_v3", "Standard_E8s_v3", "Standard_E16s_v3", "Standard_E32s_v3", "Standard_E64s_v3"
+				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2"
 			],
 			"metadata": {
 				"description": "OpenShift Infra Node VM(s) size"
@@ -79,16 +67,10 @@
 				"Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14",
 				"Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
 				"Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2",
-				"Standard_G1", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5",
 				"Standard_DS2", "Standard_DS3", "Standard_DS4",
 				"Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14",
 				"Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
-				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2",
-				"Standard_GS1", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5",
-				"Standard_D2_v3", "Standard_D4_v3", "Standard_D8_v3", "Standard_D16_v3", "Standard_D32_v3", "Standard_D64_v3",
-				"Standard_D2s_v3", "Standard_D4s_v3", "Standard_D8s_v3", "Standard_D16s_v3", "Standard_D32s_v3", "Standard_D64s_v3",
-				"Standard_E2_v3", "Standard_E4_v3", "Standard_E8_v3", "Standard_E16_v3", "Standard_E32_v3", "Standard_E64_v3",
-				"Standard_E2s_v3", "Standard_E4s_v3", "Standard_E8s_v3", "Standard_E16s_v3", "Standard_E32s_v3", "Standard_E64s_v3"
+				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2"
 			],
 			"metadata": {
 				"description": "OpenShift Compute Node VM(s) size"
@@ -98,12 +80,11 @@
 			"type": "string",
 			"defaultValue": "Standard_E4s_v3",
 			"allowedValues": [
-				"Standard_DS4_v2", "Standard_DS12_v2",
-				"Standard_D4s_v3", "Standard_D8s_v3", "Standard_D16s_v3", "Standard_D32s_v3", "Standard_D64s_v3",
-				"Standard_E4s_v3", "Standard_E8s_v3", "Standard_E16s_v3", "Standard_E32s_v3", "Standard_E64s_v3"
+				"Standard_DS4", "Standard_DS12", "Standard_DS13", "Standard_DS14", 
+				"Standard_DS4_v2", "Standard_DS5_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2"
 			],
 			"metadata": {
-				"description": "OpenShift CNS Node VM(s) size"
+				"description": "OpenShift OCS Node VM(s) size"
 			}
 		},
 		"osImageType": {
@@ -113,7 +94,7 @@
 				"marketplace"
 			],
 			"metadata": {
-				"description": "OpenShift OS image type. 'defaultgallery' will use the on demand RHEL image. 'marketplace' allows you to define a third party marketplace image to use."
+				"description": "OpenShift OS image type. For Azure Stack, this can only be set to 'marketplace' which allows you to reference the RHEL image that was imported."
 			}
 		},
 		"marketplaceOsImage": {
@@ -121,7 +102,7 @@
 			"defaultValue": {
 				"publisher": "redhat",
 				"offer": "rhel-byos",
-				"sku": "rhel-75",
+				"sku": "rhel-76",
 				"version": "latest"
 			},
 			"metadata": {
@@ -133,7 +114,7 @@
 			"defaultValue": "managed",
 			"allowedValues": ["managed"],
 			"metadata": {
-				"description": "Use Managed or Unmanaged Disks"
+				"description": "Use Managed Disks"
 			}
 		},
 		"openshiftClusterPrefix": {
@@ -147,7 +128,7 @@
 		},
 		"minorVersion": {
 			"type": "string",
-			"defaultValue": "69",
+			"defaultValue": "82",
 			"metadata": {
 				"description": "Minor version of OpenShift 3.11 to deploy"
 			}
@@ -178,10 +159,10 @@
 		},
 		"cnsInstanceCount": {
 			"type": "int",
-			"defaultValue": 3,
-			"allowedValues": [3, 4, 5],
+			"defaultValue": 4,
+			"allowedValues": [4, 5, 6],
 			"metadata": {
-				"description": "Number of OpenShift CNS nodes. 3 is the default but 4 is recommended per ref arch"
+				"description": "Number of OpenShift OCS nodes. 4 is the default per ref arch"
 			}
 		},
 		"osDiskSize": {
@@ -205,7 +186,7 @@
 			"defaultValue": 128,
 			"allowedValues": [32, 64, 128, 256, 512, 1024, 2048],
 			"metadata": {
-				"description": "Size of disk in GB for gluster storage on CNS nodes"
+				"description": "Size of disk in GB for gluster storage on OCS nodes"
 			}
 		},
 		"adminUsername": {
@@ -223,7 +204,7 @@
 				"true", "false"
 			],
 			"metadata": {
-				"description": "Enable OpenShift Metrics: true or false"
+				"description": "Enable OpenShift Hawkular Metrics: true or false"
 			}
 		},
 		"enableLogging": {
@@ -233,7 +214,7 @@
 				"true", "false"
 			],
 			"metadata": {
-				"description": "Enable OpenShift Logging: true or false"
+				"description": "Enable OpenShift ELK Logging: true or false"
 			}
 		},
 		"enableCNS": {
@@ -243,7 +224,7 @@
 				"true", "false"
 			],
 			"metadata": {
-				"description": "Enable Container Native Storage: true or false"
+				"description": "Enable OpenShift Container Storage: true or false"
 			}
 		},
 		"rhsmUsernameOrOrgId": {
@@ -298,7 +279,7 @@
 				"false"
 			],
 			"metadata": {
-				"description": "Enable Azure as Cloud Provider - true or false"
+				"description": "Enable Azure as Cloud Provider. This is 'false' for Azure Stack since this isn't avaialbe in Azure Stack today"
 			}
 		},
 		"aadClientId": {
@@ -312,7 +293,7 @@
 			"type": "string",
 			"defaultValue": "none",
 			"metadata": {
-				"description": "Domain search name"
+				"description": "Domain search name.  This needs to be set to 'none' unless you are provisioning a fully private cluster - master cluster type and router cluster type are set to private."
 			}
 		},
 		"masterClusterDnsType": {
@@ -424,28 +405,28 @@
 		  "type": "string",
 		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/mastersubnet",
 		  "metadata": {
-			"description": "Full reference to existing subnet for Master nodes"
+			"description": "Full reference to existing subnet for Master nodes.  Ignored for new vnets"
 		  }
 		},
 		"existingInfraSubnetReference": {
 		  "type": "string",
 		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/infrasubnet",
 		  "metadata": {
-			"description": "Full reference to existing subnet for Infra nodes"
+			"description": "Full reference to existing subnet for Infra nodes.  Ignored for new vnets"
 		  }
 		},
 		"existingCnsSubnetReference": {
 		  "type": "string",
 		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/cnssubnet",
 		  "metadata": {
-			"description": "Full reference to existing subnet for CNS nodes"
+			"description": "Full reference to existing subnet for OCS nodes.  Ignored for new vnets"
 		  }
 		},
 		"existingNodeSubnetReference": {
 		  "type": "string",
 		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/nodesubnet",
 		  "metadata": {
-			"description": "Full reference to existing subnet for Compute nodes"
+			"description": "Full reference to existing subnet for Compute nodes.  Ignored for new vnets"
 		  }
 		},
 		"masterClusterType": {
@@ -500,6 +481,16 @@
 			],
 			"metadata": {
 				"description": "Use custom certificate for master domain or the default self-signed certificate"
+			}
+		},
+		"automaticDeployment": {
+			"type": "string",
+			"defaultValue": "automatic",
+			"allowedValues": [
+				"automatic", "manual"
+			],
+			"metadata": {
+				"description": "Determine if OpenShift is automatically installed or just the infrastructure components along witht he initial preparation of all the hosts."
 			}
 		}
 	},
@@ -2487,6 +2478,7 @@
 				}
 			}
 		}, {
+			"condition": "[equals(parameters('automaticDeployment'), 'automatic')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "OpenShiftDeployment",
 			"dependsOn": [

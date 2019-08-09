@@ -2529,10 +2529,10 @@
 						"value": "[variables('openshiftMasterHostname')]"
 					},
 					"openshiftMasterPublicIpFqdn": {
-						"value": "[if(equals(parameters('masterClusterDnsType'),'default'), reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, variables('masterClusterDns'))]"
+						"value": "[if(equals(parameters('masterClusterDnsType'),'default'), reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, parameters('masterClusterDns'))]"
 					},
 					"openshiftMasterPublicIpAddress": {
-						"value": "[if(equals(parameters('masterClusterDnsType'),'default'), reference(variables('openshiftMasterPublicIpDnsLabel')).ipAddress, variables('masterPrivateClusterIp'))]"
+						"value": "[if(equals(parameters('masterClusterDnsType'),'default'), reference(variables('openshiftMasterPublicIpDnsLabel')).ipAddress, parameters('masterPrivateClusterIp'))]"
 					},
 					"openshiftInfraHostname": {
 						"value": "[variables('openshiftInfraHostname')]"

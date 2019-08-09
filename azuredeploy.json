@@ -2629,7 +2629,7 @@
 						"value": "[parameters('routerClusterType')]"
 					},
 					"routerPublicIpName": {
-						"value": "[variables('infraLbPublicIpDnsLabel')]"
+						"value": "[if(equals(parameters('routingSubDomainType'),'nipio'), variables('infraLbPublicIpDnsLabel'), variables('routingSubDomain'))]"
 					},
 					"routingCertType": {
 						"value": "[parameters('routingCertType')]"

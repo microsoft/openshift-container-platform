@@ -2593,7 +2593,7 @@
 						}
 					},
 					"nipioDomain": {
-						"value": "[concat(reference(variables('infraLbPublicIpDnsLabel')).ipAddress, '.nip.io')]"
+						"value": "[if(equals(parameters('routingSubDomainType'),'nipio'), concat(reference(variables('infraLbPublicIpDnsLabel')).ipAddress, '.nip.io'), variables('routingSubDomain'))]"
 					},
 					"customDomain": {
 						"value": "[variables('routingSubDomain')]"

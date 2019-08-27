@@ -8,6 +8,8 @@
 
 The master branch contains the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new items or enable new configuration options. We will maintain the templates for the current version of OCP as well as one version back (N-1). The older branches will not be deleted but will no longer be maintained or updated.
 
+New as of August 27, 2019: I have added the azurestack-release-3.11 branch with templates and scripts for deploying OCP 3.11 to Azure Stack.
+
 The following branches exist:
 
 **Commercial Azure**
@@ -19,6 +21,7 @@ The following branches exist:
 **Azure Stack**
 - azurestack-release-3.7 (As is; no longer updated)
 - azurestack-release-3.9 (As is; no longer updated)
+- azurestack-release-3.11
 
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 

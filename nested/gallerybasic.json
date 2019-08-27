@@ -1,6 +1,7 @@
 {
 	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
 	"contentVersion": "1.0.0.0",
+	"apiProfile": "2018-03-01-hybrid",
 	"parameters": {
 		"location": {
 			"type": "string",
@@ -147,7 +148,6 @@
 		"type": "Microsoft.Compute/virtualMachines",
 		"name": "[parameters('hostName')]",
 		"location": "[parameters('location')]",
-		"apiVersion": "[parameters('apiVersionCompute')]",
 		"tags": {
 			"Role": "[parameters('role')]",
 				"provider": "[parameters('redHatTags').provider]",

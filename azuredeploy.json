@@ -1,6 +1,7 @@
 {
 	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
 	"contentVersion": "1.0.0.0",
+	"apiProfile": "2018-03-01-hybrid",
 	"parameters": {
 		"_artifactsLocation": {
 			"type": "string",
@@ -8,7 +9,7 @@
 				"description": "Base URL for Template Files",
 				"artifactsBaseUrl": ""
 			},
-			"defaultValue": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/master"
+			"defaultValue": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/azurestack-release-3.11"
 		},
 		"_artifactsLocationSasToken": {
           "type": "securestring",
@@ -26,22 +27,16 @@
 		},
 		"masterVmSize": {
 			"type": "string",
-			"defaultValue": "Standard_E2s_v3",
+			"defaultValue": "Standard_DS3_v2",
 			"allowedValues": [
 				"Standard_D2", "Standard_D3", "Standard_D4",
 				"Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14",
 				"Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
 				"Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2",
-				"Standard_G1", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5",
 				"Standard_DS2", "Standard_DS3", "Standard_DS4",
 				"Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14",
 				"Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
-				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2",
-				"Standard_GS1", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5",
-				"Standard_D2_v3", "Standard_D4_v3", "Standard_D8_v3", "Standard_D16_v3", "Standard_D32_v3", "Standard_D64_v3",
-				"Standard_D2s_v3", "Standard_D4s_v3", "Standard_D8s_v3", "Standard_D16s_v3", "Standard_D32s_v3", "Standard_D64s_v3",
-				"Standard_E2_v3", "Standard_E4_v3", "Standard_E8_v3", "Standard_E16_v3", "Standard_E32_v3", "Standard_E64_v3",
-				"Standard_E2s_v3", "Standard_E4s_v3", "Standard_E8s_v3", "Standard_E16s_v3", "Standard_E32s_v3", "Standard_E64s_v3"
+				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2"
 			],
 			"metadata": {
 				"description": "OpenShift Master VM size"
@@ -49,22 +44,16 @@
 		},
 		"infraVmSize": {
 			"type": "string",
-			"defaultValue": "Standard_D4s_v3",
+			"defaultValue": "Standard_DS3_v2",
 			"allowedValues": [
 				"Standard_D2", "Standard_D3", "Standard_D4",
 				"Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14",
 				"Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
 				"Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2",
-				"Standard_G1", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5",
 				"Standard_DS2", "Standard_DS3", "Standard_DS4",
 				"Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14",
 				"Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
-				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2",
-				"Standard_GS1", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5",
-				"Standard_D2_v3", "Standard_D4_v3", "Standard_D8_v3", "Standard_D16_v3", "Standard_D32_v3", "Standard_D64_v3",
-				"Standard_D2s_v3", "Standard_D4s_v3", "Standard_D8s_v3", "Standard_D16s_v3", "Standard_D32s_v3", "Standard_D64s_v3",
-				"Standard_E2_v3", "Standard_E4_v3", "Standard_E8_v3", "Standard_E16_v3", "Standard_E32_v3", "Standard_E64_v3",
-				"Standard_E2s_v3", "Standard_E4s_v3", "Standard_E8s_v3", "Standard_E16s_v3", "Standard_E32s_v3", "Standard_E64s_v3"
+				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2"
 			],
 			"metadata": {
 				"description": "OpenShift Infra Node VM(s) size"
@@ -72,22 +61,16 @@
 		},
 		"nodeVmSize": {
 			"type": "string",
-			"defaultValue": "Standard_D4s_v3",
+			"defaultValue": "Standard_DS3_v2",
 			"allowedValues": [
 				"Standard_D2", "Standard_D3", "Standard_D4",
 				"Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14",
 				"Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
 				"Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2",
-				"Standard_G1", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5",
 				"Standard_DS2", "Standard_DS3", "Standard_DS4",
 				"Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14",
 				"Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
-				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2",
-				"Standard_GS1", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5",
-				"Standard_D2_v3", "Standard_D4_v3", "Standard_D8_v3", "Standard_D16_v3", "Standard_D32_v3", "Standard_D64_v3",
-				"Standard_D2s_v3", "Standard_D4s_v3", "Standard_D8s_v3", "Standard_D16s_v3", "Standard_D32s_v3", "Standard_D64s_v3",
-				"Standard_E2_v3", "Standard_E4_v3", "Standard_E8_v3", "Standard_E16_v3", "Standard_E32_v3", "Standard_E64_v3",
-				"Standard_E2s_v3", "Standard_E4s_v3", "Standard_E8s_v3", "Standard_E16s_v3", "Standard_E32s_v3", "Standard_E64s_v3"
+				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2"
 			],
 			"metadata": {
 				"description": "OpenShift Compute Node VM(s) size"
@@ -95,24 +78,23 @@
 		},
 		"cnsVmSize": {
 			"type": "string",
-			"defaultValue": "Standard_E4s_v3",
+			"defaultValue": "Standard_DS4_v2",
 			"allowedValues": [
-				"Standard_DS4_v2", "Standard_DS12_v2",
-				"Standard_D4s_v3", "Standard_D8s_v3", "Standard_D16s_v3", "Standard_D32s_v3", "Standard_D64s_v3",
-				"Standard_E4s_v3", "Standard_E8s_v3", "Standard_E16s_v3", "Standard_E32s_v3", "Standard_E64s_v3"
+				"Standard_DS4", "Standard_DS12", "Standard_DS13", "Standard_DS14", 
+				"Standard_DS4_v2", "Standard_DS5_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2"
 			],
 			"metadata": {
-				"description": "OpenShift CNS Node VM(s) size"
+				"description": "OpenShift OCS Node VM(s) size"
 			}
 		},
 		"osImageType": {
 			"type": "string",
-			"defaultValue": "defaultgallery",
+			"defaultValue": "marketplace",
 			"allowedValues": [
-				"defaultgallery", "marketplace"
+				"marketplace"
 			],
 			"metadata": {
-				"description": "OpenShift OS image type. 'defaultgallery' will use the on demand RHEL image. 'marketplace' allows you to define a third party marketplace image to use."
+				"description": "OpenShift OS image type. For Azure Stack, this can only be set to 'marketplace' which allows you to reference the RHEL image that was imported."
 			}
 		},
 		"marketplaceOsImage": {
@@ -130,9 +112,9 @@
 		"storageKind": {
 			"type": "string",
 			"defaultValue": "managed",
-			"allowedValues": ["managed", "unmanaged"],
+			"allowedValues": ["managed"],
 			"metadata": {
-				"description": "Use Managed or Unmanaged Disks"
+				"description": "Use Managed Disks"
 			}
 		},
 		"openshiftClusterPrefix": {
@@ -146,7 +128,7 @@
 		},
 		"minorVersion": {
 			"type": "string",
-			"defaultValue": "69",
+			"defaultValue": "82",
 			"metadata": {
 				"description": "Minor version of OpenShift 3.11 to deploy"
 			}
@@ -177,10 +159,10 @@
 		},
 		"cnsInstanceCount": {
 			"type": "int",
-			"defaultValue": 3,
-			"allowedValues": [3, 4, 5],
+			"defaultValue": 4,
+			"allowedValues": [4, 5, 6],
 			"metadata": {
-				"description": "Number of OpenShift CNS nodes. 3 is the default but 4 is recommended per ref arch"
+				"description": "Number of OpenShift OCS nodes. 4 is the default per ref arch"
 			}
 		},
 		"osDiskSize": {
@@ -204,7 +186,7 @@
 			"defaultValue": 128,
 			"allowedValues": [32, 64, 128, 256, 512, 1024, 2048],
 			"metadata": {
-				"description": "Size of disk in GB for gluster storage on CNS nodes"
+				"description": "Size of disk in GB for gluster storage on OCS nodes"
 			}
 		},
 		"adminUsername": {
@@ -222,7 +204,7 @@
 				"true", "false"
 			],
 			"metadata": {
-				"description": "Enable OpenShift Metrics: true or false"
+				"description": "Enable OpenShift Hawkular Metrics: true or false"
 			}
 		},
 		"enableLogging": {
@@ -232,7 +214,7 @@
 				"true", "false"
 			],
 			"metadata": {
-				"description": "Enable OpenShift Logging: true or false"
+				"description": "Enable OpenShift ELK Logging: true or false"
 			}
 		},
 		"enableCNS": {
@@ -242,7 +224,7 @@
 				"true", "false"
 			],
 			"metadata": {
-				"description": "Enable Container Native Storage: true or false"
+				"description": "Enable OpenShift Container Storage: true or false"
 			}
 		},
 		"rhsmUsernameOrOrgId": {
@@ -292,12 +274,12 @@
 		},
 		"enableAzure": {
 			"type": "string",
-			"defaultValue": "true",
+			"defaultValue": "false",
 			"allowedValues": [
-				"true", "false"
+				"false"
 			],
 			"metadata": {
-				"description": "Enable Azure as Cloud Provider - true or false"
+				"description": "Enable Azure as Cloud Provider. This is 'false' for Azure Stack since this isn't avaialbe in Azure Stack today"
 			}
 		},
 		"aadClientId": {
@@ -311,7 +293,7 @@
 			"type": "string",
 			"defaultValue": "none",
 			"metadata": {
-				"description": "Domain search name"
+				"description": "Domain search name.  This needs to be set to 'none' unless you are provisioning a fully private cluster - master cluster type and router cluster type are set to private."
 			}
 		},
 		"masterClusterDnsType": {
@@ -423,28 +405,28 @@
 		  "type": "string",
 		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/mastersubnet",
 		  "metadata": {
-			"description": "Full reference to existing subnet for Master nodes"
+			"description": "Full reference to existing subnet for Master nodes.  Ignored for new vnets"
 		  }
 		},
 		"existingInfraSubnetReference": {
 		  "type": "string",
 		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/infrasubnet",
 		  "metadata": {
-			"description": "Full reference to existing subnet for Infra nodes"
+			"description": "Full reference to existing subnet for Infra nodes.  Ignored for new vnets"
 		  }
 		},
 		"existingCnsSubnetReference": {
 		  "type": "string",
 		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/cnssubnet",
 		  "metadata": {
-			"description": "Full reference to existing subnet for CNS nodes"
+			"description": "Full reference to existing subnet for OCS nodes.  Ignored for new vnets"
 		  }
 		},
 		"existingNodeSubnetReference": {
 		  "type": "string",
 		  "defaultValue": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/nodesubnet",
 		  "metadata": {
-			"description": "Full reference to existing subnet for Compute nodes"
+			"description": "Full reference to existing subnet for Compute nodes.  Ignored for new vnets"
 		  }
 		},
 		"masterClusterType": {
@@ -500,15 +482,25 @@
 			"metadata": {
 				"description": "Use custom certificate for master domain or the default self-signed certificate"
 			}
+		},
+		"automaticDeployment": {
+			"type": "string",
+			"defaultValue": "automatic",
+			"allowedValues": [
+				"automatic", "manual"
+			],
+			"metadata": {
+				"description": "Determine if OpenShift is automatically installed or just the infrastructure components along witht he initial preparation of all the hosts."
+			}
 		}
 	},
 	"variables": {
 		"resourceGroupName": "[resourceGroup().name]",
 		"tenantId": "[subscription().tenantId]",
 		"subscriptionId": "[subscription().subscriptionId]",
-		"apiVersionCompute": "2018-06-01",
-		"apiVersionNetwork": "2018-06-01",
-		"apiVersionStorage": "2018-07-01",
+		"apiVersionCompute": "2017-12-01",
+		"apiVersionNetwork": "2017-10-01",
+		"apiVersionStorage": "2017-10-01",
 		"apiVersionLinkTemplate": "2015-01-01",
 		"routingSubDomain": "[toLower(parameters('routingSubDomain'))]",
 		"masterClusterDns": "[toLower(parameters('masterClusterDns'))]",
@@ -668,7 +660,7 @@
 			"platform": "AzurePublic",
 			"provider": "5c55d719-e293-4b46-8d7b-9c6221a227e4"
 		},
-		"bastionVmSize": "Standard_D2s_v3",
+		"bastionVmSize": "Standard_DS2_v2",
 		"singlequote": "'",
 		"sshKeyPath": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
 		"bastionPrepScriptUrl": "[concat(parameters('_artifactsLocation'), '/scripts/bastionPrep.sh')]",
@@ -737,37 +729,37 @@
 			"Standard_D3_v2": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D4_v2": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D5_v2": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D11_v2": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D12_v2": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D13_v2": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D14_v2": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_G1": {
 				"storageAccountType": "Standard_LRS",
@@ -795,108 +787,108 @@
 				"acceleratedNetworking": "false"
 			},
 			"Standard_DS2": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_DS3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_DS4": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_DS11": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_DS12": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_DS13": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_DS14": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_DS2_v2": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_DS3_v2": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_DS4_v2": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_DS5_v2": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_DS11_v2": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_DS12_v2": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_DS13_v2": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_DS14_v2": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_DS15_v2": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_GS1": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_GS2": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_GS3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_GS4": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_GS5": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_D2_v3": {
@@ -907,57 +899,57 @@
 			"Standard_D4_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D8_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D16_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D32_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D64_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D2s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_D4s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D8s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D16s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D32s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_D64s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E2_v3": {
 				"storageAccountType": "Standard_LRS",
@@ -967,63 +959,62 @@
 			"Standard_E4_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E8_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E16_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E32_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E64_v3": {
 				"storageAccountType": "Standard_LRS",
 				"storageAccountTier": "Standard",
-				"acceleratedNetworking": "true"
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E2s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
 				"acceleratedNetworking": "false"
 			},
 			"Standard_E4s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E8s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E16s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E32s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			},
 			"Standard_E64s_v3": {
-				"storageAccountType": "Premium_LRS",
-				"storageAccountTier": "Premium",
-				"acceleratedNetworking": "true"
+				"storageAccountType": "Standard_LRS",
+				"storageAccountTier": "Standard",
+				"acceleratedNetworking": "false"
 			}
 		}
 	},
 	"resources": [
 		{ 
-			"apiVersion": "2018-02-01",
 			"type": "Microsoft.Resources/deployments",
 			"name": "pid-5c55d719-e293-4b46-8d7b-9c6221a227e4",
 			"properties": {
@@ -1035,7 +1026,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[concat(variables('openshiftBastionHostname'), '-nsg')]",
 			"location": "[parameters('location')]",
@@ -1063,7 +1053,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[concat(variables('openshiftMasterHostname'), '-nsg')]",
 			"location": "[parameters('location')]",
@@ -1104,7 +1093,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[concat(variables('openshiftInfraHostname'), '-nsg')]",
 			"location": "[parameters('location')]",
@@ -1159,7 +1147,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[concat(variables('openshiftCnsHostname'), '-nsg')]",
 			"location": "[parameters('location')]",
@@ -1187,7 +1174,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkSecurityGroups",
 			"name": "[concat(variables('openshiftNodeHostname'), '-nsg')]",
 			"location": "[parameters('location')]",
@@ -1242,7 +1228,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/virtualNetworks",
 			"name": "[parameters('virtualNetworkName')]",
 			"location": "[parameters('location')]",
@@ -1280,7 +1265,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionStorage')]",
 			"type": "Microsoft.Storage/storageAccounts",
 			"name": "[variables('newStorageAccountArray')[copyIndex()].name]",
 			"location": "[parameters('location')]",
@@ -1301,7 +1285,6 @@
 				"tier": "[variables('newStorageAccountArray')[copyIndex()].skuTier]"
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionStorage')]",
 			"type": "Microsoft.Storage/storageAccounts",
 			"name": "[variables('newStorageAccountCns')]",
 			"location": "[parameters('location')]",
@@ -1317,7 +1300,6 @@
 				"name": "[variables('storageSkuObject').cns.skuName]"
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[variables('bastionPublicIp')]",
 			"location": "[parameters('location')]",
@@ -1336,7 +1318,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('routerClusterType'), 'public')]",
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[variables('infraLbPublicIpDnsLabel')]",
 			"location": "[parameters('location')]",
@@ -1355,7 +1336,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('masterClusterType'), 'public')]",
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[variables('openshiftMasterPublicIpDnsLabel')]",
 			"location": "[parameters('location')]",
@@ -1373,7 +1353,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionCompute')]",
 			"type": "Microsoft.Compute/availabilitySets",
 			"name": "[variables('availabilitySetArray')[copyIndex()].name]",
 			"location": "[parameters('location')]",
@@ -1397,7 +1376,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
-			"apiVersion": "[variables('apiVersionCompute')]",
 			"type": "Microsoft.Compute/availabilitySets",
 			"name": "cnsavailabilityset",
 			"location": "[parameters('location')]",
@@ -1416,7 +1394,6 @@
 				"platform": "[variables('redHatTags').platform]"
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/loadBalancers",
 			"name": "[variables('masterLoadBalancerName')]",
 			"location": "[parameters('location')]",
@@ -1468,7 +1445,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/loadBalancers",
 			"name": "[variables('infraLoadBalancerName')]",
 			"location": "[parameters('location')]",
@@ -1542,7 +1518,6 @@
 				}]
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('openshiftBastionHostname'), '-nic')]",
 			"location": "[parameters('location')]",
@@ -1576,7 +1551,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('openshiftMasterHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
@@ -1615,7 +1589,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('openshiftInfraHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
@@ -1655,7 +1628,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('openshiftCnsHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
@@ -1690,7 +1662,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionNetwork')]",
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('openshiftNodeHostname'), padLeft(add(copyIndex(), 1), 2, '0'), '-nic')]",
 			"location": "[parameters('location')]",
@@ -1725,7 +1696,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "bastionVmDeployment",
 			"dependsOn": [
@@ -1799,7 +1769,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('masterVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -1893,7 +1862,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('infraVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -1987,7 +1955,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('nodeVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -2082,7 +2049,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('cnsVmDeployment', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -2180,7 +2146,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "bastionPrep",
 			"dependsOn": [
@@ -2305,7 +2270,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('masterPrep', padLeft(add(copyIndex(), 1), 2, '0'))]",			
 			"dependsOn": [
@@ -2360,7 +2324,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('InfraPrep', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -2413,7 +2376,6 @@
 			}
 		}, {
 			"condition": "[equals(parameters('enableCNS'), 'true')]",
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('CNSPrep', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -2465,7 +2427,6 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "[concat('NodePrep', padLeft(add(copyIndex(), 1), 2, '0'))]",
 			"dependsOn": [
@@ -2517,7 +2478,7 @@
 				}
 			}
 		}, {
-			"apiVersion": "[variables('apiVersionLinkTemplate')]",
+			"condition": "[equals(parameters('automaticDeployment'), 'automatic')]",
 			"type": "Microsoft.Resources/deployments",
 			"name": "OpenShiftDeployment",
 			"dependsOn": [
@@ -2568,10 +2529,10 @@
 						"value": "[variables('openshiftMasterHostname')]"
 					},
 					"openshiftMasterPublicIpFqdn": {
-						"value": "[if(equals(parameters('masterClusterDnsType'),'default'), reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, variables('masterClusterDns'))]"
+						"value": "[if(equals(parameters('masterClusterDnsType'),'default'), reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn, parameters('masterClusterDns'))]"
 					},
 					"openshiftMasterPublicIpAddress": {
-						"value": "[reference(variables('openshiftMasterPublicIpDnsLabel')).ipAddress]"
+						"value": "[if(equals(parameters('masterClusterDnsType'),'default'), reference(variables('openshiftMasterPublicIpDnsLabel')).ipAddress, parameters('masterPrivateClusterIp'))]"
 					},
 					"openshiftInfraHostname": {
 						"value": "[variables('openshiftInfraHostname')]"
@@ -2632,7 +2593,7 @@
 						}
 					},
 					"nipioDomain": {
-						"value": "[concat(reference(variables('infraLbPublicIpDnsLabel')).ipAddress, '.nip.io')]"
+						"value": "[if(equals(parameters('routingSubDomainType'),'nipio'), concat(reference(variables('infraLbPublicIpDnsLabel')).ipAddress, '.nip.io'), variables('routingSubDomain'))]"
 					},
 					"customDomain": {
 						"value": "[variables('routingSubDomain')]"
@@ -2668,7 +2629,7 @@
 						"value": "[parameters('routerClusterType')]"
 					},
 					"routerPublicIpName": {
-						"value": "[variables('infraLbPublicIpDnsLabel')]"
+						"value": "[if(equals(parameters('routingSubDomainType'),'nipio'), variables('infraLbPublicIpDnsLabel'), variables('routingSubDomain'))]"
 					},
 					"routingCertType": {
 						"value": "[parameters('routingCertType')]"

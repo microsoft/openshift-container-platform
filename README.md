@@ -1,28 +1,5 @@
-# OpenShift Container Platform Deployment Template
+# OpenShift Container Platform Deployment Template for Azure Stack
 
-## NOTE: Structure of Repo
-
-**The Master branch has been updated to deploy version 3.11**
-
-**MAJOR UPDATES HAVE BEEN MADE - READ BEFORE DEPLOYING**
-
-The master branch contains the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new items or enable new configuration options. We will maintain the templates for the current version of OCP as well as one version back (N-1). The older branches will not be deleted but will no longer be maintained or updated.
-
-The following branches exist:
-
-**Commercial Azure**
-- Release-3.6 (As is; no longer updated)
-- Release-3.7 (As is; no longer updated)
-- Release-3.9 (As is; no longer updated)
-- Release-3.10
-
-**Azure Stack**
-- azurestack-release-3.7 (As is; no longer updated)
-- azurestack-release-3.9 (As is; no longer updated)
-
-Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
-
-**For OpenShift Origin refer to https://github.com/Microsoft/openshift-origin**
 
 ## OpenShift Container Platform 3.11 with Username / Password authentication for OpenShift
 
@@ -32,7 +9,7 @@ Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 4.  Support cluster with private masters (no public IP on load balancer in front of master nodes)
 5.  Support cluster with private router (no public IP on load balancer in front of infra nodes)
 6.  Support broker pool ID (for master and infra nodes) along with compute pool ID (for compute nodes)
-7.  Support for default gallery RHEL On Demand image and 3rd party Marketplace offer such as BYOS image in Private Marketplace
+7.  Support for specifying your own RHEL image in your Azure Stack
 8.  Support self-signed certificates or custom SSL certificates for master load balancer (Web Console)
 9.  Support self-signed certificates or custom SSL certificates for infra load balancer (Router)
 
@@ -50,7 +27,7 @@ This template deploys OpenShift Container Platform with basic username / passwor
 |Storage Accounts <br />Managed Disks      |2 Storage Accounts for Diagnostics Logs <br />1 Storage Account for Private Docker Registry |
 |Network Security Groups|1 Network Security Group for Bastion VM<br />1 Network Security Group Master VMs<br />1 Network Security Group for Infra VMs<br />1 Network Security Group for CNS VMs (if CNS enabled)<br />1 Network Security Group for Node VMs |
 |Availability Sets      |1 Availability Set for Master VMs<br />1 Availability Set for Infra VMs<br />1 Availability Set for CNS VMs (if CNS enabled)<br />1 Availability Set for Node VMs  |
-|Virtual Machines   	|1 Bastion Node - Used to run ansible playbook for OpenShift deployment<br />1, 3 or 5 Master Nodes<br />1, 2 or 3 Infra Nodes<br />3 or 4 CNS Nodes (if CNS enabled)<br />User-defined number of Nodes (1 to 30)<br />All VMs include a single attached data disk for Docker thin pool logical volume<br />CNS VMs include 3 additional data disks for glusterfs storage (if CNS enabled)|
+|Virtual Machines   	|1 Bastion Node - Used to run ansible playbook for OpenShift deployment<br />1, 3 or 5 Master Nodes<br />1, 2 or 3 Infra Nodes<br />3 or 4 OCS Nodes (if CNS enabled)<br />User-defined number of Nodes (1 to 30)<br />All VMs include a single attached data disk for Docker thin pool logical volume<br />OCS VMs include 3 additional data disks for glusterfs storage (if CNS enabled)|
 
 ![Cluster Diagram](images/openshiftdiagram.jpg)
 
@@ -58,14 +35,15 @@ This template deploys OpenShift Container Platform with basic username / passwor
 
 Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started
 
-This template deploys multiple VMs and requires some pre-work before you can successfully deploy the OpenShift Cluster.  If you don't complete the pre-work correctly, you will most likely fail to deploy the cluster using this template.  Please read the instructions completely before you proceed. 
+Currently, the Azure Cloud Provider does not work in Azure Stack. This means you will not be able to use disk attach for persistent storage in Azure Stack. You can always configure other storage options such as NFS, iSCSI, Gluster, etc. that can be used for persistent storage. We are exploring options to address the Azure Cloud Provider in Azure Stack but this will take a little bit of time.
 
-By default, this template uses the On-Demand Red Hat Enterprise Linux image from the Azure Gallery. 
->When using the On-Demand image, there is an additional hourly RHEL subscription charge for using this image on top of the normal compute, network and storage costs.  At the same time, the instance will be registered to your Red Hat subscription, so you will also be using one of your entitlements. This will lead to "double billing". To avoid this, you would need to build your own RHEL image, which is defined in [this Red Hat KB article](https://access.redhat.com/articles/uploading-rhel-image-to-azure). 
+As an alternative, you can choose to enable OCS and use Gluster for persistent storage.  If OCS is enabled, four additional nodes will be deployed with additional storage for Gluster. 
 
-If you have a valid Red Hat subscription, register for Cloud Access and [request access](http://aka.ms/rhel-byos) to the BYOS RHEL image in the Private Azure Marketplace to avoid the double billing. To use a 3rd party marketplace offer (such as the BYOS private image), you need to provide the following information for the offer - publisher, offer, sku, and version.  You also need to enable the offer for programmatic deployment.
+Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started
 
-If you are only using one pool ID for all nodes, then enter the same pool ID for both 'rhsmPoolId' and 'rhsmBrokerPoolId'.
+This template deploys multiple VMs and requires some pre-work before you can successfully deploy the OpenShift Cluster.  If you don't get the pre-work done correctly, you will most likely fail to deploy the cluster using this template.  Please read the instructions completely before you proceed. 
+
+After successful deployment, the Bastion Node is no longer required unless you want to use it to add nodes or run other playbooks in the future.  You can turn it off and delete it or keep it around for running future playbooks.  You can also use this as the jump host for managing your OpenShift cluster.
 
 **Private Clusters**
 
@@ -80,6 +58,18 @@ If private masters and private router is selected, the custom domain name must a
 After successful deployment, the Bastion Node is the only node with a public IP that you can ssh into.  Even if the master nodes are configured for public access, they are not exposed for ssh access.
 
 ## Prerequisites
+
+### Configure Azure CLI to connect to your Azure Stack environment
+
+In order to use the Azure CLI to manage resources in your Azure Stack environment, you will need to first configure the CLI to connect to your Azure Stack.  Follow instructions here: https://docs.microsoft.com/en-us/azure/azure-stack/user/azure-stack-connect-cli.
+
+You will need to determine the necessary endpoints for each of the following settings:
+
+  - endpoint-resource-manager 
+  - suffix-storage-endpoint 
+  - suffix-keyvault-dns  
+  - endpoint-active-directory-graph-resource-id 
+  - endpoint-vm-image-alias-doc 
 
 ### Create Key Vault to store secret based information
 
@@ -117,18 +107,18 @@ Assigning permissions to the entire Subscription is the easiest method but does 
 **Azure CLI 2.0**
 
 1. **Create Service Principal and assign permissions to Subscription**<br/>
-  a.  az ad sp create-for-rbac -n \<friendly name\> --password \<password\> --role contributor --scopes /subscriptions/\<subscription_id\><br/>
-      Ex: `az ad sp create-for-rbac -n openshiftcloudprovider --password Pass@word1 --role contributor --scopes /subscriptions/555a123b-1234-5ccc-defgh-6789abcdef01`<br/>
+  a.  az ad sp create-for-rbac -n \<friendly name\>  --role contributor --scopes /subscriptions/\<subscription_id\><br/>
+      Ex: `az ad sp create-for-rbac -n openshiftcloudprovider --role contributor --scopes /subscriptions/555a123b-1234-5ccc-defgh-6789abcdef01`<br/>
 
 2. **Create Service Principal and assign permissions to Resource Group**<br/>
   a.  If you use this option, you must have created the Resource Group first.  Be sure you don't create any resources in this Resource Group before deploying the cluster.<br/>
-  b.  az ad sp create-for-rbac -n \<friendly name\> --password \<password\> --role contributor --scopes /subscriptions/\<subscription_id\>/resourceGroups/\<Resource Group Name\><br/>
-      Ex: `az ad sp create-for-rbac -n openshiftcloudprovider --password Pass@word1 --role contributor --scopes /subscriptions/555a123b-1234-5ccc-defgh-6789abcdef01/resourceGroups/00000test`<br/>
+  b.  az ad sp create-for-rbac -n \<friendly name\> --role contributor --scopes /subscriptions/\<subscription_id\>/resourceGroups/\<Resource Group Name\><br/>
+      Ex: `az ad sp create-for-rbac -n openshiftcloudprovider --role contributor --scopes /subscriptions/555a123b-1234-5ccc-defgh-6789abcdef01/resourceGroups/00000test`<br/>
 
 3. **Create Service Principal without assigning permissions to Resource Group**<br/>
   a.  If you use this option, you will need to assign permissions to either the Subscription or the newly created Resource Group shortly after you initiate the deployment of the cluster or the post installation scripts will fail when configuring Azure as the Cloud Provider.<br/>
-  b.  az ad sp create-for-rbac -n \<friendly name\> --password \<password\> --role contributor --skip-assignment<br/>
-      Ex: `az ad sp create-for-rbac -n openshiftcloudprovider --password Pass@word1 --role contributor --skip-assignment`<br/>
+  b.  az ad sp create-for-rbac -n \<friendly name\> --role contributor --skip-assignment<br/>
+      Ex: `az ad sp create-for-rbac -n openshiftcloudprovider --role contributor --skip-assignment`<br/>
 
 You will get an output similar to:
 

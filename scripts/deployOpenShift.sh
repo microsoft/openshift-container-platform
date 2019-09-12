@@ -295,15 +295,6 @@ openshift_examples_modify_imagestreams=true
 openshift_router_selector='node-role.kubernetes.io/infra=true'
 openshift_registry_selector='node-role.kubernetes.io/infra=true'
 
-# Configure registry to use Azure blob storage
-openshift_hosted_registry_replicas=1
-openshift_hosted_registry_storage_kind=object
-openshift_hosted_registry_storage_provider=azure_blob
-openshift_hosted_registry_storage_azure_blob_accountname=$REGISTRYSA
-openshift_hosted_registry_storage_azure_blob_accountkey=$ACCOUNTKEY
-openshift_hosted_registry_storage_azure_blob_container=registry
-openshift_hosted_registry_storage_azure_blob_realm=$DOCKERREGISTRYREALM
-
 # Deploy Service Catalog
 openshift_enable_service_catalog=false
 

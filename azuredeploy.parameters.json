@@ -95,7 +95,7 @@
 			"value": "changeme"
 		},
 		"domainName": {
-			"value": "contoso.com"
+			"value": "none"
 		},
 		"masterClusterDnsType": {
 			"value": "default"

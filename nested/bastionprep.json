@@ -38,6 +38,12 @@
 				"description": "Administrator username on all VMs"
 			}
 		},
+		"domainName": {
+			"type": "string",
+			"metadata": {
+				"description": "Domain name search"
+			}
+		},
 		"rhsmUsernameOrOrgId": {
 			"type": "string",
 			"metadata": {
@@ -62,6 +68,72 @@
 				"description": "SSH private key for deploying OpenShift"
 			}
 		},
+		"routingCertType": {
+			"type": "string",
+			"metadata": {
+				"description": "Use custom certificate for routing domain or the default self-signed certificate"
+			}
+		},
+		"masterCertType": {
+			"type": "string",
+			"metadata": {
+				"description": "Use custom certificate for master domain or the default self-signed certificate"
+			}
+		},
+		"customRoutingCaFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "Routing domain CA file"
+			}
+		},
+		"customRoutingCertFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "Routing domain Cert file"
+			}
+		},
+		"customRoutingKeyFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "Routing domain Key file"
+			}
+		},
+		"customMasterCaFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "Master domain CA file"
+			}
+		},
+		"customMasterCertFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "Master domain Cert file"
+			}
+		},
+		"customMasterKeyFile": {
+			"type": "securestring",
+			"metadata": {
+				"description": "Master domain Key file"
+			}
+		},
+		"minorVersion": {
+			"type": "string",
+			"metadata": {
+				"description": "Minor version of OpenShift 3.11 to deploy"
+			}
+		},
+		"masterClusterDnsType": {
+			"type": "string",
+			"metadata": {
+				"description": "Domain type for web console - default (use DNS label of master infra public IP) or custom (defined in next parameter)"
+			}
+		},
+		"routingSubDomainType": {
+			"type": "string",
+			"metadata": {
+				"description": "Default Subdomain type - nip.io or custom (defined in next parameter)"
+			}
+		},
 		"redHatTags": {
 			"type": "object",
 			"metadata": {
@@ -70,11 +142,7 @@
 		}
 	},
 	"variables": {
-		"singlequote": "'",
-		"tenantId": "[subscription().tenantId]",
-		"subscriptionId": "[subscription().subscriptionId]",
-		"location": "[parameters('location')]",
-		"resourceGroupName": "[resourceGroup().name]"
+		"singlequote": "'"
 	},
 	"resources": [{
 		"type": "Microsoft.Compute/virtualMachines/extensions",
@@ -84,7 +152,9 @@
 		"tags": {
 			"displayName": "PrepBastion",
 				"provider": "[parameters('redHatTags').provider]",
-				"app": "[parameters('redHatTags').app]"
+				"app": "[parameters('redHatTags').app]",
+				"version": "[parameters('redHatTags').version]",
+				"platform": "[parameters('redHatTags').platform]"
 		},
 		"properties": {
 			"publisher": "Microsoft.Azure.Extensions",
@@ -97,7 +167,7 @@
 				]
 			},
 			"protectedSettings": {
-				"commandToExecute": "[concat('bash ', parameters('bastionPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ',variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', variables('singlequote'), parameters('sshPrivateKey'), variables('singlequote'), ' ', variables('singlequote'), parameters('adminUsername'), variables('singlequote'))]"
+				"commandToExecute": "[concat('bash ', parameters('bastionPrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ',variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'), ' ', variables('singlequote'), parameters('sshPrivateKey'), variables('singlequote'), ' ', variables('singlequote'), parameters('adminUsername'), variables('singlequote'), ' ', variables('singlequote'), parameters('routingCertType'), variables('singlequote'), ' ', variables('singlequote'), parameters('masterCertType'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingCaFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingCertFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customRoutingKeyFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterCaFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterCertFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('customMasterKeyFile'), variables('singlequote'), ' ', variables('singlequote'), parameters('domainName'), variables('singlequote'), ' ', variables('singlequote'), parameters('minorVersion'), variables('singlequote'), ' ', variables('singlequote'), parameters('masterClusterDnsType'), variables('singlequote'), ' ', variables('singlequote'), parameters('routingSubDomainType'), variables('singlequote'))]"
 			}
 		}
 	}],

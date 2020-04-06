@@ -6,13 +6,27 @@
 			"value": "https://raw.githubusercontent.com/Microsoft/openshift-container-platform/master"
 		},
 		"masterVmSize": {
-			"value": "Standard_DS2_v2"
+			"value": "Standard_E2s_v3"
 		},
 		"infraVmSize": {
-			"value": "Standard_DS2_v2"
+			"value": "Standard_D4s_v3"
 		},
 		"nodeVmSize": {
-			"value": "Standard_DS2_v2"
+			"value": "Standard_D4s_v3"
+		},
+		"cnsVmSize": {
+			"value": "Standard_E4s_v3"
+		},
+		"osImageType": {
+			"value": "defaultgallery"
+		},
+		"marketplaceOsImage": {
+			"value": {
+				"publisher": "RedHat",
+				"offer": "RHEL",
+				"sku": "7-RAW",
+				"version": "latest"
+			}
 		},
 		"storageKind": {
 			"value": "managed"
@@ -20,23 +34,29 @@
 		"openshiftClusterPrefix": {
 			"value": "ocpcluster"
 		},
+		"minorVersion": {
+			"value": "69"
+		},
 		"masterInstanceCount": {
 			"value": 3
 		},
 		"infraInstanceCount": {
-			"value": 2
+			"value": 3
 		},
 		"nodeInstanceCount": {
-			"value": 1
+			"value": 3
+		},
+		"cnsInstanceCount": {
+			"value": 3
 		},
 		"dataDiskSize": {
 			"value": 128
 		},
-		"adminUsername": {
-			"value": "clusteradmin"
+		"cnsGlusterDiskSize": {
+			"value": 128
 		},
-		"openshiftPassword": {
-			"value": "GEN-PASSWORD"
+		"adminUsername": {
+			"value": "ocpadmin"
 		},
 		"enableMetrics": {
 			"value": "false"
@@ -44,41 +64,107 @@
 		"enableLogging": {
 			"value": "false"
 		},
-		"rhsmUsernameOrOrgId": {
-			"value": "rhsmuser"
+		"enableCNS": {
+			"value": "false"
 		},
-		"rhsmPasswordOrActivationKey": {
-			"value": "GEN-PASSWORD"
+		"rhsmUsernameOrOrgId": {
+			"value": "myrhsmusername"
 		},
 		"rhsmPoolId": {
-			"value": "8a81234151631b3201a5e6f4322e42a9"
+			"value": "1a23f12345c8c8380166abcde01a251b"
+		},
+		"rhsmBrokerPoolId": {
+			"value": "1a23f12345c8c8380166abcde01a111a"
 		},
 		"sshPublicKey": {
 			"value": "GEN-SSH-PUB-KEY"
 		},
+		"keyVaultSubscriptionId": {
+			"value": "255a325e-8276-4ada-af8f-33af5658eb34"
+		},
 		"keyVaultResourceGroup": {
-			"value": "kvrg"
+			"value": "keyvaultrg"
 		},
 		"keyVaultName": {
-			"value": "keyvaultname"
-		},
-		"keyVaultSecret": {
-			"value": "mysecret"
+			"value": "keyvault"
 		},
 		"enableAzure": {
 			"value": "true"
 		},
 		"aadClientId": {
-			"value": "12345678-abcd-47bf-9b6f-12345678abcd"
+			"value": "aa1f18d9-1234-4f11-11cb-d6da4f6def11"
 		},
-		"aadClientSecret": {
-			"value": "GEN-PASSWORD"
+		"domainName": {
+			"value": "contoso.com"
 		},
-		"defaultSubDomainType": {
+		"masterClusterDnsType": {
+			"value": "default"
+		},
+		"masterClusterDns": {
+			"value": "console.contoso.com"
+		},
+		"routingSubDomainType": {
 			"value": "nipio"
 		},
-		"defaultSubDomain": {
-			"value": "domain.com"
+		"routingSubDomain": {
+			"value": "apps.contoso.com"
+		},
+		"virtualNetworkNewOrExisting": {
+			"value": "new"
+		},
+		"virtualNetworkName": {
+			"value": "ocpvnet"
+		},
+		"addressPrefixes": {
+			"value": "10.0.0.0/14"
+		},
+		"masterSubnetName": {
+			"value": "mastersubnet"
+		},
+		"masterSubnetPrefix": {
+			"value": "10.1.0.0/16"
+		},
+		"infraSubnetName": {
+			"value": "infrasubnet"
+		},
+		"infraSubnetPrefix": {
+			"value": "10.2.0.0/16"
+		},
+		"nodeSubnetName": {
+			"value": "nodesubnet"
+		},
+		"nodeSubnetPrefix": {
+			"value": "10.3.0.0/16"
+		},
+		"existingMasterSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/mastersubnet"
+		},
+		"existingInfraSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/infrasubnet"
+		},
+		"existingCnsSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/cnssubnet"
+		},
+		"existingNodeSubnetReference": {
+			"value": "/subscriptions/abc686f6-963b-4e64-bff4-99dc369ab1cd/resourceGroups/vnetresourcegroup/providers/Microsoft.Network/virtualNetworks/openshiftvnet/subnets/nodesubnet"
+		},
+		"masterClusterType": {
+			"value": "public"
+		},
+		"masterPrivateClusterIp": {
+			"value": "10.1.0.200"
+		},
+		"routerClusterType": {
+			"value": "public"
+		},
+		"routerPrivateClusterIp": {
+			"value": "10.2.0.200"
+		},
+		"routingCertType": {
+			"value": "selfsigned"
+		},
+		"masterCertType": {
+			"value": "selfsigned"
 		}
 	}
 }

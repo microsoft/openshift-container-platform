@@ -1,4 +1,4 @@
-# OpenShift Container Platform Deployment Template
+# OpenShift Container Platform 3 Deployment Template
 
 ## NOTE: Structure of Repo
 
@@ -6,7 +6,7 @@
 
 **MAJOR UPDATES HAVE BEEN MADE - READ BEFORE DEPLOYING**
 
-The master branch contains the most current release of OpenShift Container Platform with experimental items.  This may cause instability but will include new items or enable new configuration options. We will maintain the templates for the current version of OCP as well as one version back (N-1). The older branches will not be deleted but will no longer be maintained or updated.
+The master branch contains the most current release of OpenShift Container Platform 3, which is currently version 3.11.  We will maintain the templates for the current version of OCP only, as version 3.10 is [no longer commercially suported by Red Hat](https://access.redhat.com/support/policy/updates/openshift_noncurrent). The older branches will not be deleted but will no longer be maintained or updated.
 
 New as of August 27, 2019: I have added the azurestack-release-3.11 branch with templates and scripts for deploying OCP 3.11 to Azure Stack.
 
@@ -16,7 +16,7 @@ The following branches exist:
 - Release-3.6 (As is; no longer updated)
 - Release-3.7 (As is; no longer updated)
 - Release-3.9 (As is; no longer updated)
-- Release-3.10
+- Release-3.10 (As is; no longer updated)
 
 **Azure Stack**
 - azurestack-release-3.7 (As is; no longer updated)
@@ -207,7 +207,7 @@ az keyvault secret set --vault-name KeyVaultName -n mastercafile --file ~/certif
 | `marketplaceOsImage`      | If `osImageType` is marketplace, then enter the appropriate values for 'publisher', 'offer', 'sku', 'version' of the marketplace offer. This is an object type       |               |                   |
 | `storageKind`             | The type of storage to be used.                                                                             | - "managed"<br>- "unmanaged"                                           | managed           |
 | `openshiftClusterPrefix`  | Cluster Prefix used to configure hostnames for all nodes.  Between 1 and 20 characters                      |                                                                        | mycluster         |
-| `minoVersion`             | The minor version of OpenShift Container Platform 3.11 to deploy                                            |                                                                        | 69                |
+| `minoVersion`             | The minor version of OpenShift Container Platform 3.11 to deploy                                            |                                                                        | 188                |
 | `masterInstanceCount`     | Number of Masters nodes to deploy                                                                           | - 1, 3, 5                                                              | 3                 |
 | `infraInstanceCount`      | Number of infra nodes to deploy                                                                             | - 1, 2, 3                                                              | 3                 |
 | `nodeInstanceCount`       | Number of Nodes to deploy                          | - 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30                 | 2                 |
@@ -327,4 +327,4 @@ To create additional (non-admin) users in your environment, login to your master
 
 ### Additional OpenShift Configuration Options
  
-You can configure additional settings per the official (<a href="https://docs.openshift.com/container-platform/3.10/welcome/index.html" target="_blank">OpenShift Enterprise Documentation</a>).
+You can configure additional settings per the official (<a href="https://docs.openshift.com/container-platform/3.11/welcome/index.html" target="_blank">OpenShift Container Platform Documentation</a>).

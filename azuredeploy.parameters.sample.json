@@ -95,7 +95,7 @@
 			"value": "aa1f18d9-1234-4f11-11cb-d6da4f6def11"
 		},
 		"domainName": {
-			"value": "contoso.com"
+			"value": "none"
 		},
 		"masterClusterDnsType": {
 			"value": "default"
